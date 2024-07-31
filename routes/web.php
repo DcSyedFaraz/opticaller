@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,4 +38,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('addresses', AddressController::class);
+
+    Route::get('/addresses/next', [AddressController::class, 'nextAddress'])->name('addresses.next');
+
+    Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
+    Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
+
+    Route::resource('projects', ProjectController::class);
+
+});
+
+require __DIR__ . '/auth.php';

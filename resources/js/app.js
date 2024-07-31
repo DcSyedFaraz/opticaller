@@ -5,8 +5,17 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Import the component
+import NavLink from '@/Components/NavLink.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
+import { Head } from '@inertiajs/vue3';
+import ToastService from 'primevue/toastservice';
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+PrimeVue.theme = 'light';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -15,6 +24,19 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(ToastService)
+            .component('AuthenticatedLayout', AuthenticatedLayout)
+            .component('Head', Head)
+            .component('NavLink', NavLink)
+            .component('PrimaryButton', PrimaryButton)
+            .use(PrimeVue, {
+                theme: {
+                    preset: Aura,
+                    options: {
+                        darkModeSelector: 'off',
+                    }
+                }
+            })
             .mount(el);
     },
     progress: {
