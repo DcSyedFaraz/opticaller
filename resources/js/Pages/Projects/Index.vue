@@ -75,8 +75,8 @@ export default {
     },
     mounted() {
 
-        if (this.$page.props.success) {
-            this.$toast.add({ severity: 'success', summary: this.$page.props.success, detail: this.$page.props.success });
+        if (this.$page.props.message) {
+            this.$toast.add({ severity: 'message', summary: this.$page.props.success, Life:3000 });
         }
     },
     methods: {

@@ -14,7 +14,7 @@ class ActivityController extends Controller
             'address_id' => $request->address_id,
             'project_id' => $request->project_id,
             'activity_type' => $request->activity_type,
-            'start_time' => now(),
+            'starting_time' => now(),
         ]);
 
         return response()->json($activity);
@@ -22,7 +22,7 @@ class ActivityController extends Controller
 
     public function update(Request $request, Activity $activity)
     {
-        $activity->update(['end_time' => now()]);
+        $activity->update(['ending_time' => now()]);
         return response()->json($activity);
     }
 }

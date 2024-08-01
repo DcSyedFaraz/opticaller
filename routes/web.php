@@ -4,6 +4,8 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TimeTrackingController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,6 +29,8 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+// routes/web.php
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -47,6 +51,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
 
     Route::resource('projects', ProjectController::class);
+    Route::resource('users', UsersController::class);
+    
+    Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
+    Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
+    Route::post('/resume-tracking/{id}', [TimeTrackingController::class, 'resumeTracking']);
+    Route::post('/stop-tracking/{id}', [TimeTrackingController::class, 'stopTracking']);
 
 });
 

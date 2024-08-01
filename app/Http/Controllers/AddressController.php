@@ -9,12 +9,34 @@ use Illuminate\Http\Request;
 
 class AddressController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $addresses = Address::orderBy('id')
-            ->get();
-        return inertia('Addresses/Index', ['addresses' => $addresses]);
+        $query = Address::query();
+
+        // Search functionality
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('company_name', 'like', "%{$search}%")
+                ->orWhere('city', 'like', "%{$search}%")
+                ->orWhere('phone_number', 'like', "%{$search}%")
+                ->orWhere('email_address', 'like', "%{$search}%");
+        }
+
+        // Sorting functionality with validation
+        $sortField = $request->input('sortField', 'id');
+        $sortOrder = $request->input('sortOrder', 'asc');
+        // dd($sortField, $sortOrder);
+        $query->orderBy($sortField, $sortOrder);
+
+        // Pagination
+        $addresses = $query->paginate(10);
+
+        return inertia('Addresses/Index', [
+            'addresses' => $addresses,
+            'filters' => $request->all('search', 'sortField', 'sortOrder', 'page')
+        ]);
     }
+
 
     public function show(Address $address)
     {
