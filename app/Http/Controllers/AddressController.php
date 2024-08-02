@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Address;
 use App\Models\Project;
+use App\Models\User;
 use DB;
 use Illuminate\Http\Request;
 
@@ -41,13 +42,15 @@ class AddressController extends Controller
     public function show(Address $address)
     {
         $project = Project::all();
-        return inertia('Addresses/Show', ['address' => $address, 'projects' => $project]);
+        $users = User::select('id', 'name')->get();
+        return inertia('Addresses/Show', ['address' => $address, 'projects' => $project, 'users' => $users]);
     }
     public function create()
     {
         $project = Project::all();
-        // dd($project);
-        return inertia('Addresses/Create', ['projects' => $project]);
+        $users = User::select('id', 'name')->get();
+        // dd($users);
+        return inertia('Addresses/Create', ['projects' => $project, 'users' => $users]);
     }
 
     public function update(Request $request, $id)
@@ -69,6 +72,7 @@ class AddressController extends Controller
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
             'project_id' => 'nullable|exists:projects,id',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         DB::beginTransaction();
@@ -107,6 +111,7 @@ class AddressController extends Controller
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
             'project_id' => 'nullable|exists:projects,id',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         DB::beginTransaction();

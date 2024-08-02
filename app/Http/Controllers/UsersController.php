@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Address;
 use Illuminate\Http\Request;
 
@@ -13,8 +14,9 @@ class UsersController extends Controller
     public function index()
     {
         $address = Address::first();
+        $callLogs = Activity::where('address_id', $address->id)->where('activity_type', 'call')->select('id', 'address_id', 'starting_time')->get();
         // dd($address);
-        return inertia('user/index', ['address' => $address]);
+        return inertia('user/index', ['address' => $address,'logs' => $callLogs]);
     }
 
     /**

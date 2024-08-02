@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\Address;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,10 @@ class TimeTrackingController extends Controller
     public function resumeTracking(Request $request, $id)
     {
         $timeLog = Activity::find($id);
-        $timeLog->update(['ending_time' => Carbon::now()]);
+        $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
+        $totalTime = $timeLog->ending_time->diffInSeconds($timeLog->starting_time);
+        $timeLog->total_duration = $totalTime;
+        $timeLog->save();
 
         return response()->json($timeLog);
     }
@@ -43,11 +47,15 @@ class TimeTrackingController extends Controller
     {
         $timeLog = Activity::find($id);
         $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
+        $effectiveTime = $timeLog->calculateEffectiveTime();
+        $timeLog->total_duration = $effectiveTime;
         $timeLog->save();
 
-        $effectiveTime = $timeLog->calculateEffectiveTime();
 
 
-        return response()->json($effectiveTime);
+        $address = Address::inRandomOrder()->with('calLogs')->first();
+        // dd($address->company_name);
+        return response()->json(['address' => $address]);
+        // return inertia('user/index', ['address' => $address]);
     }
 }

@@ -14,6 +14,7 @@ import Aura from '@primevue/themes/aura';
 import { Head } from '@inertiajs/vue3';
 import ToastService from 'primevue/toastservice';
 import store from './store/index';
+import 'primeicons/primeicons.css'
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -42,7 +43,7 @@ createInertiaApp({
             })
             .use(store)
             .mount(el);
-            
+
     },
     progress: {
         color: '#4B5563',

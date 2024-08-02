@@ -82,6 +82,12 @@
                         placeholder="Select a Project" class="w-full" filter />
                     <Message v-if="errors.project_id" severity="error" class="mt-2">{{ errors.project_id }}</Message>
                 </div>
+                <div class="mb-4">
+                    <InputLabel for="user_id">Assign User</InputLabel>
+                    <Select v-model="newAddress.user_id" :options="users" optionLabel="name" optionValue="id"
+                        placeholder="Select a Project" class="w-full" filter />
+                    <Message v-if="errors.user_id" severity="error" class="mt-2">{{ errors.user_id }}</Message>
+                </div>
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">
                     <Button type="submit" class="btn btn-primary">Add Address</Button>
                 </div>
@@ -114,6 +120,7 @@ export default {
     },
     props: {
         projects: Array,
+        users: Array,
     },
     methods: {
         createAddress() {

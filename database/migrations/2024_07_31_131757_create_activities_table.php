@@ -18,7 +18,8 @@ return new class extends Migration {
             $table->string('activity_type')->default('call');
             $table->string('starting_time');
             $table->string('ending_time')->nullable();
-            $table->timestamps();
+            $table->string('total_duration')->nullable();
+            // $table->timestamps();
         });
     }
 

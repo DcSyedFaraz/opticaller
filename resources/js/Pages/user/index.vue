@@ -1,62 +1,83 @@
 <template>
+
+    <Head title="Addresses" />
     <AuthenticatedLayout>
         <div class="user-page grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
             <div class="user-actions mb-4 lg:mb-0">
                 <span>Login Time: {{ loginTime }}</span>
-                <Button label="Pause Countdown" icon="pi pi-pause" @click="togglePause" class="mr-2" />
+                <Button :label="isPaused ? 'Resume Countdown' : 'Pause Countdown'"
+                    :severity="isPaused ? 'success' : 'info'" :icon="isPaused ? 'pi pi-play' : 'pi pi-pause'"
+                    @click="togglePause" class="mr-2" />
                 <Button label="Callback" icon="pi pi-phone" @click="showCallbackForm = true" />
             </div>
             <div class="countdown-timer lg:col-span-2">
-                <h3 class="text-lg font-bold">Time spent on current address: {{ formattedCountdown }}</h3>
+                <h3 class="text-lg font-bold">Time spent on current Address: {{ formattedCountdown }}</h3>
             </div>
-            <div class="address-container lg:col-span-2">
+            <div class="localAddress-container lg:col-span-2">
                 <Card class="shadow-md">
                     <template #title>
-                        <h2 class="text-lg font-bold">{{ address.company_name }}</h2>
+                        <h2 class="text-lg font-bold">{{ localAddress.company_name }}</h2>
                     </template>
                     <template #content>
-                        <p><strong>Address:</strong> {{ address.street_address }}, {{ address.city }}, {{
-                    address.postal_code }}</p>
-                        <p><strong>Phone:</strong> {{ address.phone_number }}</p>
-                        <p><strong>Email:</strong> {{ address.email_address }}</p>
-                        <p><strong>Website:</strong> {{ address.website }}</p>
-                        <InputText v-model="address.company_name" placeholder="Company Name" class="w-full mt-2" />
-                        <InputText v-model="address.street_address" placeholder="Street Address" class="w-full mt-2" />
-                        <InputText v-model="address.city" placeholder="City" class="w-full mt-2" />
-                        <InputText v-model="address.postal_code" placeholder="Postal Code" class="w-full mt-2" />
-                        <InputText v-model="address.phone_number" placeholder="Phone Number" class="w-full mt-2" />
-                        <InputText v-model="address.email_address" placeholder="Email Address" class="w-full mt-2" />
-                        <InputText v-model="address.website" placeholder="Website" class="w-full mt-2" />
+                        <p><strong>Address:</strong> {{ localAddress.street_address }}, {{ localAddress.city }}, {{
+                    localAddress.postal_code }}</p>
+                        <p><strong>Phone:</strong> <a :href="'tel:' + localAddress.phone_number"
+                                class="text-blue-500 hover:underline">{{ localAddress.phone_number }}</a></p>
+                        <p><strong>Email:</strong> {{ localAddress.email_address }}</p>
+                        <p><strong>Website:</strong> {{ localAddress.website }}</p>
+                        <InputText v-model="localAddress.company_name" placeholder="Company Name" class="w-full mt-2" />
+                        <InputText v-model="localAddress.street_address" placeholder="Street Address"
+                            class="w-full mt-2" />
+                        <InputText v-model="localAddress.city" placeholder="City" class="w-full mt-2" />
+                        <InputText v-model="localAddress.postal_code" placeholder="Postal Code" class="w-full mt-2" />
+                        <InputText v-model="localAddress.phone_number" placeholder="Phone Number" class="w-full mt-2" />
+                        <InputText v-model="localAddress.email_address" placeholder="Email Address"
+                            class="w-full mt-2" />
+                        <InputText v-model="localAddress.website" placeholder="Website" class="w-full mt-2" />
                     </template>
                 </Card>
             </div>
             <div class="feedback-form lg:col-span-1">
                 <h3 class="text-lg font-bold">Feedback</h3>
-                <Select v-model="address.feedback" :options="feedbackOptions" optionValue="label" optionLabel="label"
-                    placeholder="Select Feedback" class="w-full" />
-                <Textarea v-model="address.personal_notes" rows="5" placeholder="Enter notes here" autoResize
+                <Select v-model="localAddress.feedback" :options="feedbackOptions" optionValue="label"
+                    optionLabel="label" placeholder="Select Feedback" class="w-full my-2" />
+                <Textarea v-model="localAddress.personal_notes" rows="5" placeholder="Enter notes here" autoResize
                     class="w-full" />
                 <Button label="Submit Feedback" icon="pi pi-check" @click="submitFeedback" class="w-full" />
             </div>
             <div class="call-history lg:col-span-1">
                 <h3 class="text-lg font-bold">Call History</h3>
-                <DataTable :value="callHistory" class="w-full">
-                    <Column field="date" header="Date" />
-                    <Column field="note" header="Note" />
-                </DataTable>
+                <DataTable :value="callHistory" class="w-full" scrollable scrollHeight="250px">
+                    <Column field="starting_time" header="Date" >
+                        <template #body="slotProps">
+                            {{ formatDate(slotProps.data) }}
+                        </template>
+                </Column>
+                <template #empty> No call logs available. </template>
+                <!-- <Column field="id" header="Note" /> -->
+            </DataTable>
             </div>
-            <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal>
-                <div class="p-fluid">
-                    <Dropdown v-model="callbackForm.project" :options="projectOptions" placeholder="Select Project"
-                        optionValue="label" optionLabel="label" class="w-full" />
-                    <InputText v-model="callbackForm.salutation" placeholder="Salutation" class="w-full" />
-                    <InputText v-model="callbackForm.firstName" placeholder="First Name" class="w-full" />
-                    <InputText v-model="callbackForm.lastName" placeholder="Last Name" class="w-full" />
-                    <InputText v-model="callbackForm.phoneNumber" placeholder="Phone Number" class="w-full" />
-                    <Textarea v-model="callbackForm.notes" rows="5" placeholder="Notes" autoResize class="w-full" />
-                </div>
-                <div class="p-d-flex p-jc-end">
-                    <Button label="Submit" icon="pi pi-check" @click="submitCallbackRequest" />
+            <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg">
+                <div class="p-6 space-y-4">
+                    <div class="space-y-2">
+                        <Select v-model="callbackForm.project" :options="projectOptions" placeholder="Select Project"
+                            optionValue="label" optionLabel="label"
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                        <InputText v-model="localAddress.salutation" placeholder="Salutation"
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                        <InputText v-model="localAddress.first_name" placeholder="First Name"
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                        <InputText v-model="localAddress.last_name" placeholder="Last Name"
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                        <InputText v-model="localAddress.phone_number" placeholder="Phone Number"
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                        <Textarea v-model="localAddress.personal_notes" rows="5" placeholder="Notes" autoResize
+                            class="w-full p-2 border border-gray-300 rounded-md" />
+                    </div>
+                    <div class="flex justify-end">
+                        <Button label="Submit" icon="pi pi-check" @click="submitCallbackRequest"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
+                    </div>
                 </div>
             </Dialog>
         </div>
@@ -69,10 +90,12 @@
 export default {
     props: {
         address: Object,
+        logs: Array,
     },
     data() {
         return {
-            callHistory: [],
+            localAddress: { ...this.address },
+            callHistory: [...this.logs],
             countdown: 0,
             pauseTime: 0,
             projectTitle: '',
@@ -113,6 +136,7 @@ export default {
             ];
         },
         formattedCountdown() {
+            // console.log(this.countdown);
             const minutes = Math.floor(this.countdown / 60);
             const seconds = this.countdown % 60;
             return `${minutes}m ${seconds}s`;
@@ -123,15 +147,22 @@ export default {
     },
     mounted() {
         this.startTracking();
+        console.log(this.address);
     },
     methods: {
+        formatDate(data) {
+            const date = new Date(data.starting_time);
+            return date.toLocaleDateString();
+        },
         async startTracking() {
             try {
+                this.isPaused = false;
                 const response = await axios.post('/start-tracking', {
                     address_id: this.address.id,
                 });
                 this.timeLogId = response.data.id;
-                this.startCountdown();
+                this.countdown = 0;
+                await this.startCountdown();
             } catch (error) {
                 console.error('Error starting tracking:', error);
             }
@@ -165,14 +196,27 @@ export default {
         async submitFeedback() {
             // Implement feedback submission logic here
             // alert(`Feedback: ${this.address.feedback}\nNotes: ${this.address.personal_notes}`);
+            if (this.isPaused) {
+                await this.togglePause(); // Resume the tracking if it's paused
+            }
             this.isPaused = true;
             clearInterval(this.timer);
             const res = await axios.post(`/stop-tracking/${this.timeLogId}`);
+            console.log(res.data.address);
+            this.localAddress = res.data.address;
+            this.callHistory = res.data.calLogs;
+            this.timer = null;
+            await this.startTracking();
+            // if (res.data) {
+            //     this.address = res.data;
+            //     this.countdown = 0;
+            //     this.startTracking();
+            // }
             // Save the edits
             //   await axios.post('/api/save-address', this.address);
-            console.log(res.data, 'new');
+            // console.log(res.data, 'new');
             // Fetch the next address (for demo, we'll just reset the current address)
-            this.$inertia.reload();
+            // this.$inertia.reload();
         },
         async submitCallbackRequest() {
             const emailMap = {

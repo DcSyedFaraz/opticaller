@@ -29,7 +29,7 @@ class AddressFactory extends Factory
             'email_address' => $this->faker->safeEmail,
             'personal_notes' => $this->faker->paragraph,
             'interest_notes' => $this->faker->paragraph,
-            'feedback' => $this->faker->randomElement(['positive', 'neutral', 'negative']),
+            'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request','Follow-up','Delete Address']),
             'follow_up_date' => $this->faker->date,
         ];
     }

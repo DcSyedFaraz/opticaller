@@ -75,7 +75,7 @@ export default {
     mounted() {
         console.log(this.$page.props);
         if (this.$page.props.flash.message) {
-            this.$toast.add({ severity: 'success', summary: this.$page.props.flash.message, Life: 3000 });
+            this.$toast.add({ severity: 'success', summary: this.$page.props.flash.message, life: 3000 });
             this.$page.props.flash.message = null;
         }
     }

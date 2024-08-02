@@ -9,4 +9,8 @@ class Address extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    public function calLogs()
+    {
+        return $this->hasMany(Activity::class)->where('activity_type', 'call')->select('id','address_id','starting_time');
+    }
 }

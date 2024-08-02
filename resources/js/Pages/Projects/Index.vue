@@ -76,7 +76,7 @@ export default {
     mounted() {
 
         if (this.$page.props.message) {
-            this.$toast.add({ severity: 'message', summary: this.$page.props.success, Life:3000 });
+            this.$toast.add({ severity: 'message', summary: this.$page.props.success, life:3000 });
         }
     },
     methods: {
