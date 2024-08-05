@@ -52,7 +52,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('projects', ProjectController::class);
     Route::resource('users', UsersController::class);
-    
+    Route::get('/new/dashboard', [UsersController::class, 'dash'])->name('dash');
+
     Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
     Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
     Route::post('/resume-tracking/{id}', [TimeTrackingController::class, 'resumeTracking']);

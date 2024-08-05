@@ -14,7 +14,10 @@ import Aura from '@primevue/themes/aura';
 import { Head } from '@inertiajs/vue3';
 import ToastService from 'primevue/toastservice';
 import store from './store/index';
-import 'primeicons/primeicons.css'
+import 'primeicons/primeicons.css';
+import ConfirmationService from 'primevue/confirmationservice';
+import ConfirmDialog from 'primevue/confirmdialog';
+
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -28,6 +31,7 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .use(ToastService)
+            .use(ConfirmationService)
             .component('AuthenticatedLayout', AuthenticatedLayout)
             .component('Head', Head)
             .component('NavLink', NavLink)

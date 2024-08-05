@@ -112,7 +112,7 @@ export default {
         deleteProject(project) {
             this.$inertia.delete(`/projects/${project.id}`, {
                 onSuccess: () => {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully' });
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life:3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {

@@ -4,66 +4,91 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Address;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function dash()
     {
         $address = Address::first();
         $callLogs = Activity::where('address_id', $address->id)->where('activity_type', 'call')->select('id', 'address_id', 'starting_time')->get();
         // dd($address);
-        return inertia('user/index', ['address' => $address,'logs' => $callLogs]);
+        return Inertia::render('Users/dash', ['address' => $address, 'logs' => $callLogs]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function index()
+    {
+        $users = User::with('roles')->get();
+        return Inertia::render('Users/Index', ['users' => $users]);
+    }
+    public function show()
+    {
+        $users = User::with('roles')->get();
+        return Inertia::render('Users/Index', ['users' => $users]);
+    }
+
     public function create()
     {
-        //
+        $roles = Role::all();
+        return Inertia::render('Users/Create', ['roles' => $roles]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'roles' => 'required'
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ]);
+
+        $user->syncRoles($data['roles']);
+
+        return redirect()->route('users.index')->with('success', 'User created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(User $user)
     {
-        //
+        $roles = Role::all();
+        $userRoles = $user->roles->first()->name;
+        return Inertia::render('Users/Edit', ['user' => $user, 'roles' => $roles, 'userRoles' => $userRoles]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'roles' => 'required'
+        ]);
+
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => $data['password'] ? bcrypt($data['password']) : $user->password,
+        ]);
+
+        $user->syncRoles($data['roles']);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(User $user)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $user->delete();
+        return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
 }
