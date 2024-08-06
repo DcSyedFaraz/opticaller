@@ -17,11 +17,6 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'admin']);
         Role::create(['name' => 'user']);
 
-        User::factory()->count(5)->admin()->create();
-        User::factory()->count(50)->user()->create();
-
-        \App\Models\Address::factory(50)->create();
-        \App\Models\Project::factory(10)->create();
 
         $admin = User::factory()->create([
             'name' => 'Test User',
@@ -36,5 +31,10 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678'),
         ]);
         $user->assignRole('user');
+        User::factory()->count(5)->admin()->create();
+        User::factory()->count(50)->user()->create();
+
+        \App\Models\Address::factory(5)->create();
+        \App\Models\Project::factory(5)->create();
     }
 }

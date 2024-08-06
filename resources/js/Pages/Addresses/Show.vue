@@ -50,15 +50,27 @@
                     <Message v-if="errors.phone_number" severity="error" class="mt-2">{{ errors.phone_number }}</Message>
                 </div>
                 <div class="mb-4">
-                    <InputLabel for="email_address">Email Address</InputLabel>
-                    <InputText v-model="address.email_address" type="email" class="w-full" />
-                    <Message v-if="errors.email_address" severity="error" class="mt-2">{{ errors.email_address }}</Message>
+                    <InputLabel for="email_address_system">System Email Address</InputLabel>
+                    <InputText v-model="address.email_address_system" type="email" class="w-full" />
+                    <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{ errors.email_address_system }}</Message>
                 </div>
-                <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
+                <div class="mb-4">
+                    <InputLabel for="email_address_new">New Email Address</InputLabel>
+                    <InputText v-model="address.email_address_new" type="email" class="w-full" />
+                    <Message v-if="errors.email_address_new" severity="error" class="mt-2">{{ errors.email_address_new }}</Message>
+                </div>
+
+                <div class="mb-4">
+                    <InputLabel for="priority">Project Priority</InputLabel>
+                    <Select v-model="address.priority" :options="priorityOptions" optionValue="value" optionLabel="label"
+                        placeholder="Select Priority" class="w-full" />
+                    <Message v-if="errors.priority" severity="error" class="mt-2">{{ errors.priority }}</Message>
+                </div>
+                <!-- <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="personal_notes">Personal Notes</InputLabel>
                     <Textarea v-model="address.personal_notes" class="w-full" />
                     <Message v-if="errors.personal_notes" severity="error" class="mt-2">{{ errors.personal_notes }}</Message>
-                </div>
+                </div> -->
                 <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="interest_notes">Interest Notes</InputLabel>
                     <Textarea v-model="address.interest_notes" class="w-full" />
@@ -88,7 +100,7 @@
                     <Message v-if="errors.user_id" severity="error" class="mt-2">{{ errors.user_id }}</Message>
                 </div>
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">
-                    <Button type="submit" class="btn btn-primary">Update Address</Button>
+                    <Button type="submit" severity='success'>Update Address</Button>
                 </div>
             </form>
         </div>
@@ -114,6 +126,12 @@ export default {
                 { label: 'Request', value: 'Request' },
                 { label: 'Follow-up', value: 'Follow-up' },
                 { label: 'Delete Address', value: 'Delete Address' },
+            ],
+            priorityOptions: [
+                { label: 'Low', value: 1 },
+                { label: 'Medium', value: 2 },
+                { label: 'High', value: 3 },
+                { label: 'Critical', value: 4 },
             ],
         }
     },

@@ -43,14 +43,14 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-    public function configure()
-    {
-        return $this->afterCreating(function (User $user) {
-            // Assign a random role to the user
-            $role = Role::inRandomOrder()->first();
-            $user->assignRole($role);
-        });
-    }
+    // public function configure()
+    // {
+    //     return $this->afterCreating(function (User $user) {
+    //         // Assign a random role to the user
+    //         $role = Role::inRandomOrder()->first();
+    //         $user->assignRole($role);
+    //     });
+    // }
 
     public function admin()
     {

@@ -16,13 +16,18 @@
                 <Column field="company_name" header="Company Name" sortable></Column>
                 <Column field="city" header="City" sortable></Column>
                 <Column field="phone_number" header="Phone Number" sortable></Column>
-                <Column field="email_address" header="Email Address" sortable></Column>
+                <Column field="email_address_system" header="Email Address System" sortable></Column>
                 <Column header="Actions">
                     <template #body="slotProps">
-                        <NavLink :href="`/addresses/${slotProps.data.id}`" class="text-blue-600 hover:text-blue-900">
+                        <NavLink :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">
                             View</NavLink>
                     </template>
                 </Column>
+                <template #empty>
+                    <div class="text-center py-4 text-gray-500">
+                        No address found. Please try adjusting your search criteria or add a new address.
+                    </div>
+                </template>
             </DataTable>
             <Paginator :rows="addresses.per_page" :totalRecords="addresses.total" @page="onPageChange($event)" />
         </div>

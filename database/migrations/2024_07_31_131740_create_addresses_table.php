@@ -21,13 +21,16 @@ return new class extends Migration {
             $table->string('city')->nullable();
             $table->string('website')->nullable();
             $table->string('phone_number')->nullable();
-            $table->string('email_address')->nullable();
-            $table->text('personal_notes')->nullable();
+            $table->string('email_address_system')->unique();
+            $table->string('email_address_new')->nullable();
+            // $table->text('personal_notes')->nullable();
             $table->text('interest_notes')->nullable();
             $table->string('feedback')->nullable();
-            $table->date('follow_up_date')->nullable();
+            $table->string('follow_up_date')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
             $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
+            $table->integer('priority')->default(0);
+            $table->integer('seen')->default(0);
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,11 +27,14 @@ class AddressFactory extends Factory
             'city' => $this->faker->city,
             'website' => $this->faker->url,
             'phone_number' => $this->faker->phoneNumber,
-            'email_address' => $this->faker->safeEmail,
-            'personal_notes' => $this->faker->paragraph,
+            'email_address_system' => $this->faker->safeEmail,
+            'email_address_new' => $this->faker->safeEmail,
+            'priority' => $this->faker->numberBetween(0, 4),
+            // 'personal_notes' => $this->faker->paragraph,
             'interest_notes' => $this->faker->paragraph,
             'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request','Follow-up','Delete Address']),
-            'follow_up_date' => $this->faker->date,
+            // 'follow_up_date' => $this->faker->date,
+            'user_id' => 2,
         ];
     }
 }

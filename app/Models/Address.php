@@ -11,6 +11,6 @@ class Address extends Model
     protected $guarded = [];
     public function calLogs()
     {
-        return $this->hasMany(Activity::class)->where('activity_type', 'call')->select('id','address_id','starting_time');
+        return $this->hasMany(Activity::class)->where('activity_type', 'call')->whereNotNull('ending_time')->select('id','address_id','starting_time');
     }
 }

@@ -33,8 +33,16 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        Auth::user()->update(['logintime' => now()]);
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        $user = Auth::guard()->user()->getRoleNames();
+
+
+        return match ($user[0]) {
+            'admin' => redirect()->route('dashboard'),
+            default => redirect()->route('dash'),
+        };
+        // return redirect()->intended(RouteServiceProvider::HOME);
     }
 
     /**

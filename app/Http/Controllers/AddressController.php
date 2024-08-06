@@ -20,7 +20,7 @@ class AddressController extends Controller
             $query->where('company_name', 'like', "%{$search}%")
                 ->orWhere('city', 'like', "%{$search}%")
                 ->orWhere('phone_number', 'like', "%{$search}%")
-                ->orWhere('email_address', 'like', "%{$search}%");
+                ->orWhere('email_address_system', 'like', "%{$search}%");
         }
 
         // Sorting functionality with validation
@@ -66,7 +66,9 @@ class AddressController extends Controller
             'city' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'email_address' => 'nullable|email|max:255',
+            'email_address_system' => 'required|email|max:255',
+            'email_address_new' => 'required|email|max:255',
+            'priority' => 'required',
             'personal_notes' => 'nullable|string',
             'interest_notes' => 'nullable|string',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
@@ -105,7 +107,9 @@ class AddressController extends Controller
             'city' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
             'phone_number' => 'nullable|string|max:20',
-            'email_address' => 'nullable|email|max:255',
+            'email_address_system' => 'required|email|max:255',
+            'email_address_new' => 'required|email|max:255',
+            'priority' => 'required',
             'personal_notes' => 'nullable|string',
             'interest_notes' => 'nullable|string',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',

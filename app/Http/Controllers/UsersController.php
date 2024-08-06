@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\User;
+use App\Services\AddressService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Session;
 use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
@@ -16,17 +19,45 @@ class UsersController extends Controller
      */
     public function dash()
     {
-        $address = Address::first();
-        $callLogs = Activity::where('address_id', $address->id)->where('activity_type', 'call')->select('id', 'address_id', 'starting_time')->get();
-        // dd($address);
-        return Inertia::render('Users/dash', ['address' => $address, 'logs' => $callLogs]);
+        $addressService = new AddressService();
+        $address = $addressService->getDueAddress();
+        // Return the address with Inertia
+        return Inertia::render('Users/dash', ['address' => $address]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->get();
-        return Inertia::render('Users/Index', ['users' => $users]);
+        $query = User::with('roles');
+
+        // Search functionality
+        if ($request->has('search') && $request->input('search') !== '') {
+            $search = $request->input('search');
+            $query->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('email', 'LIKE', "%{$search}%");
+            // dd($query);
+        }
+
+        // Sorting functionality
+        if (
+            $request->has('sortField') && $request->input('sortField') !== '' &&
+            $request->has('sortOrder') && $request->input('sortOrder') !== null
+        ) {
+            $sortField = $request->input('sortField');
+            $sortOrder = $request->input('sortOrder') === 1 ? 'asc' : 'desc';
+            $query->orderBy($sortField, $sortOrder);
+        }
+
+
+        // Pagination
+        $users = $query->paginate(10);
+        // dd($users);
+        return Inertia::render('Users/Index', [
+            'users' => $users,
+            'filters' => $request->only(['search', 'sortField', 'sortOrder'])
+        ]);
     }
+
+
     public function show()
     {
         $users = User::with('roles')->get();
