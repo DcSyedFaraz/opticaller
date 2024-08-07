@@ -2,173 +2,177 @@
 
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <div class="user-page grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-            <div class="user-actions mb-4 lg:mb-0 lg:col-span-2 flex justify-center">
-                <span class="mr-4 mt-2">Login Time: {{ loginTime }}</span>
-                <Button :label="isPaused ? 'Resume Countdown' : 'Pause Countdown'"
-                    :severity="isPaused ? 'success' : 'info'" :icon="isPaused ? 'pi pi-play' : 'pi pi-pause'"
-                    @click="togglePause" class="mr-2" />
-                <Button label="Callback" icon="pi pi-phone" @click="showCallbackForm = true" />
-            </div>
-            <div class="countdown-timer lg:col-span-2 flex justify-center">
-                <h3 class="text-lg font-bold">Time spent on current Address: {{ formattedCountdown }}</h3>
-            </div>
-            <div class="localAddress-container lg:col-span-2">
-                <Card class="shadow-md">
-                    <template #title>
-                        <h2 class="text-lg font-bold">{{ localAddress.company_name }}</h2>
-                    </template>
-                    <template #content>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div class="field">
-                                <label for="email_address_system">Email System:</label>
-                                {{ localAddress.email_address_system }}
-                            </div>
-                            <div class="field">
-                                <label for="street_address">Street Address:</label>
-                                <InputText id="street_address" v-model="localAddress.street_address" class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="city">City:</label>
-                                <InputText id="city" v-model="localAddress.city" class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="postal_code">Postal Code:</label>
-                                <InputText id="postal_code" v-model="localAddress.postal_code" class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="phone_number">Phone Number:</label>
-                                <InputText id="phone_number" v-model="localAddress.phone_number" class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="email_address_system">Email New:</label>
-                                <InputText id="email_address_system" v-model="localAddress.email_address_new"
-                                    class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="website">Website:</label>
-                                <InputText id="website" v-model="localAddress.website" class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="attempts">No of call attempts:</label>
-                                <InputText type="number" id="attempts" v-model="logdata.call_attempts" class="w-full" />
-                                <div v-if="!logdata.call_attempts || logdata.call_attempts <= 0"
-                                    class="text-red-500 text-sm">Please enter a positive number</div>
 
-                            </div>
-                            <div class="field">
-                                <label for="interest_notes">Interest Notes:</label>
-                                <Textarea id="interest_notes" v-model="localAddress.interest_notes" rows="5"
-                                    class="w-full" />
-                            </div>
-                            <div class="field">
-                                <label for="personal_notes">Personal Notes:</label>
-                                <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="5"
-                                    class="w-full" />
-                            </div>
-                        </div>
-                    </template>
-                </Card>
-            </div>
-            <div class="feedback-form lg:col-span-1">
-                <Card class="shadow-md">
-                    <template #title>
-                        <h2 class="text-lg font-bold">Feedback</h2>
-                    </template>
-                    <template #content>
-                        <div class="field">
-                            <label for="feedback">Feedback:</label>
-                            <Select id="feedback" v-model="localAddress.feedback" :options="feedbackOptions"
-                                optionValue="label" optionLabel="label" class="w-full" />
-                        </div>
-                        <div class="field" v-if="localAddress.feedback === 'Follow-up'">
-                            <label for="follow_up_date">Follow-up Date:</label>
-                            <DatePicker id="follow_up_date" showTime hourFormat="24" fluid
-                                v-model="localAddress.follow_up_date" class="w-full" />
-                        </div>
-                        <Button label="Submit Feedback" icon="pi pi-check" @click="submitFeedback" class="w-full" />
-                    </template>
-                </Card>
-            </div>
-            <div class="call-history lg:col-span-1">
-                <Card class="shadow-md">
-                    <template #title>
-                        <h2 class="text-lg font-bold">Call History</h2>
-                    </template>
-                    <template #content>
-                        <DataTable :value="callHistory" class="w-full" scrollable scrollHeight="250px">
-                            <Column field="created_at" header="Date">
-                                <template #body="slotProps">
-                                    {{ formatDate(slotProps.data) }}
-                                </template>
-                            </Column>
-                            <Column header="Call Attempts">
-                                <template #body="slotProps">
-                                    {{ slotProps.data.notes?.call_attempts ?? 'N/A' }}
-                                </template>
-                            </Column>
-                            <Column header="Personal Notes">
-                                <template #body="slotProps">
-                                    <Button @click="showNotes(slotProps.data.notes?.personal_notes)"
-                                        v-if="slotProps.data.notes?.personal_notes">
-                                        View Notes
-                                    </Button>
-                                    <span v-else>
-                                        N/A
-                                    </span>
-                                </template>
-                            </Column>
-                            <template #empty> No call logs available. </template>
-                        </DataTable>
-                    </template>
-                </Card>
-            </div>
-            <Dialog header="Personal Notes" v-model:visible="showNotesModal" modal class="rounded-lg shadow-lg"
-                :style="{ width: '36rem' }">
-                <div class="p-6 space-y-4">
-                    <div class="space-y-2">
-                        {{ selectedNotes }}
+            <div class="user-page grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+                <div class="user-actions mb-4 lg:mb-0 lg:col-span-2 flex justify-center">
+                    <span class="mr-4 mt-2">Login Time: {{ loginTime }}</span>
+                    <Button :label="isPaused ? 'Resume Countdown' : 'Pause Countdown'"
+                        :severity="isPaused ? 'success' : 'info'" :icon="isPaused ? 'pi pi-play' : 'pi pi-pause'"
+                        @click="togglePause" class="mr-2" />
+                    <Button label="Callback" icon="pi pi-phone" @click="showCallbackForm = true" />
+                </div>
+                <KeepAlive>
 
+                    <div class="countdown-timer lg:col-span-2 flex justify-center">
+                        <h3 class="text-lg font-bold">Time spent on current Address: {{ formattedCountdown }}</h3>
                     </div>
+                </KeepAlive>
+                <div class="localAddress-container lg:col-span-2">
+                    <Card class="shadow-md">
+                        <template #title>
+                            <h2 class="text-lg font-bold">{{ localAddress.company_name }}</h2>
+                        </template>
+                        <template #content>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="field">
+                                    <label for="email_address_system">Email System:</label>
+                                    {{ localAddress.email_address_system }}
+                                </div>
+                                <div class="field">
+                                    <label for="street_address">Street Address:</label>
+                                    <InputText id="street_address" v-model="localAddress.street_address" class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="city">City:</label>
+                                    <InputText id="city" v-model="localAddress.city" class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="postal_code">Postal Code:</label>
+                                    <InputText id="postal_code" v-model="localAddress.postal_code" class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="phone_number">Phone Number:</label>
+                                    <InputText id="phone_number" v-model="localAddress.phone_number" class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="email_address_system">Email New:</label>
+                                    <InputText id="email_address_system" v-model="localAddress.email_address_new"
+                                        class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="website">Website:</label>
+                                    <InputText id="website" v-model="localAddress.website" class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="attempts">No of call attempts:</label>
+                                    <InputText type="number" id="attempts" v-model="logdata.call_attempts" class="w-full" />
+                                    <div v-if="!logdata.call_attempts || logdata.call_attempts <= 0"
+                                        class="text-red-500 text-sm">Please enter a positive number</div>
+
+                                </div>
+                                <div class="field">
+                                    <label for="interest_notes">Interest Notes:</label>
+                                    <Textarea id="interest_notes" v-model="localAddress.interest_notes" rows="5"
+                                        class="w-full" />
+                                </div>
+                                <div class="field">
+                                    <label for="personal_notes">Personal Notes:</label>
+                                    <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="5"
+                                        class="w-full" />
+                                </div>
+                            </div>
+                        </template>
+                    </Card>
                 </div>
-            </Dialog>
-            <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
-                :style="{ width: '36rem' }">
-                <div class="p-6 space-y-4">
-                    <div class="space-y-2">
-                        <div class="field">
-                            <label for="project">Project:</label>
-                            <Select id="project" v-model="callbackForm.project" :options="projectOptions"
-                                optionValue="label" optionLabel="label" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="salutation">Salutation:</label>
-                            <InputText id="salutation" v-model="callbackForm.salutation" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="first_name">First Name:</label>
-                            <InputText id="first_name" v-model="callbackForm.firstName" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="last_name">Last Name:</label>
-                            <InputText id="last_name" v-model="callbackForm.lastName" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="phoneNumber">Phone Number:</label>
-                            <InputText id="phoneNumber" v-model="callbackForm.phoneNumber" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="personal_notes">Notes:</label>
-                            <Textarea id="personal_notes" v-model="callbackForm.notes" rows="5" class="w-full" />
-                        </div>
-                    </div>
-                    <div class="flex justify-end">
-                        <Button label="Submit" icon="pi pi-check" @click="submitCallbackRequest"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
-                    </div>
+                <div class="feedback-form lg:col-span-1">
+                    <Card class="shadow-md">
+                        <template #title>
+                            <h2 class="text-lg font-bold">Feedback</h2>
+                        </template>
+                        <template #content>
+                            <div class="field">
+                                <label for="feedback">Feedback:</label>
+                                <Select id="feedback" v-model="localAddress.feedback" :options="feedbackOptions"
+                                    optionValue="label" optionLabel="label" class="w-full" />
+                            </div>
+                            <div class="field" v-if="localAddress.feedback === 'Follow-up'">
+                                <label for="follow_up_date">Follow-up Date:</label>
+                                <DatePicker id="follow_up_date" showTime hourFormat="24" fluid
+                                    v-model="localAddress.follow_up_date" class="w-full" />
+                            </div>
+                            <Button label="Submit Feedback" icon="pi pi-check" @click="submitFeedback" class="w-full" />
+                        </template>
+                    </Card>
                 </div>
-            </Dialog>
-        </div>
+                <div class="call-history lg:col-span-1">
+                    <Card class="shadow-md">
+                        <template #title>
+                            <h2 class="text-lg font-bold">Call History</h2>
+                        </template>
+                        <template #content>
+                            <DataTable :value="callHistory" class="w-full" scrollable scrollHeight="250px">
+                                <Column field="created_at" header="Date">
+                                    <template #body="slotProps">
+                                        {{ formatDate(slotProps.data) }}
+                                    </template>
+                                </Column>
+                                <Column header="Call Attempts">
+                                    <template #body="slotProps">
+                                        {{ slotProps.data.notes?.call_attempts ?? 'N/A' }}
+                                    </template>
+                                </Column>
+                                <Column header="Personal Notes">
+                                    <template #body="slotProps">
+                                        <Button @click="showNotes(slotProps.data.notes?.personal_notes)"
+                                            v-if="slotProps.data.notes?.personal_notes">
+                                            View Notes
+                                        </Button>
+                                        <span v-else>
+                                            N/A
+                                        </span>
+                                    </template>
+                                </Column>
+                                <template #empty> No call logs available. </template>
+                            </DataTable>
+                        </template>
+                    </Card>
+                </div>
+                <Dialog header="Personal Notes" v-model:visible="showNotesModal" modal class="rounded-lg shadow-lg"
+                    :style="{ width: '36rem' }">
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-2">
+                            {{ selectedNotes }}
+
+                        </div>
+                    </div>
+                </Dialog>
+                <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
+                    :style="{ width: '36rem' }">
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-2">
+                            <div class="field">
+                                <label for="project">Project:</label>
+                                <Select id="project" v-model="callbackForm.project" :options="projectOptions"
+                                    optionValue="label" optionLabel="label" class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label for="salutation">Salutation:</label>
+                                <InputText id="salutation" v-model="callbackForm.salutation" class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label for="first_name">First Name:</label>
+                                <InputText id="first_name" v-model="callbackForm.firstName" class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label for="last_name">Last Name:</label>
+                                <InputText id="last_name" v-model="callbackForm.lastName" class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label for="phoneNumber">Phone Number:</label>
+                                <InputText id="phoneNumber" v-model="callbackForm.phoneNumber" class="w-full" />
+                            </div>
+                            <div class="field">
+                                <label for="personal_notes">Notes:</label>
+                                <Textarea id="personal_notes" v-model="callbackForm.notes" rows="5" class="w-full" />
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <Button label="Submit" icon="pi pi-check" @click="submitCallbackRequest"
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
+                        </div>
+                    </div>
+                </Dialog>
+            </div>
         <div v-if="isLoading" class="loading-overlay">
             <ProgressSpinner style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
         </div>

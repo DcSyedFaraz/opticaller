@@ -35,7 +35,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:admin'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -43,7 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('addresses', AddressController::class);
 
     Route::get('/addresses/next', [AddressController::class, 'nextAddress'])->name('addresses.next');
@@ -53,6 +53,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('projects', ProjectController::class);
     Route::resource('users', UsersController::class);
+
+});
+Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/new/dashboard', [UsersController::class, 'dash'])->name('dash');
 
     Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);

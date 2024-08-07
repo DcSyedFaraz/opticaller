@@ -20,14 +20,24 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        $project = Project::create($request->all());
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        $project = Project::create($validatedData);
 
         return redirect()->route('projects.index')->with('success', 'Project created successfully');
     }
 
     public function update(Request $request, Project $project)
     {
-        $project->update($request->all());
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+        ]);
+
+        $project->update($validatedData);
         return redirect()->route('projects.index');
     }
     public function destroy(Project $project)

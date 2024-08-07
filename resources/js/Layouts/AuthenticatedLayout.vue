@@ -20,8 +20,13 @@ const showingNavigationDropdown = ref(false);
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <!-- Logo -->
-                            <div class="shrink-0 flex items-center">
+                            <div class="shrink-0 flex items-center" v-if="$page.props.auth.roles.includes('admin')">
                                 <Link :href="route('dashboard')">
+                                <ApplicationLogo class="block h-9 w-auto fill-current text-gray-800" />
+                                </Link>
+                            </div>
+                            <div class="shrink-0 flex items-center" v-else>
+                                <Link :href="route('dash')">
                                 <ApplicationLogo class="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
                             </div>

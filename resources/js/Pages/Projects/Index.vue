@@ -30,27 +30,30 @@
                 <Column field="description" header="Description"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column header="Actions"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
-                        <Button @click="editProject(slotProps.data)" label="Edit"
-                            class="text-indigo-600 hover:text-indigo-900" />
-                        <Button @click="deleteProject(slotProps.data)" label="Delete"
+                        <Button @click="editProject(slotProps.data)" severity="info" label="Edit"
+                            class="text-indigo-600 mx-2 hover:text-indigo-900" />
+                        <Button @click="deleteProject(slotProps.data)" severity="danger" label="Delete"
                             class="text-red-600 hover:text-red-900" />
                     </template>
                 </Column>
             </DataTable>
             <Dialog v-model:visible="editDialogVisible" :style="{ width: '450px' }" header="Edit Project" :modal="true"
-                class="p-fluid">
-                <form @submit.prevent="updateProject">
+                class="p-fluid max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+                <form @submit.prevent="updateProject" class="grid grid-cols-1 gap-4">
                     <div class="field">
-                        <label for="title">Title</label>
-                        <InputText v-model="editProjectData.title" type="text" />
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <InputText v-model="editProjectData.title" type="text"
+                            class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <div class="field">
-                        <label for="description">Description</label>
-                        <Textarea v-model="editProjectData.description" rows="5" cols="30" />
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <Textarea v-model="editProjectData.description" rows="5" cols="30"
+                            class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
-                    <Button type="submit" label="Update" class="mt-2" />
+                    <Button type="submit" label="Update" severity="success"
+                        class="mt-4 justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
                 </form>
             </Dialog>
         </div>
@@ -76,7 +79,7 @@ export default {
     mounted() {
 
         if (this.$page.props.message) {
-            this.$toast.add({ severity: 'message', summary: this.$page.props.success, life:3000 });
+            this.$toast.add({ severity: 'message', summary: this.$page.props.success, life: 3000 });
         }
     },
     methods: {
@@ -85,25 +88,28 @@ export default {
                 onSuccess: () => {
                     this.newProject.title = '';
                     this.newProject.description = '';
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project created successfully' ,life:3000});
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project created successfully', life: 3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
+                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] , life: 3000 });
                     });
                 },
             });
         },
-
+        editProject(project) {
+            this.editProjectData = { ...project };
+            this.editDialogVisible = true;
+        },
         updateProject() {
             this.$inertia.put(`/projects/${this.editProjectData.id}`, this.editProjectData, {
                 onSuccess: () => {
                     this.editDialogVisible = false;
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project updated successfully' });
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project updated successfully', life: 3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
+                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key], life: 3000  });
                     });
                 },
             });
@@ -112,7 +118,7 @@ export default {
         deleteProject(project) {
             this.$inertia.delete(`/projects/${project.id}`, {
                 onSuccess: () => {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life:3000 });
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life: 3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {

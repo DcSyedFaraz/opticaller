@@ -47,8 +47,10 @@ class AddressService
         if ($storedAddresses->isEmpty()) {
             Session::forget('addresses');
         }
+        if($address){
 
-        $address->update(['seen' => 1]);
+            $address->update(['seen' => 1]);
+        }
 
         return $address;
     }
