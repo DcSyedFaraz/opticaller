@@ -27,7 +27,7 @@ class AddressFactory extends Factory
             'city' => $this->faker->city,
             'website' => $this->faker->url,
             'phone_number' => $this->faker->phoneNumber,
-            'email_address_system' => $this->faker->safeEmail,
+            'email_address_system' => fake()->unique()->safeEmail(),
             'email_address_new' => $this->faker->safeEmail,
             'priority' => $this->faker->numberBetween(0, 4),
             // 'personal_notes' => $this->faker->paragraph,

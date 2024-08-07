@@ -21,6 +21,13 @@ class UsersController extends Controller
     {
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
+        // $now = now()->utc();
+        // $query = Address::with('calLogs.notes')
+        //     ->whereNotNull('follow_up_date')
+        //     ->orderBy('follow_up_date', 'asc')->get();
+
+        // dd($query);
+
         // Return the address with Inertia
         return Inertia::render('Users/dash', ['address' => $address]);
     }

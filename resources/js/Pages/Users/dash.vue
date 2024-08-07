@@ -184,6 +184,7 @@
 
 
 export default {
+
     props: {
         address: Object,
     },

@@ -113,6 +113,8 @@ class TimeTrackingController extends Controller
         $address->update($validatedData['address']);
 
         if ($address->follow_up_date) {
+            $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+
             $address->seen = 0;
             $address->save();
         }
