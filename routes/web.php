@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\WebexController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -53,6 +54,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::resource('projects', ProjectController::class);
     Route::resource('users', UsersController::class);
+
+    Route::get('/webex/callback', [WebexController::class, 'index'])->name('webex.call');
+    Route::get('/webex/authorize', [WebexController::class, 'authorizeWebex']);
+    // Route::get('/webex/callback', [WebexController::class, 'callback']);
+    Route::get('/webex/call', [WebexController::class, 'makeCall']);
+    Route::post('/webex/candidate', [WebexController::class, 'handleCandidate']);
 
 });
 Route::middleware(['auth', 'role:user'])->group(function () {
