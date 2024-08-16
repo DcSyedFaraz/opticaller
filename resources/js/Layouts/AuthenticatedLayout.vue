@@ -48,6 +48,9 @@ const showingNavigationDropdown = ref(false);
                                 <NavLink :href="route('users.index')" :active="route().current('users.*')">
                                     User Management
                                 </NavLink>
+                                <NavLink :href="route('webex.call')" :active="route().current('webex.*')">
+                                    Webex
+                                </NavLink>
                             </div>
                         </div>
 

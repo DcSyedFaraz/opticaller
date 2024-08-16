@@ -13,6 +13,11 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'webex' => [
+        'client_id' => env('WEBEX_CLIENT_ID'),
+        'client_secret' => env('WEBEX_CLIENT_SECRET'),
+        'redirect_uri' => env('WEBEX_REDIRECT_URI'),
+    ],
 
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
