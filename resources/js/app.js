@@ -16,12 +16,31 @@ import ToastService from 'primevue/toastservice';
 import store from './store/index';
 import 'primeicons/primeicons.css';
 import ConfirmationService from 'primevue/confirmationservice';
-import ConfirmDialog from 'primevue/confirmdialog';
+import { definePreset } from '@primevue/themes';
+
 
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 PrimeVue.theme = 'light';
+
+const MyPreset = definePreset(Aura, {
+    semantic: {
+        primary: {
+            50: '#A7704A',
+            100: '#A7704A',
+            200: '#A7704A',
+            300: '#A7704A',
+            400: '#A7704A',
+            500: '#A7704A',
+            600: '#A7704A',
+            700: '#A7704A',
+            800: '#A7704A',
+            900: '#A7704A',
+            950: '#A7704A'
+        }
+    }
+});
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -38,11 +57,12 @@ createInertiaApp({
             .component('InputLabel', InputLabel)
             .component('PrimaryButton', PrimaryButton)
             .use(PrimeVue, {
+                ripple: true,
                 theme: {
-                    preset: Aura,
+                    preset: MyPreset,
                     options: {
                         darkModeSelector: 'off',
-                    }
+                    },
                 }
             })
             .use(store)
