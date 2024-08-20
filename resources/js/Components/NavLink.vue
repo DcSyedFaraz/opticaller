@@ -14,13 +14,21 @@ const props = defineProps({
 
 const classes = computed(() =>
     props.active
-        ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-        : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out'
+        ? 'flex-1 flex flex-col items-center group'
+        : 'flex-1 flex flex-col items-center group'
+);
+
+const iconClasses = computed(() =>
+    props.active
+        ? 'w-10 h-10 flex justify-center items-center bg-gray-200 rounded-full !bg-white !text-primary transition'
+        : 'w-10 h-10 flex justify-center items-center bg-gray-200 rounded-full hover:bg-white hover:text-primary transition'
 );
 </script>
 
 <template>
     <Link :href="href" :class="classes">
+    <div :class="iconClasses">
         <slot />
+    </div>
     </Link>
 </template>

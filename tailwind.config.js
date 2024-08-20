@@ -12,6 +12,11 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                primary: '#A7704A', // pink-600
+                secondary: '#649182', // or any other color you want
+            },
+
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
