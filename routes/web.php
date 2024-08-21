@@ -53,7 +53,17 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
 
     Route::resource('projects', ProjectController::class);
+    Route::post('/subprojects', [ProjectController::class, 'subprojects']);
+    Route::put('/subprojects/{id}', [ProjectController::class, 'subprojectsUpdate']);
+    Route::delete('/subprojects/{id}', [ProjectController::class, 'subprojectsDelete']);
+    Route::get('/subprojects/assign', [ProjectController::class, 'assign'])->name('projects.assign');
+    Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
     Route::resource('users', UsersController::class);
+
+    // Settings
+    Route::get('/settings', function () {
+        return Inertia::render('Settings/index');
+    })->name('settings.index');
 
     Route::get('/webex/callback', [WebexController::class, 'index'])->name('webex.call');
     Route::get('/webex/authorize', [WebexController::class, 'authorizeWebex']);

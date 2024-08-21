@@ -17,7 +17,7 @@ import store from './store/index';
 import 'primeicons/primeicons.css';
 import ConfirmationService from 'primevue/confirmationservice';
 import { definePreset } from '@primevue/themes';
-
+import { Link } from '@inertiajs/vue3';
 
 
 
@@ -52,6 +52,7 @@ createInertiaApp({
             .use(ToastService)
             .use(ConfirmationService)
             .component('AuthenticatedLayout', AuthenticatedLayout)
+            .component('Link', Link)
             .component('Head', Head)
             .component('NavLink', NavLink)
             .component('InputLabel', InputLabel)

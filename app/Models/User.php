@@ -44,4 +44,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function subProjects()
+    {
+        return $this->belongsToMany(SubProject::class, 'sub_project_user');
+    }
+
 }

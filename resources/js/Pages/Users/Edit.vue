@@ -3,7 +3,7 @@
     <Head title="Users" />
     <AuthenticatedLayout>
 
-        <div class="container mx-auto px-4 py-8">
+        <div class="">
             <h1 class="text-2xl font-bold mb-4">Edit User</h1>
             <form @submit.prevent="submit">
                 <div class="mb-4">
