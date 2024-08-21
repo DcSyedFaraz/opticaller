@@ -11,6 +11,8 @@ const showingNavigationDropdown = ref(false);
 </script>
 
 <template>
+    <Toast />
+    
     <header class="flex justify-between items-center bg-[#eae9e7] p-4 md:p-6">
         <div class="flex items-center">
             <!-- Optionally, you can uncomment and use the following lines -->
@@ -26,7 +28,8 @@ const showingNavigationDropdown = ref(false);
     <!-- Sidebar and Main Content Wrapper -->
     <div class="flex flex-col md:flex-row min-h-[75vh] bg-white">
         <!-- Sidebar -->
-        <div class="w-full md:w-20 md:ml-8 my-2 md:my-5 md:border md:h-screen bg-[#eae9e7] rounded-none md:rounded-[3rem]">
+        <div
+            class="w-full md:w-20 md:ml-8 my-2 md:my-5 md:border md:h-screen bg-[#eae9e7] rounded-none md:rounded-[3rem]">
             <aside class="flex justify-center md:block md:py-4">
                 <!-- Sidebar Menu -->
                 <nav class="flex md:flex-col justify-around md:justify-between md:h-screen gap-4 md:gap-8">
@@ -38,7 +41,8 @@ const showingNavigationDropdown = ref(false);
                         <i class="pi pi-map-marker !text-2xl"></i>
                     </NavLink>
 
-                    <NavLink href="#" :active="false">
+                    <NavLink :href="route('settings.index')"
+                        :active="route().current('settings.*') || route().current('users.*') || route().current('projects.*')">
                         <i class="pi pi-cog !text-2xl"></i>
                     </NavLink>
 
