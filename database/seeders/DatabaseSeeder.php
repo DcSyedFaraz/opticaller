@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\SubProject;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
@@ -34,7 +35,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->count(5)->admin()->create();
         User::factory()->count(50)->user()->create();
 
-        \App\Models\Address::factory(4000)->create();
+        \App\Models\Address::factory(40)->create();
         \App\Models\Project::factory(5)->create();
+        SubProject::factory(5)->create();
     }
 }

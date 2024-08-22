@@ -6,14 +6,19 @@
         <div class="container mx-auto py-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 <h2 class="text-2xl font-bold mb-4">Sub Projects</h2>
-                <DataTable :value="subProjects" dataKey="id"  class="w-full">
-                    <Column field="title" header="Sub Project Name" class="font-semibold text-lg"></Column>
+                <DataTable :value="subProjects" dataKey="id" class="w-full">
+                    <Column header="Project Title" class="text-lg font-semibold">
+                        <template #body="slotProps">
+                            {{ slotProps.data.projects.title ? slotProps.data.projects.title : 'N/A' }}
+                        </template>
+                    </Column>
+                    <Column field="title" header="Sub Project Title" class="font-semibold text-lg"></Column>
                     <Column header="Assigned Users" class="text-lg">
                         <template #body="slotProps">
                             {{ slotProps.data.users ? slotProps.data.users.length : 0 }}
                         </template>
                     </Column>
-                    <Column header="Assign Users">
+                    <Column header="Action" class="text-lg">
                         <template #body="slotProps">
                             <Button @click="openDialog(slotProps.data)" label="Assign Users"
                                 class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300" />
@@ -68,6 +73,14 @@ export default {
                 user_ids: this.selectedUsers
             })
                 .then(response => {
+
+                    const subProjectIndex = this.subProjects.findIndex(sp => sp.id === response.data.subProject.id);
+
+                    // If found, update the subproject in the array
+                    if (subProjectIndex !== -1) {
+                        this.subProjects[subProjectIndex] = response.data.subProject;
+                    }
+
                     this.dialogVisible = false;
                     this.$toast.add({
                         severity: 'success',

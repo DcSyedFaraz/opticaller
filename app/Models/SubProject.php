@@ -12,7 +12,11 @@ class SubProject extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'sub_project_user');
+        return $this->belongsToMany(User::class, 'sub_project_user')->select('users.id', 'users.name');
+    }
+    public function projects()
+    {
+        return $this->belongsTo(Project::class,'project_id');
     }
 
 }

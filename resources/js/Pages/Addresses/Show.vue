@@ -1,7 +1,7 @@
 <template>
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto  sm:px-6 lg:px-8">
             <h1 class="text-2xl font-bold mb-8 text-center">Address Details</h1>
             <form @submit.prevent="updateAddress" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
@@ -88,19 +88,14 @@
                     <Message v-if="errors.follow_up_date" severity="error" class="mt-2">{{ errors.follow_up_date }}</Message>
                 </div>
                 <div class="mb-4">
-                    <InputLabel for="project_id">Project</InputLabel>
-                    <Select v-model="address.project_id" :options="projects" optionLabel="title" optionValue="id"
+                    <InputLabel for="sub_project_id">Sub Project</InputLabel>
+                    <Select v-model="address.sub_project_id" :options="subprojects" optionLabel="title" optionValue="id"
                         placeholder="Select a Project" class="w-full" filter />
-                    <Message v-if="errors.project_id" severity="error" class="mt-2">{{ errors.project_id }}</Message>
+                    <Message v-if="errors.sub_project_id" severity="error" class="mt-2">{{ errors.sub_project_id }}</Message>
                 </div>
-                <div class="mb-4">
-                    <InputLabel for="user_id">Assign User</InputLabel>
-                    <Select v-model="address.user_id" :options="users" optionLabel="name" optionValue="id"
-                        placeholder="Select a Project" class="w-full" filter />
-                    <Message v-if="errors.user_id" severity="error" class="mt-2">{{ errors.user_id }}</Message>
-                </div>
+
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">
-                    <Button type="submit" severity='success'>Update Address</Button>
+                    <Button type="submit" severity='contrast'>Update Address</Button>
                 </div>
             </form>
         </div>
@@ -114,7 +109,7 @@ export default {
     components: { Link },
     props: {
         address: Object,
-        projects: Array,
+        subprojects: Array,
         users: Array,
     },
     data() {

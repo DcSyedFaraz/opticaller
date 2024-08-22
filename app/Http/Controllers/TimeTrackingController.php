@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Address;
+use App\Models\GlobalLockedFields;
 use App\Services\AddressService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -68,7 +69,6 @@ class TimeTrackingController extends Controller
             'address.interest_notes' => 'nullable|string',
             'address.feedback' => 'nullable|string',
             'address.follow_up_date' => 'nullable|date|after:today',
-            'address.user_id' => 'required|integer|exists:users,id',
             'address.project_id' => 'nullable|integer|exists:projects,id',
         ], [
             'call_attempts.required' => 'Call attempts is required',
@@ -101,8 +101,6 @@ class TimeTrackingController extends Controller
             'address.feedback.string' => 'Feedback must be a string',
             'address.follow_up_date.after' => 'Follow up date must be after today',
             'address.user_id.required' => 'User ID is required',
-            'address.user_id.integer' => 'User ID must be an integer',
-            'address.user_id.exists' => 'User ID does not exist',
             'address.project_id.integer' => 'Project ID must be an integer',
             'address.project_id.exists' => 'Project ID does not exist',
         ]);
@@ -134,6 +132,9 @@ class TimeTrackingController extends Controller
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
 
-        return response()->json(['address' => $address]);
+        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
+
+
+        return response()->json(['address' => $address, 'lockfields' => $globalLockedFields]);
     }
 }

@@ -34,7 +34,6 @@ class AddressFactory extends Factory
             'interest_notes' => $this->faker->paragraph,
             'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request','Follow-up','Delete Address']),
             // 'follow_up_date' => $this->faker->date,
-            'user_id' => 2,
         ];
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Models\GlobalLockedFields;
 use App\Models\Project;
+use App\Models\SubProject;
 use App\Models\User;
 use DB;
 use Illuminate\Http\Request;
@@ -41,16 +43,28 @@ class AddressController extends Controller
 
     public function show(Address $address)
     {
-        $project = Project::all();
+        $subproject = SubProject::all();
         $users = User::select('id', 'name')->get();
-        return inertia('Addresses/Show', ['address' => $address, 'projects' => $project, 'users' => $users]);
+        return inertia('Addresses/Show', ['address' => $address, 'subprojects' => $subproject, 'users' => $users]);
     }
     public function create()
     {
-        $project = Project::all();
+        $subproject = SubProject::all();
         $users = User::select('id', 'name')->get();
         // dd($users);
-        return inertia('Addresses/Create', ['projects' => $project, 'users' => $users]);
+        return inertia('Addresses/Create', ['subprojects' => $subproject, 'users' => $users]);
+    }
+    public function updateLockedFields(Request $request)
+    {
+        $validated = $request->validate([
+            'locked_fields' => 'array',
+            'locked_fields.*' => 'string|in:company_name,salutation,first_name,last_name,street_address,postal_code,city,website,phone_number,email_address_new',
+        ]);
+
+        $globalLockedFields = GlobalLockedFields::firstOrCreate();
+        $globalLockedFields->update(['locked_fields' => $validated['locked_fields']]);
+
+        return redirect()->back()->with('success', 'Locked fields updated successfully.');
     }
 
     public function update(Request $request, $id)
@@ -73,8 +87,7 @@ class AddressController extends Controller
             'interest_notes' => 'nullable|string',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
-            'project_id' => 'nullable|exists:projects,id',
-            'user_id' => 'nullable|exists:users,id',
+            'sub_project_id' => 'nullable|exists:sub_projects,id',
         ]);
 
         DB::beginTransaction();
@@ -114,8 +127,7 @@ class AddressController extends Controller
             'interest_notes' => 'nullable|string',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
-            'project_id' => 'nullable|exists:projects,id',
-            'user_id' => 'nullable|exists:users,id',
+            'sub_project_id' => 'nullable|exists:sub_projects,id',
         ]);
 
         DB::beginTransaction();
