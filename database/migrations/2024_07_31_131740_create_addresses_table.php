@@ -27,10 +27,10 @@ return new class extends Migration {
             $table->text('interest_notes')->nullable();
             $table->string('feedback')->nullable();
             $table->string('follow_up_date')->nullable();
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
-            $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('sub_project_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
             $table->integer('priority')->default(0);
             $table->integer('seen')->default(0);
+            // $table->json('locked_fields')->nullable();
             $table->timestamps();
         });
     }

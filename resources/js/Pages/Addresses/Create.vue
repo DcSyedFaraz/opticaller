@@ -2,13 +2,14 @@
 
     <Head title="Address" />
     <AuthenticatedLayout>
-        <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto  sm:px-6 lg:px-8">
             <h1 class="text-2xl font-bold mb-8 text-center">Add New Address</h1>
             <form @submit.prevent="createAddress" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="company_name">Company Name</InputLabel>
                     <InputText v-model="newAddress.company_name" type="text" required class="w-full" />
-                    <Message v-if="errors.company_name" severity="error" class="mt-2">{{ errors.company_name }}</Message>
+                    <Message v-if="errors.company_name" severity="error" class="mt-2">{{ errors.company_name }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="salutation">Salutation</InputLabel>
@@ -28,7 +29,8 @@
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="street_address">Street Address</InputLabel>
                     <InputText v-model="newAddress.street_address" type="text" class="w-full" />
-                    <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}</Message>
+                    <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="postal_code">Postal Code</InputLabel>
@@ -48,23 +50,26 @@
                 <div class="mb-4">
                     <InputLabel for="phone_number">Phone Number</InputLabel>
                     <InputText v-model="newAddress.phone_number" type="text" class="w-full" />
-                    <Message v-if="errors.phone_number" severity="error" class="mt-2">{{ errors.phone_number }}</Message>
+                    <Message v-if="errors.phone_number" severity="error" class="mt-2">{{ errors.phone_number }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="email_address_system">System Email Address</InputLabel>
-                    <InputText v-model="address.email_address_system" type="email" class="w-full" />
-                    <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{ errors.email_address_system }}</Message>
+                    <InputText v-model="newAddress.email_address_system" type="email" class="w-full" />
+                    <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{
+                errors.email_address_system }}</Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="email_address_new">New Email Address</InputLabel>
-                    <InputText v-model="address.email_address_new" type="email" class="w-full" />
-                    <Message v-if="errors.email_address_new" severity="error" class="mt-2">{{ errors.email_address_new }}</Message>
+                    <InputText v-model="newAddress.email_address_new" type="email" class="w-full" />
+                    <Message v-if="errors.email_address_new" severity="error" class="mt-2">{{ errors.email_address_new
+                        }}</Message>
                 </div>
 
                 <div class="mb-4">
                     <InputLabel for="priority">Project Priority</InputLabel>
-                    <Select v-model="address.priority" :options="priorityOptions" optionValue="value" optionLabel="label"
-                        placeholder="Select Priority" class="w-full" />
+                    <Select v-model="newAddress.priority" :options="priorityOptions" optionValue="value"
+                        optionLabel="label" placeholder="Select Priority" class="w-full" />
                     <Message v-if="errors.priority" severity="error" class="mt-2">{{ errors.priority }}</Message>
                 </div>
                 <!-- <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
@@ -75,7 +80,8 @@
                 <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="interest_notes">Interest Notes</InputLabel>
                     <Textarea v-model="newAddress.interest_notes" class="w-full" />
-                    <Message v-if="errors.interest_notes" severity="error" class="mt-2">{{ errors.interest_notes }}</Message>
+                    <Message v-if="errors.interest_notes" severity="error" class="mt-2">{{ errors.interest_notes }}
+                    </Message>
                 </div>
                 <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="feedback">Feedback</InputLabel>
@@ -86,22 +92,18 @@
                 <div class="mb-4">
                     <InputLabel for="follow_up_date">Follow Up Date</InputLabel>
                     <DatePicker v-model="newAddress.follow_up_date" dateFormat="dd/mm/yy" class="w-full" />
-                    <Message v-if="errors.follow_up_date" severity="error" class="mt-2">{{ errors.follow_up_date }}</Message>
+                    <Message v-if="errors.follow_up_date" severity="error" class="mt-2">{{ errors.follow_up_date }}
+                    </Message>
                 </div>
                 <div class="mb-4">
-                    <InputLabel for="project_id">Project</InputLabel>
-                    <Select v-model="newAddress.project_id" :options="projects" optionLabel="title" optionValue="id"
-                        placeholder="Select a Project" class="w-full" filter />
-                    <Message v-if="errors.project_id" severity="error" class="mt-2">{{ errors.project_id }}</Message>
-                </div>
-                <div class="mb-4">
-                    <InputLabel for="user_id">Assign User</InputLabel>
-                    <Select v-model="newAddress.user_id" :options="users" optionLabel="name" optionValue="id"
-                        placeholder="Select a Project" class="w-full" filter />
-                    <Message v-if="errors.user_id" severity="error" class="mt-2">{{ errors.user_id }}</Message>
+                    <InputLabel for="sub_project_id">Sub Project</InputLabel>
+                    <Select v-model="newAddress.sub_project_id" :options="subprojects" optionLabel="title"
+                        optionValue="id" placeholder="Select a Project" class="w-full" filter />
+                    <Message v-if="errors.sub_project_id" severity="error" class="mt-2">{{ errors.sub_project_id }}
+                    </Message>
                 </div>
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">
-                    <Button type="submit" severity='success'>Add Address</Button>
+                    <Button type="submit" severity='contrast'>Add Address</Button>
                 </div>
             </form>
         </div>
@@ -137,12 +139,12 @@ export default {
         };
     },
     props: {
-        projects: Array,
+        subprojects: Array,
         users: Array,
     },
     methods: {
         createAddress() {
-            if(this.newAddress.follow_up_date){
+            if (this.newAddress.follow_up_date) {
 
                 const formattedDate = new Date(this.newAddress.follow_up_date).toISOString().split('T')[0];
                 this.newAddress.follow_up_date = formattedDate;
@@ -176,7 +178,7 @@ export default {
                 interest_notes: '',
                 feedback: '',
                 follow_up_date: '',
-                project_id: null,
+                sub_project_id: null,
             };
             this.errors = {};
         },
@@ -184,6 +186,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

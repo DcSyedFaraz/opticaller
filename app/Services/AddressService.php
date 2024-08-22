@@ -12,7 +12,7 @@ class AddressService
         $now = Carbon::now();
 
         $dueAddress = Address::with('calLogs.notes')
-            ->where('user_id', auth()->id())
+            // ->where('user_id', auth()->id())
             ->where(function ($query) use ($now) {
                 $query->where('follow_up_date', '<=', $now)
                     ->orWhere('follow_up_date', '=', $now);
@@ -28,7 +28,7 @@ class AddressService
         // If no due address is found, handle session-based addresses
         if (!Session::has('addresses')) {
             $addresses = Address::with('calLogs.notes')
-                ->where('user_id', auth()->id())
+                // ->where('user_id', auth()->id())
                 ->where(function ($query) {
                     $query->where('seen', 0)
                         ->orWhere('feedback', 'not_reachable');

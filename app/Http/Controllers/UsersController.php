@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use App\Models\Address;
+use App\Models\GlobalLockedFields;
 use App\Models\User;
 use App\Services\AddressService;
 use Carbon\Carbon;
@@ -21,15 +22,11 @@ class UsersController extends Controller
     {
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
-        // $now = now()->utc();
-        // $query = Address::with('calLogs.notes')
-        //     ->whereNotNull('follow_up_date')
-        //     ->orderBy('follow_up_date', 'asc')->get();
 
-        // dd($query);
+        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
 
         // Return the address with Inertia
-        return Inertia::render('Users/dash', ['address' => $address]);
+        return Inertia::render('Users/dash', ['address' => $address, 'lockfields' => $globalLockedFields]);
     }
 
     public function index(Request $request)

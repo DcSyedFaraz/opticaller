@@ -2,13 +2,12 @@
 
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <template #header>
-            <div class="flex justify-between">
-                <h1 class="text-2xl font-bold">Addresses</h1>
-                <Link :href="route('addresses.create')" class="p-button p-component" as="button" type="button">Create
-                New</Link>
-            </div>
-        </template>
+
+        <div class="flex justify-between">
+            <h1 class="text-2xl font-bold">Addresses</h1>
+            <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button" type="button">Create
+            New</Link>
+        </div>
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <InputText v-model="filters.search" placeholder="Search..." class="mb-4" @input="fetchData" />
             <DataTable :value="addresses.data" responsiveLayout="scroll" :sortField="filters.sortField"
@@ -19,8 +18,8 @@
                 <Column field="email_address_system" header="Email Address System" sortable></Column>
                 <Column header="Actions">
                     <template #body="slotProps">
-                        <NavLink :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">
-                            View</NavLink>
+                        <Link :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">
+                        View</Link>
                     </template>
                 </Column>
                 <template #empty>

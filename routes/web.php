@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WebexController;
+use App\Models\GlobalLockedFields;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -36,7 +37,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'role:admin'])->name('dashboard');
+})->middleware(['auth', 'verified', 'role:admin|user'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -62,8 +63,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     // Settings
     Route::get('/settings', function () {
-        return Inertia::render('Settings/index');
+        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
+        return Inertia::render('Settings/index', ['lockfields' => $globalLockedFields]);
     })->name('settings.index');
+    Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');
+
 
     Route::get('/webex/callback', [WebexController::class, 'index'])->name('webex.call');
     Route::get('/webex/authorize', [WebexController::class, 'authorizeWebex']);
@@ -72,7 +76,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/webex/candidate', [WebexController::class, 'handleCandidate']);
 
 });
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/new/dashboard', [UsersController::class, 'dash'])->name('dash');
 
     Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
