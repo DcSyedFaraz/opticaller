@@ -3,31 +3,26 @@
     <Head title="Addresses" />
     <AuthenticatedLayout>
 
-        <div class="user-page grid grid-cols-4 gap-4 p-4">
+        <div class="user-page grid grid-cols-4 gap-4 p-4" v-if="localAddress && localAddress.company_name">
             <!-- Main Panel -->
             <div class="col-span-3 border rounded-xl shadow-xl">
                 <div class=" pb-2 p-4">
                     <div
                         class="inline-flex items-center rounded-md bg-black px-2 py-1 text-3xl font-medium text-white ring-1 ring-inset ring-black mb-1">
                         Sub
-                        Project Title</div>
+                        Project Title: {{ localAddress.subproject?.title }}</div>
                     <div class="flex justify-between items-center">
 
                         <div
                             class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-xl font-medium text-white ring-1 ring-inset ring-primary mb-1">
-                            Project Title: Name of the active project.</div>
-                        <div
-                            class="inline-flex items-center rounded-md  px-2 py-1  font-medium text-black border border-black mb-1">
-                            <span>
-                                Contact ID: &nbsp;
-                            </span>
-                            <span class="font-extrabold">
-                                X37590
-                            </span>
+                            Project Title: {{ localAddress.subproject?.projects?.title }} </div>
+                        <div class="inline-flex items-center rounded-md mr-2 mb-1">
+                            <InputText id="contact_id" v-model="localAddress.contact_id" placeholder="Contact ID"
+                                class="w-full !border-black" :disabled="isFieldLocked('contact_id')" />
                         </div>
                     </div>
                 </div>
-                <div class="border m-7 rounded-lg shadow-xl shadow-secondary">
+                <div class="border m-7 rounded-lg shadow shadow-secondary">
                     <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-lg">
                             Details
@@ -41,7 +36,8 @@
                                     <div class="field">
                                         <label for="company_name" class="font-extrabold text-lg">Company Name: <span
                                                 class="text-red-600">*</span></label>
-                                        <InputText id="company_name" v-model="localAddress.company_name" class="w-full"
+                                        <InputText id="company_name" v-model="localAddress.company_name"
+                                            class="w-full !border-secondary"
                                             :disabled="isFieldLocked('company_name')" />
                                     </div>
 
@@ -49,20 +45,23 @@
                                         <div class="field">
                                             <label for="salutation" class="font-extrabold text-lg">Salutation: <span
                                                     class="text-red-600">*</span></label>
-                                            <InputText id="salutation" v-model="localAddress.salutation" class="w-full"
+                                            <InputText id="salutation" v-model="localAddress.salutation"
+                                                class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('salutation')" />
                                         </div>
 
                                         <div class="field col-span-2">
                                             <label for="first_name" class="font-extrabold text-lg">First Name: <span
                                                     class="text-red-600">*</span></label>
-                                            <InputText id="first_name" v-model="localAddress.first_name" class="w-full"
+                                            <InputText id="first_name" v-model="localAddress.first_name"
+                                                class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('first_name')" />
                                         </div>
                                         <div class="field col-span-2">
                                             <label for="last_name" class="font-extrabold text-lg">Last Name: <span
                                                     class="text-red-600">*</span></label>
-                                            <InputText id="last_name" v-model="localAddress.last_name" class="w-full"
+                                            <InputText id="last_name" v-model="localAddress.last_name"
+                                                class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('last_name')" />
                                         </div>
                                     </div>
@@ -72,62 +71,103 @@
                                             <label class="font-extrabold text-lg" for="street_address">Street Address:
                                                 <span class="text-red-600">*</span></label>
                                             <InputText id="street_address" v-model="localAddress.street_address"
-                                                class="w-full" :disabled="isFieldLocked('street_address')" />
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('street_address')" />
                                         </div>
                                         <div class="field ">
                                             <label class="font-extrabold text-lg" for="postal_code">Postal Code: <span
                                                     class="text-red-600">*</span></label>
                                             <InputText id="postal_code" v-model="localAddress.postal_code"
-                                                class="w-full" :disabled="isFieldLocked('postal_code')" />
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('postal_code')" />
                                         </div>
                                         <div class="field col-span-2">
                                             <label class="font-extrabold text-lg" for="city">City: <span
                                                     class="text-red-600">*</span></label>
-                                            <InputText id="city" v-model="localAddress.city" class="w-full"
-                                                :disabled="isFieldLocked('city')" />
+                                            <InputText id="city" v-model="localAddress.city"
+                                                class="w-full !border-secondary" :disabled="isFieldLocked('city')" />
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
+                                        <div class="field ">
+                                            <label class="font-extrabold text-lg" for="country">Country: <span
+                                                    class="text-red-600">*</span>
+                                            </label>
+                                            <InputText id="country" v-model="localAddress.country"
+                                                placeholder="country name" class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('country')" />
+                                        </div>
+                                        <div class="field">
+                                            <label class="font-extrabold text-lg" for="website">Website: <span
+                                                    class="text-red-600">*</span></label>
+                                            <InputText id="website" v-model="localAddress.website"
+                                                class="w-full !border-secondary" :disabled="isFieldLocked('website')" />
+                                        </div>
 
                                     </div>
-                                    <div class="field">
-                                        <label for="phone_number">Phone Number:</label>
-                                        <InputText id="phone_number" v-model="localAddress.phone_number" class="w-full"
-                                            :disabled="isFieldLocked('phone_number')" />
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="field">
+                                            <label class="font-extrabold text-lg" for="phone_number">Phone Number: <span
+                                                    class="text-red-600">*</span></label>
+                                            <InputText id="phone_number" v-model="localAddress.phone_number"
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('phone_number')" />
+                                        </div>
+                                        <div class="field">
+                                            <label for="email_address_system" class="font-extrabold text-lg">Email
+                                                Address: <span class="text-red-600">*</span></label>
+                                            <InputText id="email_address_system"
+                                                v-model="localAddress.email_address_system"
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('email_address_system')" />
+                                        </div>
+
                                     </div>
-                                    <div class="field">
-                                        <label for="email_address_system" class="font-extrabold text-lg">Email
-                                            Address: <span class="text-red-600">*</span></label>
-                                        <InputText id="email_address_system" v-model="localAddress.email_address_system"
-                                            class="w-full" :disabled="isFieldLocked('email_address_system')" />
-                                    </div>
-                                    <div class="field">
-                                        <label for="email_address_new">Email New:</label>
-                                        <InputText id="email_address_new" v-model="localAddress.email_address_new"
-                                            class="w-full" :disabled="isFieldLocked('email_address_new')" />
-                                    </div>
-                                    <div class="field">
-                                        <label for="website">Website:</label>
-                                        <InputText id="website" v-model="localAddress.website" class="w-full"
-                                            :disabled="isFieldLocked('website')" />
-                                    </div>
-                                    <div class="field">
+
+                                    <!-- <div class="field">
                                         <label for="attempts">No of call attempts:</label>
                                         <InputText type="number" id="attempts" v-model="logdata.call_attempts"
-                                            class="w-full" />
+                                            class="w-full !border-secondary" />
                                         <div v-if="!logdata.call_attempts || logdata.call_attempts <= 0"
                                             class="text-red-500 text-sm">Please enter a positive number</div>
 
+                                    </div> -->
+                                </div>
+                            </template>
+                        </Card>
+                    </div>
+                </div>
+                <div class="border m-7 rounded-lg shadow shadow-blue-200 pb-4">
+                    <div class="border-b-2 p-3">
+                        <span class="mx-4 font-extrabold text-lg">
+                            Notes
+                        </span>
+                    </div>
+                    <div class="grid">
+                        <Card class="shadow-md">
+                            <template #content>
+                                <div class="grid">
+                                    <div class="grid grid-cols-2 gap-4">
+
+                                        <div class="field">
+                                            <label class="font-extrabold text-lg" for="feedback">Feedback: <span
+                                                    class="text-red-600">*</span></label>
+                                            <Select id="feedback" v-model="localAddress.feedback"
+                                                class="  w-full !border-secondary" :options="feedbackOptions"
+                                                optionValue="value" optionLabel="label" />
+                                        </div>
+                                        <div class="field">
+                                            <label class="font-extrabold text-lg" for="interest_notes">Interest
+                                                Notes: <span class="text-red-600">*</span></label>
+                                            <Textarea id="interest_notes" v-model="localAddress.interest_notes" rows="5"
+                                                class="w-full !border-secondary" />
+                                        </div>
                                     </div>
                                     <div class="field">
-                                        <label for="interest_notes">Interest Notes:</label>
-                                        <Textarea id="interest_notes" v-model="localAddress.interest_notes" rows="5"
-                                            class="w-full" />
-                                    </div>
-                                    <div class="field">
-                                        <label for="personal_notes">Personal Notes:</label>
-                                        <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="5"
-                                            class="w-full" />
+                                        <label class="font-extrabold text-lg" for="personal_notes">Personal Notes: <span
+                                                class="text-red-600">*</span></label>
+                                        <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="2"
+                                            class="w-full !border-secondary" />
                                     </div>
                                 </div>
                             </template>
@@ -135,33 +175,62 @@
                     </div>
                 </div>
 
-                <div class="feedback-form ">
-                    <Card class="shadow-md">
-                        <template #title>
-                            <h2 class="text-lg font-bold">Feedback</h2>
-                        </template>
-                        <template #content>
-                            <div class="field">
-                                <label for="feedback">Feedback:</label>
-                                <Select id="feedback" v-model="localAddress.feedback" :options="feedbackOptions"
-                                    optionValue="label" optionLabel="label" class="w-full" />
-                            </div>
-                            <div class="field" v-if="localAddress.feedback === 'Follow-up'">
-                                <label for="follow_up_date">Follow-up Date:</label>
-                                <DatePicker id="follow_up_date" showTime hourFormat="24" fluid
-                                    v-model="localAddress.follow_up_date" class="w-full" />
-                            </div>
-                            <Button label="Submit Feedback" icon="pi pi-check" @click="submitFeedback" class="w-full" />
-                        </template>
-                    </Card>
+                <div class="flex justify-center my-4">
+
+                    <button @click="submitFeedback"
+                        class="bg-yellow-700 text-white font-bold py-2 px-6 rounded hover:bg-primary flex align-middle mx-2">
+                        <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M22.4383 24.261C19.9103 24.261 17.3183 23.628 14.6623 22.362C12.0063 21.096 9.53434 19.3185 7.24634 17.0295C4.97634 14.7415 3.20833 12.274 1.94233 9.62705C0.676335 6.98005 0.043335 4.39305 0.043335 1.86605C0.043335 1.41605 0.193335 1.03605 0.493335 0.726047C0.793335 0.416047 1.16834 0.261047 1.61834 0.261047H5.32783C5.73583 0.261047 6.09183 0.389547 6.39583 0.646547C6.69983 0.903547 6.90533 1.23305 7.01233 1.63505L7.75634 5.21105C7.82634 5.63105 7.81383 5.99755 7.71883 6.31055C7.62383 6.62355 7.45734 6.88005 7.21934 7.08005L3.92834 10.149C4.54434 11.266 5.22484 12.304 5.96984 13.263C6.71484 14.222 7.50984 15.1305 8.35484 15.9885C9.22484 16.8585 10.1618 17.6685 11.1658 18.4185C12.1698 19.1675 13.2718 19.8745 14.4718 20.5395L17.6803 17.274C17.9243 17.011 18.1988 16.8375 18.5038 16.7535C18.8078 16.6705 19.1448 16.654 19.5148 16.704L22.6693 17.349C23.0773 17.449 23.4083 17.6545 23.6623 17.9655C23.9163 18.2765 24.0433 18.6325 24.0433 19.0335V22.686C24.0433 23.136 23.8883 23.511 23.5783 23.811C23.2683 24.111 22.8883 24.261 22.4383 24.261Z"
+                                fill="white" />
+                            <path d="M15.0433 2.26105L20.3483 7.56605M20.3483 2.26105L15.0433 7.56605" stroke="white"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="mx-2 my-1">
+
+                            Not Reached
+                        </span>
+                    </button>
+                    <button @click="showFollowModal = true" :disabled="this.localAddress.feedback != 'Follow-up'"
+                        class="bg-[#383838] text-white font-bold py-2 px-6 rounded hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed flex align-middle mx-2">
+                        <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.60718 3.66168V20.2422H28.4797V3.66168" stroke="white" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M20.5222 24.8817L16.5434 28.8604L12.5647 24.8817" stroke="white" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M16.5435 20.2398V28.8604" stroke="white" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M19.1885 7.62616L22.5116 10.956L19.1885 14.3315" stroke="white" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M10.5759 10.9567H22.5116" stroke="white" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+
+                        <span class="mx-2 my-1">
+
+                            Follow-Ups
+                        </span>
+                    </button>
+                    <button @click="submitFeedback"
+                        class="bg-secondary text-white font-bold py-2 px-6 rounded hover:bg-secondary/75 flex align-middle mx-2">
+
+                        <span class="mx-2 my-1">
+                            <i class="pi pi-save"></i>
+                            Save Edits
+                        </span>
+                    </button>
+
                 </div>
-                <div class="call-history lg:col-span-1">
+
+
+                <div class="call-history lg:col-span-1 hidden">
                     <Card class="shadow-md">
                         <template #title>
                             <h2 class="text-lg font-bold">Call History</h2>
                         </template>
                         <template #content>
-                            <DataTable :value="callHistory" class="w-full" scrollable scrollHeight="250px">
+                            <DataTable :value="callHistory" class="w-full !border-secondary" scrollable
+                                scrollHeight="250px">
                                 <Column field="created_at" header="Date">
                                     <template #body="slotProps">
                                         {{ formatDate(slotProps.data) }}
@@ -195,12 +264,13 @@
                     @click="showCallbackForm = true" />
                 <Button @click="togglePause" :label="isPaused ? 'End Break' : 'Take Break'"
                     :icon="isPaused ? 'pi pi-play' : 'pi pi-hourglass'"
-                    class=" w-full my-2 !bg-secondary !border-secondary" size="large" />
+                    :class="isPaused ? '!bg-red-500 !border-red-500' : '!bg-secondary !border-secondary'"
+                    class=" w-full my-2 " size="large" />
 
                 <div class="grid grid-cols-3 border my-3 rounded-md p-4 shadow shadow-secondary">
                     <div class="col-span-2">
                         <p class="text-[#424E79] font-sans text-sm">Login Time</p>
-                        <h1 class="text-[#424E79] font-sans font-extrabold text-2xl">{{ loginTime }}</h1>
+                        <h1 class="text-[#424E79] font-sans font-extrabold text-xl">{{ loginTime }}</h1>
                     </div>
                     <div class="col-span-1">
                         <span class=" pi pi-clock !text-[3rem] text-primary ml-2" data-pc-section="icon"></span>
@@ -211,7 +281,8 @@
                 <div class="grid grid-cols-3 border my-3 rounded-md p-4 shadow shadow-secondary">
                     <div class="col-span-2">
                         <p class="text-[#424E79] font-sans text-[0.85rem]">Count down Time</p>
-                        <h1 class="text-[#424E79] font-sans font-extrabold text-2xl">00:05:25</h1>
+                        <h1 class="text-[#424E79] font-sans font-extrabold text-2xl">{{ formattedReverseCountdown }}
+                        </h1>
                     </div>
                     <div class="col-span-1">
                         <span class=" pi pi-clock !text-[3rem] ml-2" data-pc-section="icon"></span>
@@ -233,7 +304,7 @@
                 <div class="bg-white border border-gray-300 rounded-lg shadow-xl  ">
                     <div class="flex justify-between items-center pb-2  border-b-2 p-4">
                         <h3 class="text-lg font-semibold text-gray-800">Call History</h3>
-                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none" @click="showNotes()">
                             <i class="pi pi-expand !text-xl text-secondary"></i>
                         </button>
                     </div>
@@ -307,14 +378,122 @@
 
             </div>
 
-            <Dialog header="Personal Notes" v-model:visible="showNotesModal" modal class="rounded-lg shadow-lg"
+            <Dialog header="Follow Up" v-model:visible="showFollowModal" modal class="rounded-lg shadow-lg"
                 :style="{ width: '36rem' }">
                 <div class="p-6 space-y-4">
                     <div class="space-y-2">
-                        {{ selectedNotes }}
+                        <div class="field">
+                            <label for="follow_up_date">Follow-up Date:</label>
+                            <DatePicker id="follow_up_date" showTime hourFormat="12" placeholder="Follow up datetime"
+                                fluid v-model="localAddress.follow_up_date" class="w-full !border-secondary" />
+                        </div>
 
                     </div>
                 </div>
+            </Dialog>
+            <Dialog header="Call History" v-model:visible="showNotesModal" :maximizable="true" modal
+                :style="{ width: '100vw', height: '100vh' }" :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
+                :draggable='false' class="rounded-lg shadow-lg">
+                <div class="my-3">
+
+                    <div class="ml-2 mb-2">
+                        <span
+                            class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
+                            call on: Sep 20 Friday</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
+                            Newyork, USA</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
+                            Smith Parker</span>
+                    </div>
+                    <div class="border-b border-gray-300 pt-2 p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-1">
+                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
+                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
+                            </div>
+                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
+                            </p>
+                        </div>
+                        <div class="">
+                            <div class="flex items-center mb-1">
+                                <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
+                            </div>
+                            <p class="text-sm  font-bold">Interested in X product or ...</p>
+                        </div>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
+                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
+                    </div>
+                </div>
+                <div class="my-3">
+
+                    <div class="ml-2 mb-2">
+                        <span
+                            class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
+                            call on: Sep 20 Friday</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
+                            Newyork, USA</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
+                            Smith Parker</span>
+                    </div>
+                    <div class="border-b border-gray-300 pt-2 p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-1">
+                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
+                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
+                            </div>
+                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
+                            </p>
+                        </div>
+                        <div class="">
+                            <div class="flex items-center mb-1">
+                                <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
+                            </div>
+                            <p class="text-sm  font-bold">Interested in X product or ...</p>
+                        </div>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
+                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
+                    </div>
+                </div>
+                <div class="my-3">
+
+                    <div class="ml-2 mb-2">
+                        <span
+                            class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
+                            call on: Sep 20 Friday</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
+                            Newyork, USA</span>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
+                            Smith Parker</span>
+                    </div>
+                    <div class="border-b border-gray-300 pt-2 p-4">
+                        <div class="mb-4">
+                            <div class="flex items-center mb-1">
+                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
+                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
+                            </div>
+                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
+                            </p>
+                        </div>
+                        <div class="">
+                            <div class="flex items-center mb-1">
+                                <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
+                            </div>
+                            <p class="text-sm  font-bold">Interested in X product or ...</p>
+                        </div>
+                        <span
+                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
+                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
+                    </div>
+                </div>
+
             </Dialog>
             <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
                 :style="{ width: '36rem' }">
@@ -351,7 +530,19 @@
                             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
                     </div>
                 </div>
+                !border-secondary
             </Dialog>
+        </div>
+
+        <div v-else
+            class="flex items-center justify-center my-auto p-6 text-center bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-md mx-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9m0 0h3.03M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9m0 0h3.03M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9" />
+            </svg>
+            <p class="font-semibold">No address available at the moment. Please check back later or contact support for
+                assistance.</p>
         </div>
         <div v-if="isLoading" class="loading-overlay">
             <ProgressSpinner style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
@@ -372,18 +563,20 @@ export default {
     data() {
         return {
             localAddress: { ...this.address },
-            locallockfields: [...this.lockfields],
+            locallockfields: this.lockfields ? [...this.lockfields] : [],
             callHistory: [...(this.address?.cal_logs ?? [])],
             logdata: {},
             errors: {},
             form: {},
             countdown: 0,
+            ReverseCountdown: 180,
             pauseTime: 0,
             projectTitle: '',
             feedback: '',
             notes: '',
             isPaused: false,
             timer: null,
+            reversetimer: null,
             showCallbackForm: false,
             callbackForm: {
                 project: null,
@@ -394,11 +587,12 @@ export default {
                 notes: '',
             },
             startTime: 0,
-            loginTime: this.$page.props.auth.user.logintime,
+            loginTime: new Date(this.$page.props.auth.user.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
             timeLogId: null,
             pauseLogId: null,
             isLoading: false,
             showNotesModal: false,
+            showFollowModal: false,
             selectedNotes: '',
 
         };
@@ -407,7 +601,11 @@ export default {
         isFieldLocked() {
             return (fieldName) => this.locallockfields.includes(fieldName);
         },
-
+        formattedReverseCountdown() {
+            const minutes = Math.floor(this.ReverseCountdown / 60);
+            const seconds = this.ReverseCountdown % 60;
+            return minutes > 0 ? `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` : `00:${seconds.toString().padStart(2, '0')}`;
+        },
         projectOptions() {
             return [
                 { label: 'vimtronix', value: 'vimtronix' },
@@ -418,9 +616,8 @@ export default {
         feedbackOptions() {
             return [
                 { label: 'Not Interested', value: 'Not Interested' },
-                { label: 'Interested', value: 'Interested' },
-                { label: 'Request', value: 'Request' },
-                { label: 'Follow-up', value: 'Follow-up' },
+                { label: 'Customer is interested', value: 'Interested' },
+                { label: 'Request Follow-up with date', value: 'Follow-up' },
                 { label: 'Delete Address', value: 'Delete Address' },
             ];
         },
@@ -435,14 +632,18 @@ export default {
         }
     },
     mounted() {
-        this.startTracking();
+        if (this.localAddress && this.localAddress.id) {
+
+            this.startTracking();
+        }
         console.log(this.address, this.$page.props);
     },
     methods: {
         showNotes(notes) {
-            this.selectedNotes = notes
+            // this.selectedNotes = notes
             this.showNotesModal = true
         },
+
         formatDate(data) {
             const date = new Date(data.starting_time);
             return date.toLocaleDateString();
@@ -468,6 +669,15 @@ export default {
                     this.countdown = Math.floor((new Date().getTime() - this.startTime) / 1000);
                 }
             }, 1000);
+            this.reversetimer = setInterval(() => {
+                if (!this.isPaused) {
+                    this.ReverseCountdown--;
+                    if (this.ReverseCountdown < 0) {
+                        this.ReverseCountdown = 0;
+                        clearInterval(this.reversetimer);
+                    }
+                }
+            }, 1000);
         },
         async togglePause() {
             this.isPaused = !this.isPaused;
@@ -488,10 +698,10 @@ export default {
         },
         async submitFeedback() {
 
-            if (!this.logdata.call_attempts || this.logdata.call_attempts <= 0) {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Please enter a positive number for call attempts', life: 4000 });
-                return;
-            }
+            // if (!this.logdata.call_attempts || this.logdata.call_attempts <= 0) {
+            //     this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Please enter a positive number for call attempts', life: 4000 });
+            //     return;
+            // }
 
 
             this.isLoading = true;
@@ -514,16 +724,21 @@ export default {
                 console.log(res.data);
                 this.localAddress = res.data.address;
                 this.locallockfields = res.data.lockfields;
-                this.callHistory = res.data.address.cal_logs;
-                this.timer = null;
-                this.logdata.call_attempts = null;
-                this.logdata.personal_notes = '';
-                await this.startTracking();
+                if (this.localAddress && this.localAddress.company_name) {
+
+                    this.callHistory = res.data.address.cal_logs;
+                    this.timer = null;
+                    this.logdata.call_attempts = null;
+                    this.logdata.personal_notes = '';
+                    await this.startTracking();
+                }
                 this.isLoading = false;
 
             } catch (error) {
                 this.isLoading = false;
-                if (error.response.status === 422) {
+                console.log(error);
+
+                if (error.response?.status === 422) {
                     const errors = error.response.data.errors;
                     console.log(errors);
                     for (const field in errors) {

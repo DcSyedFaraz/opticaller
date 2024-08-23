@@ -19,7 +19,7 @@ class ProjectController extends Controller
     }
     public function assign()
     {
-        $users = User::role('user')->select('name', 'id')->get();
+        $users = User::select('name', 'id')->get();
         $subprojects = SubProject::with('users','projects')->get();
 
         return inertia('Projects/assignToUsers', ['users' => $users, 'subProjects' => $subprojects]);
@@ -68,7 +68,7 @@ class ProjectController extends Controller
 
         $subProject->users()->sync($request->input('user_ids'));
 
-        $subProject->load('users');
+        $subProject->load('users','projects');
 
         // Return the updated subProject with its users as JSON
         return response()->json([

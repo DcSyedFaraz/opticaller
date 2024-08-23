@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\SubProject;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -25,14 +26,16 @@ class AddressFactory extends Factory
             'street_address' => $this->faker->streetAddress,
             'postal_code' => $this->faker->postcode,
             'city' => $this->faker->city,
+            'country' => $this->faker->country,
             'website' => $this->faker->url,
             'phone_number' => $this->faker->phoneNumber,
             'email_address_system' => fake()->unique()->safeEmail(),
             'email_address_new' => $this->faker->safeEmail,
             'priority' => $this->faker->numberBetween(0, 4),
+            'sub_project_id' => SubProject::inRandomOrder()->first()->id,
             // 'personal_notes' => $this->faker->paragraph,
             'interest_notes' => $this->faker->paragraph,
-            'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request','Follow-up','Delete Address']),
+            'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request', 'Follow-up', 'Delete Address']),
             // 'follow_up_date' => $this->faker->date,
         ];
     }

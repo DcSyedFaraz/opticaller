@@ -63,7 +63,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     // Settings
     Route::get('/settings', function () {
-        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
+        $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
         return Inertia::render('Settings/index', ['lockfields' => $globalLockedFields]);
     })->name('settings.index');
     Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');

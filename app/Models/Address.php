@@ -36,4 +36,8 @@ class Address extends Model
     {
         return $this->hasMany(Activity::class)->where('activity_type', 'call')->whereNotNull('ending_time')->select('id', 'address_id', 'starting_time');
     }
+    public function subproject()
+    {
+        return $this->belongsTo(SubProject::class, 'sub_project_id');
+    }
 }

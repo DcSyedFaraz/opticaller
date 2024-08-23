@@ -5,7 +5,7 @@
     <AuthenticatedLayout>
         <div class="container mx-auto px-4 py-6">
             <Card
-                class="bg-white rounded-lg !shadow-xl border-2 border-secondary border-opacity-50 p-6 !shadow-secondary top">
+                class="bg-white rounded-lg !shadow-md  p-6 !shadow-secondary top">
                 <template #header>
                     <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Settings</h2>
                 </template>
@@ -17,7 +17,7 @@
                             <AccordionContent>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <Card v-for="card in users" :key="card.id"
-                                        class="my-2 p-4 !shadow-lg !shadow-secondary">
+                                        class="my-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
                                             <h2 class="font-bold">{{ card.title }}</h2>
                                         </template>
@@ -40,7 +40,7 @@
                             <AccordionContent>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <Card v-for="card in projects_assign" :key="card.id"
-                                        class="my-2 p-4 !shadow-lg !shadow-secondary">
+                                        class="my-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
                                             <h2 class="font-bold">{{ card.title }}</h2>
                                         </template>
@@ -63,7 +63,7 @@
                             <AccordionContent>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <Card v-for="card in projects" :key="card.id"
-                                        class="my-2 p-4 !shadow-lg !shadow-secondary">
+                                        class="my-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
                                             <h2 class="font-bold">{{ card.title }}</h2>
                                         </template>

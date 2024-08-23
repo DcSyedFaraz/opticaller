@@ -35,8 +35,8 @@ class DatabaseSeeder extends Seeder
         User::factory()->count(5)->admin()->create();
         User::factory()->count(50)->user()->create();
 
-        \App\Models\Address::factory(40)->create();
         \App\Models\Project::factory(5)->create();
         SubProject::factory(5)->create();
+        \App\Models\Address::factory(40)->create();
     }
 }
