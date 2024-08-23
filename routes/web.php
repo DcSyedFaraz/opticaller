@@ -79,10 +79,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/new/dashboard', [UsersController::class, 'dash'])->name('dash');
 
-    Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
-    Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
-    Route::post('/resume-tracking/{id}', [TimeTrackingController::class, 'resumeTracking']);
-    Route::post('/stop-tracking/{id}', [TimeTrackingController::class, 'stopTracking']);
+    // Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
+    // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
+    Route::post('/break-end/{id}', [TimeTrackingController::class, 'break_end'])->name('break.end');
+    Route::post('/stop-tracking', [TimeTrackingController::class, 'stopTracking'])->name('stop.tracking');
 
 });
 
