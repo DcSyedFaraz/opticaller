@@ -159,7 +159,7 @@
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="interest_notes">Interest
                                                 Notes: <span class="text-red-600">*</span></label>
-                                            <Textarea id="interest_notes" v-model="localAddress.interest_notes" rows="5"
+                                            <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="5"
                                                 class="w-full !border-secondary" />
                                         </div>
                                     </div>
@@ -594,6 +594,7 @@ export default {
             showNotesModal: false,
             showFollowModal: false,
             selectedNotes: '',
+            breakDuration: 0,
 
         };
     },
@@ -651,10 +652,10 @@ export default {
         async startTracking() {
             try {
                 this.isPaused = false;
-                const response = await axios.post('/start-tracking', {
-                    address_id: this.localAddress.id,
-                });
-                this.timeLogId = response.data.id;
+                // const response = await axios.post('/start-tracking', {
+                //     address_id: this.localAddress.id,
+                // });
+                // this.timeLogId = response.data.id;
                 this.countdown = 0;
                 await this.startCountdown();
             } catch (error) {
@@ -684,13 +685,16 @@ export default {
             try {
                 if (this.isPaused) {
                     this.pauseTime = new Date().getTime(); // Store the pause time
-                    const res = await axios.post(`/pause-tracking/${this.address.id}`);
-                    this.pauseLogId = res.data.id;
-                    console.log(this.pauseLogId);
+                    // const res = await axios.post(`/pause-tracking/${this.address.id}`);
+                    // this.pauseLogId = res.data.id;
+                    // console.log(this.pauseLogId);
                 } else {
                     const resumeTime = new Date().getTime();
+                    this.breakDuration += Math.floor((resumeTime - this.pauseTime) / 1000);
                     this.startTime += resumeTime - this.pauseTime; // Adjust the start time
-                    await axios.post(`/resume-tracking/${this.pauseLogId}`);
+                    await axios.post(route('break.end', this.localAddress.id, {
+                        break_duration: this.breakDuration
+                    }));
                 }
             } catch (error) {
                 console.error('Error toggling pause:', error);
@@ -716,9 +720,12 @@ export default {
                 }
                 this.isPaused = true;
                 clearInterval(this.timer);
-                const res = await axios.post(`/stop-tracking/${this.timeLogId}`, {
+                // console.log(this.countdown);
+
+                const res = await axios.post(route('stop.tracking'), {
                     ...this.logdata,
                     address: this.localAddress,
+                    total_duration: this.countdown,
                 });
                 this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 console.log(res.data);

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('activity_id')->constrained()->onDelete('cascade');
             $table->text('personal_notes')->nullable();
-            $table->integer('call_attempts')->default(0);
+            $table->text('interest_notes')->nullable();
             $table->timestamps();
         });
     }

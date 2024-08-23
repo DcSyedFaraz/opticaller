@@ -35,7 +35,7 @@ class TimeTrackingController extends Controller
         return response()->json($timeLog);
     }
 
-    public function resumeTracking(Request $request, $id)
+    public function break_end(Request $request, $id)
     {
         $timeLog = Activity::find($id);
         $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
@@ -46,13 +46,16 @@ class TimeTrackingController extends Controller
         return response()->json($timeLog);
     }
 
-    public function stopTracking(Request $request, $id)
+    public function stopTracking(Request $request)
     {
+        // dd($request->total_duration);
         DB::beginTransaction();
 
         $validatedData = $request->validate([
             'personal_notes' => 'nullable|string',
+            'interest_notes' => 'nullable|string',
             'address' => 'required|array',
+            'total_duration' => 'required',
             'address.id' => 'required|integer|exists:addresses,id',
             'address.company_name' => 'required|string',
             'address.salutation' => 'required|string',
@@ -65,12 +68,11 @@ class TimeTrackingController extends Controller
             'address.phone_number' => 'required|string',
             'address.email_address_system' => 'required|email',
             'address.email_address_new' => 'nullable|email',
-            'address.interest_notes' => 'nullable|string',
             'address.feedback' => 'nullable|string',
             'address.follow_up_date' => 'nullable|date|after:today',
-            'address.project_id' => 'nullable|integer|exists:projects,id',
         ], [
             'personal_notes.string' => 'Personal notes must be a string',
+            'interest_notes.string' => 'Interest notes must be a string',
             'address.id.required' => 'Address ID is required',
             'address.id.integer' => 'Address ID must be an integer',
             'address.id.exists' => 'Address ID does not exist',
@@ -94,12 +96,9 @@ class TimeTrackingController extends Controller
             'address.email_address_system.required' => 'Email address is required',
             'address.email_address_system.email' => 'Email address must be a valid email address',
             'address.email_address_new.email' => 'New email address must be a valid email address',
-            'address.interest_notes.string' => 'Interest notes must be a string',
             'address.feedback.string' => 'Feedback must be a string',
             'address.follow_up_date.after' => 'Follow up date must be after today',
             'address.user_id.required' => 'User ID is required',
-            'address.project_id.integer' => 'Project ID must be an integer',
-            'address.project_id.exists' => 'Project ID does not exist',
         ]);
 
         // dd($request->all());
@@ -116,11 +115,21 @@ class TimeTrackingController extends Controller
 
         unset($validatedData['address']);
 
-        $timeLog = Activity::find($id);
-        $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
-        $effectiveTime = $timeLog->calculateEffectiveTime();
-        $timeLog->total_duration = $effectiveTime;
+        $seconds = $validatedData['total_duration'];
+
+        $hours = floor($seconds / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $remainingSeconds = $seconds % 60;
+
+        $timeLog = new Activity();
+        // $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
+        // $effectiveTime = $timeLog->calculateEffectiveTime();
+        $timeLog->user_id = auth()->id();
+        $timeLog->address_id = $validatedData['address']['id'];
+
+        $timeLog->total_duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $remainingSeconds);
         $timeLog->save();
+
 
         $timeLog->notes()->Create($validatedData);
 
