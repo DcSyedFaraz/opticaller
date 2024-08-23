@@ -15,6 +15,13 @@ return new class extends Migration {
             $table->json('locked_fields')->nullable();
             $table->timestamps();
         });
+
+        // Insert an initial record with empty locked fields
+        DB::table('global_locked_fields')->insert([
+            'locked_fields' => json_encode([]),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

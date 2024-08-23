@@ -51,7 +51,6 @@ class TimeTrackingController extends Controller
         DB::beginTransaction();
 
         $validatedData = $request->validate([
-            'call_attempts' => 'required|integer',
             'personal_notes' => 'nullable|string',
             'address' => 'required|array',
             'address.id' => 'required|integer|exists:addresses,id',
@@ -71,8 +70,6 @@ class TimeTrackingController extends Controller
             'address.follow_up_date' => 'nullable|date|after:today',
             'address.project_id' => 'nullable|integer|exists:projects,id',
         ], [
-            'call_attempts.required' => 'Call attempts is required',
-            'call_attempts.integer' => 'Call attempts must be an integer',
             'personal_notes.string' => 'Personal notes must be a string',
             'address.id.required' => 'Address ID is required',
             'address.id.integer' => 'Address ID must be an integer',
@@ -132,7 +129,7 @@ class TimeTrackingController extends Controller
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
 
-        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
+        $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
 
         return response()->json(['address' => $address, 'lockfields' => $globalLockedFields]);

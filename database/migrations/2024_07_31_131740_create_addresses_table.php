@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('street_address')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('city')->nullable();
+            $table->string('country')->nullable();
             $table->string('website')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('email_address_system')->unique();

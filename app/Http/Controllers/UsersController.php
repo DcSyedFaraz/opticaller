@@ -23,7 +23,7 @@ class UsersController extends Controller
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
 
-        $globalLockedFields = GlobalLockedFields::first()->locked_fields;
+        $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
         // Return the address with Inertia
         return Inertia::render('Users/dash', ['address' => $address, 'lockfields' => $globalLockedFields]);

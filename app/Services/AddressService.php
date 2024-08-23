@@ -10,9 +10,11 @@ class AddressService
     public function getDueAddress()
     {
         $now = Carbon::now();
+        $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
+        // Session::forget('addresses');
 
-        $dueAddress = Address::with('calLogs.notes')
-            // ->where('user_id', auth()->id())
+        $dueAddress = Address::with('calLogs.notes','subproject.projects')
+        ->whereIn('sub_project_id', $subProjectIds)
             ->where(function ($query) use ($now) {
                 $query->where('follow_up_date', '<=', $now)
                     ->orWhere('follow_up_date', '=', $now);
@@ -27,8 +29,8 @@ class AddressService
 
         // If no due address is found, handle session-based addresses
         if (!Session::has('addresses')) {
-            $addresses = Address::with('calLogs.notes')
-                // ->where('user_id', auth()->id())
+            $addresses = Address::with('calLogs.notes','subproject.projects')
+            ->whereIn('sub_project_id', $subProjectIds)
                 ->where(function ($query) {
                     $query->where('seen', 0)
                         ->orWhere('feedback', 'not_reachable');
@@ -36,6 +38,7 @@ class AddressService
                 ->orderBy('priority', 'desc')
                 ->get();
 
+                // dd($addresses);
             Session::put('addresses', $addresses);
         }
 

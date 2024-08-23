@@ -47,6 +47,7 @@ export default {
                 street_address: 'Street Address',
                 postal_code: 'Postal Code',
                 city: 'City',
+                country: 'Country',
                 website: 'Website',
                 phone_number: 'Phone Number',
                 email_address_new: 'Email Address (New)',
