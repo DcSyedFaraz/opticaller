@@ -70,6 +70,7 @@ class TimeTrackingController extends Controller
             'address.postal_code' => 'required|string',
             'address.city' => 'required|string',
             'address.website' => 'nullable|url',
+            'address.contact_id' => 'nullable|string',
             'address.phone_number' => 'required|string',
             'address.email_address_system' => 'required|email',
             'address.email_address_new' => 'nullable|email',
@@ -95,6 +96,7 @@ class TimeTrackingController extends Controller
             'address.postal_code.string' => 'Postal code must be a string',
             'address.city.required' => 'City is required',
             'address.city.string' => 'City must be a string',
+            'address.contact_id.string' => 'Contact ID must be a string',
             'address.website.url' => 'Website must be a valid URL',
             'address.phone_number.required' => 'Phone number is required',
             'address.phone_number.string' => 'Phone number must be a string',
@@ -113,7 +115,7 @@ class TimeTrackingController extends Controller
         if ($validatedData['address']['feedback'] == 'Delete Address') {
 
             $address->delete();
-            
+
         } else {
             $address->update($validatedData['address']);
 

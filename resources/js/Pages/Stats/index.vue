@@ -63,7 +63,7 @@
                     <div class="grid grid-cols-3 border my-3 h-[5.25rem] rounded-md p-4 shadow shadow-secondary">
                         <div class="col-span-2">
                             <p class="text-[#424E79] font-sans text-sm">Login Time</p>
-                            <h1 class="text-[#424E79] font-sans font-extrabold text-xl">{{ loginTime }}</h1>
+                            <h1 class="text-[#424E79] font-sans font-extrabold text-xl">{{ new Date($page.props.auth.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) }}</h1>
                         </div>
                         <div class="col-span-1">
                             <span class=" pi pi-clock !text-[3rem] text-primary ml-2" data-pc-section="icon"></span>

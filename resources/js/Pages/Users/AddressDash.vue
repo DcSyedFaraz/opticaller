@@ -211,8 +211,8 @@
                             Follow-Ups
                         </span>
                     </button>
-                    <button @click="submitFeedback"
-                        class="bg-secondary text-white font-bold py-2 px-6 rounded hover:bg-secondary/75 flex align-middle mx-2">
+                    <button @click="submitFeedback" :disabled="this.localAddress.feedback == 'Follow-up'"
+                        class="bg-secondary text-white font-bold py-2 px-6 rounded hover:bg-secondary/75 flex align-middle mx-2 disabled:bg-secondary/75 disabled:cursor-not-allowed">
 
                         <span class="mx-2 my-1">
                             <i class="pi pi-save"></i>
@@ -338,7 +338,7 @@
                                 {{ localAddress.country }}</span>
                             <span
                                 class="inline-flex items-center rounded-md bg-[#3E3E3E] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
-                                Smith Parker</span>
+                                {{ item.users?.name }}</span>
                         </div>
                         <div class="border-b border-gray-300 pt-2 p-4">
                             <div class="mb-4">
@@ -346,24 +346,33 @@
                                     <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
                                     <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
                                 </div>
-                                <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
+                                <p class="text-sm text-gray-700 font-bold">
+                                    {{ item.notes?.personal_notes?.slice(0, 50) }}{{ item.notes?.personal_notes?.length
+            > 50 ? '...'
+            : '' }}
                                 </p>
                             </div>
                             <div class="">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
                                 </div>
-                                <p class="text-sm  font-bold">Interested in X product or ...</p>
+                                <p class="text-sm  font-bold">
+                                    {{ item.notes?.interest_notes?.slice(0, 50) }}{{ item.notes?.interest_notes?.length
+            > 50 ? '...'
+            : '' }}
+                                </p>
                             </div>
                             <span
                                 class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
-                                Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
+                                Duration: &nbsp;<span class="font-bold">{{ item.total_duration < 60 ?
+            item.total_duration + ' Seconds' : Math.floor(item.total_duration / 60)
+            + ' Minutes ' + (item.total_duration % 60) + ' Seconds' }}</span></span>
                         </div>
                     </div>
                     <div v-else>
                         <div class="flex justify-center items-center h-screen">
                             <div class="text-lg text-gray-500">
-                                no history
+                                No history
                             </div>
                         </div>
                     </div>
@@ -381,6 +390,10 @@
                                 fluid v-model="localAddress.follow_up_date" class="w-full !border-secondary" />
                         </div>
 
+                    </div>
+                    <div class="flex justify-end">
+                        <Button class=" font-bold py-2 px-4 "
+                            @click="submitFeedback">Schedule Follow-up</Button>
                     </div>
                 </div>
             </Dialog>
@@ -646,6 +659,7 @@ export default {
 
 
             this.isLoading = true;
+            this.showFollowModal = false;
             try {
 
                 if (this.localAddress.feedback != 'Follow-up') {
