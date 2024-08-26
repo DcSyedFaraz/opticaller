@@ -177,7 +177,7 @@
 
                 <div class="flex justify-center my-4">
 
-                    <button @click="submitFeedback"
+                    <button @click="notreached = true; submitFeedback()"
                         class="bg-yellow-700 text-white font-bold py-2 px-6 rounded hover:bg-primary flex align-middle mx-2">
                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -263,9 +263,27 @@
                 <Button label="Callback" icon="pi pi-phone" class=" w-full my-2" size="large"
                     @click="showCallbackForm = true" />
                 <Button @click="togglePause" :label="isPaused ? 'End Break' : 'Take Break'"
-                    :icon="isPaused ? 'pi pi-play' : 'pi pi-hourglass'"
                     :class="isPaused ? '!bg-red-500 !border-red-500' : '!bg-secondary !border-secondary'"
-                    class=" w-full my-2 " size="large" />
+                    class="w-full my-2" size="large">
+                    <template #icon>
+                        <svg v-if="!isPaused" width="26" height="32" viewBox="0 0 26 37" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1.66064 12.0177H24.4261" stroke="white" stroke-width="3" stroke-linecap="round" />
+                            <path
+                                d="M5.03737 13.7601C5.0214 13.5373 5.05149 13.3137 5.12577 13.103C5.20005 12.8924 5.31693 12.6993 5.46911 12.5358C5.6213 12.3724 5.80553 12.242 6.01032 12.1529C6.2151 12.0637 6.43606 12.0177 6.65941 12.0177H19.4276C19.6509 12.0177 19.8717 12.0637 20.0765 12.1528C20.2812 12.2419 20.4654 12.3722 20.6176 12.5356C20.7697 12.6989 20.8866 12.8919 20.961 13.1025C21.0353 13.313 21.0655 13.5366 21.0496 13.7593L19.656 33.2725C19.6268 33.6828 19.4433 34.0667 19.1423 34.3471C18.8413 34.6274 18.4453 34.7832 18.034 34.7832H8.05298C7.64169 34.7832 7.24567 34.6274 6.94469 34.3471C6.64372 34.0667 6.46014 33.6828 6.43094 33.2725L5.03737 13.7601Z"
+                                stroke="white" stroke-width="3" />
+                            <path
+                                d="M13.0435 7.13939V3.88718C13.0435 3.45591 13.2148 3.04231 13.5197 2.73735C13.8247 2.4324 14.2383 2.26108 14.6696 2.26108H17.1087"
+                                stroke="white" stroke-width="3" stroke-linecap="round" />
+                            <path
+                                d="M5.49987 8.49801C5.56316 8.11847 5.75901 7.77366 6.05257 7.5249C6.34614 7.27614 6.71841 7.13955 7.10321 7.1394H18.9835C19.3685 7.13936 19.7409 7.27586 20.0347 7.52464C20.3284 7.77342 20.5244 8.11833 20.5877 8.49801L21.1739 12.0177H4.91284L5.49987 8.49801Z"
+                                stroke="white" stroke-width="3" />
+                        </svg>
+
+                        <i v-else class="pi pi-play !text-2xl"></i>
+
+                    </template>
+                </Button>
 
                 <div class="grid grid-cols-3 border my-3 rounded-md p-4 shadow shadow-secondary">
                     <div class="col-span-2">
@@ -308,15 +326,16 @@
                             <i class="pi pi-expand !text-xl text-secondary"></i>
                         </button>
                     </div>
-                    <div class="my-3">
+                    <div class="my-3" v-for="(item, index) in callHistory.slice(0, 3)" :key="index"
+                        v-if="callHistory.length > 0">
 
                         <div class="mb-2 p-4">
                             <span
                                 class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-secondary mb-1">Last
-                                call on: Sep 20 Friday</span>
+                                call on: {{ formatnewDate(item.created_at) }}</span>
                             <span
                                 class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-primary">Office:
-                                Newyork, USA</span>
+                                {{ localAddress.country }}</span>
                             <span
                                 class="inline-flex items-center rounded-md bg-[#3E3E3E] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
                                 Smith Parker</span>
@@ -341,37 +360,11 @@
                                 Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
                         </div>
                     </div>
-                    <div class="my-3">
-
-                        <div class="mb-2 p-4">
-                            <span
-                                class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-secondary mb-1">Last
-                                call on: Sep 20 Friday</span>
-                            <span
-                                class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-primary">Office:
-                                Newyork, USA</span>
-                            <span
-                                class="inline-flex items-center rounded-md bg-[#3E3E3E] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
-                                Smith Parker</span>
-                        </div>
-                        <div class="border-b border-gray-300 pt-2 p-4">
-                            <div class="mb-4">
-                                <div class="flex items-center mb-1">
-                                    <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
-                                    <span class="text-sm font-bold text-green-600">Personal Notes:</span>
-                                </div>
-                                <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
-                                </p>
+                    <div v-else>
+                        <div class="flex justify-center items-center h-screen">
+                            <div class="text-lg text-gray-500">
+                                no history
                             </div>
-                            <div class="">
-                                <div class="flex items-center mb-1">
-                                    <span class="text-sm font-bold text-red-500">Interest Notes:</span>
-                                </div>
-                                <p class="text-sm text-red-500 font-bold">Interested in X product or ...</p>
-                            </div>
-                            <span
-                                class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
-                                Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
                         </div>
                     </div>
                 </div>
@@ -394,18 +387,18 @@
             <Dialog header="Call History" v-model:visible="showNotesModal" :maximizable="true" modal
                 :style="{ width: '100vw', height: '100vh' }" :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
                 :draggable='false' class="rounded-lg shadow-lg">
-                <div class="my-3">
+                <div class="my-3" v-for="(item, index) in callHistory" :key="index" v-if="callHistory.length > 0">
 
                     <div class="ml-2 mb-2">
                         <span
                             class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
-                            call on: Sep 20 Friday</span>
+                            call on: {{ formatnewDate(item.created_at) }}</span>
                         <span
                             class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
-                            Newyork, USA</span>
+                            {{ localAddress.country }}</span>
                         <span
                             class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
-                            Smith Parker</span>
+                            {{ item.users?.name }}</span>
                     </div>
                     <div class="border-b border-gray-300 pt-2 p-4">
                         <div class="mb-4">
@@ -413,86 +406,23 @@
                                 <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
                                 <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
                             </div>
-                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
+                            <p class="text-sm text-gray-700 font-bold"> {{ item.notes?.personal_notes }}
                             </p>
                         </div>
                         <div class="">
                             <div class="flex items-center mb-1">
                                 <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
                             </div>
-                            <p class="text-sm  font-bold">Interested in X product or ...</p>
+                            <p class="text-sm  font-bold">{{ item.notes?.interest_notes }}</p>
                         </div>
                         <span
                             class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
-                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
+                            Duration: &nbsp;<span class="font-bold">{{ item.total_duration < 60 ? item.total_duration
+            + ' Seconds' : Math.floor(item.total_duration / 60) + ' Minutes ' +
+            (item.total_duration % 60) + ' Seconds' }}</span></span>
                     </div>
                 </div>
-                <div class="my-3">
 
-                    <div class="ml-2 mb-2">
-                        <span
-                            class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
-                            call on: Sep 20 Friday</span>
-                        <span
-                            class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
-                            Newyork, USA</span>
-                        <span
-                            class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
-                            Smith Parker</span>
-                    </div>
-                    <div class="border-b border-gray-300 pt-2 p-4">
-                        <div class="mb-4">
-                            <div class="flex items-center mb-1">
-                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
-                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
-                            </div>
-                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
-                            </p>
-                        </div>
-                        <div class="">
-                            <div class="flex items-center mb-1">
-                                <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
-                            </div>
-                            <p class="text-sm  font-bold">Interested in X product or ...</p>
-                        </div>
-                        <span
-                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
-                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
-                    </div>
-                </div>
-                <div class="my-3">
-
-                    <div class="ml-2 mb-2">
-                        <span
-                            class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">Last
-                            call on: Sep 20 Friday</span>
-                        <span
-                            class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">Office:
-                            Newyork, USA</span>
-                        <span
-                            class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">Agent:
-                            Smith Parker</span>
-                    </div>
-                    <div class="border-b border-gray-300 pt-2 p-4">
-                        <div class="mb-4">
-                            <div class="flex items-center mb-1">
-                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
-                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
-                            </div>
-                            <p class="text-sm text-gray-700 font-bold">New Location Visited Austin Martin Shop...
-                            </p>
-                        </div>
-                        <div class="">
-                            <div class="flex items-center mb-1">
-                                <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
-                            </div>
-                            <p class="text-sm  font-bold">Interested in X product or ...</p>
-                        </div>
-                        <span
-                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">Call
-                            Duration: &nbsp;<span class="font-bold"> 5 minutes</span></span>
-                    </div>
-                </div>
 
             </Dialog>
             <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
@@ -552,6 +482,7 @@
 
 
 <script>
+import moment from "moment";
 
 
 export default {
@@ -587,7 +518,7 @@ export default {
                 notes: '',
             },
             startTime: 0,
-            loginTime: new Date(this.$page.props.auth.user.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+            loginTime: new Date(this.$page.props.auth.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
             timeLogId: null,
             pauseLogId: null,
             isLoading: false,
@@ -595,10 +526,12 @@ export default {
             showFollowModal: false,
             selectedNotes: '',
             breakDuration: 0,
+            notreached: false,
 
         };
     },
     computed: {
+
         isFieldLocked() {
             return (fieldName) => this.locallockfields.includes(fieldName);
         },
@@ -618,7 +551,7 @@ export default {
             return [
                 { label: 'Not Interested', value: 'Not Interested' },
                 { label: 'Customer is interested', value: 'Interested' },
-                { label: 'Request Follow-up with date', value: 'Follow-up' },
+                { label: 'Request Follow-up', value: 'Follow-up' },
                 { label: 'Delete Address', value: 'Delete Address' },
             ];
         },
@@ -640,6 +573,9 @@ export default {
         console.log(this.address, this.$page.props);
     },
     methods: {
+        formatnewDate(date) {
+            return moment(date).format("MMM D dddd");
+        },
         showNotes(notes) {
             // this.selectedNotes = notes
             this.showNotesModal = true
@@ -692,9 +628,10 @@ export default {
                     const resumeTime = new Date().getTime();
                     this.breakDuration += Math.floor((resumeTime - this.pauseTime) / 1000);
                     this.startTime += resumeTime - this.pauseTime; // Adjust the start time
-                    await axios.post(route('break.end', this.localAddress.id, {
+                    await axios.post(route('break.end', this.localAddress.id), {
                         break_duration: this.breakDuration
-                    }));
+                    });
+                    this.breakDuration = 0;
                 }
             } catch (error) {
                 console.error('Error toggling pause:', error);
@@ -720,12 +657,14 @@ export default {
                 }
                 this.isPaused = true;
                 clearInterval(this.timer);
+                clearInterval(this.reversetimer);
                 // console.log(this.countdown);
 
                 const res = await axios.post(route('stop.tracking'), {
                     ...this.logdata,
                     address: this.localAddress,
                     total_duration: this.countdown,
+                    notreached: this.notreached,
                 });
                 this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 console.log(res.data);
@@ -737,11 +676,15 @@ export default {
                     this.timer = null;
                     this.logdata.call_attempts = null;
                     this.logdata.personal_notes = '';
+                    this.logdata.interest_notes = '';
                     await this.startTracking();
                 }
+                this.ReverseCountdown = 180;
+                this.notreached = false;
                 this.isLoading = false;
 
             } catch (error) {
+                this.notreached = false;
                 this.isLoading = false;
                 console.log(error);
 

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Address extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $guarded = [];
     // protected $casts = [
     //     'locked_fields' => 'array',
@@ -34,7 +35,11 @@ class Address extends Model
     // }
     public function calLogs()
     {
-        return $this->hasMany(Activity::class)->where('activity_type', 'call')->whereNotNull('ending_time')->select('id', 'address_id', 'starting_time');
+        return $this->hasMany(Activity::class)->where('activity_type', 'call');
+    }
+    public function notreached()
+    {
+        return $this->hasMany(NotReached::class, 'address_id');
     }
     public function subproject()
     {

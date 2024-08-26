@@ -63,8 +63,8 @@ const showingNavigationDropdown = ref(false);
             <!-- <input type="text" placeholder="Search here..." class="hidden md:block ml-4 md:ml-8 p-2 w-full md:w-64 bg-gray-200 rounded"> -->
         </div>
         <div class="flex flex-col mr-4 md:mr-12 text-center md:text-right">
-            <span class="text-gray-700 font-bold">Emma Watson</span>
-            <span class="text-gray-500 text-sm">admin</span>
+            <span class="text-gray-700 font-bold capitalize">{{ $page.props.auth.user?.name }}</span>
+            <span class="text-gray-500 text-sm capitalize">{{ $page.props.auth.roles[0] }}</span>
         </div>
     </header>
 
@@ -109,7 +109,7 @@ const showingNavigationDropdown = ref(false);
 
                     </NavLink>
 
-                    <NavLink href="#" :active="false">
+                    <NavLink :href="route('statistics.index')" :active="route().current('statistics.*')">
                         <i class="pi pi-chart-bar !text-2xl"></i>
                     </NavLink>
 

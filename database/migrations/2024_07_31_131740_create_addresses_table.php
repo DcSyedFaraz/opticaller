@@ -32,6 +32,7 @@ return new class extends Migration {
             $table->integer('seen')->default(0);
             // $table->json('locked_fields')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

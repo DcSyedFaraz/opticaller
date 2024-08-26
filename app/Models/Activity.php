@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Activity extends Model
@@ -11,7 +12,7 @@ class Activity extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public $timestamps = false;
+    // public $timestamps = false;
     protected $casts = [
         'starting_time' => 'datetime',
         'ending_time' => 'datetime',
@@ -57,6 +58,10 @@ class Activity extends Model
     public function notes(): HasOne
     {
         return $this->hasOne(PersonalNotes::class);
+    }
+    public function users(): BelongsTo
+    {
+        return $this->belongsTo(User::class,'user_id');
     }
 
 }
