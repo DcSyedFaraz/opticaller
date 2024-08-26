@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        Auth::user()->update(['logintime' => now()]);
+        Auth::user()->logintime()->create(['login_time' => now()]);
 
         $user = Auth::guard()->user()->getRoleNames();
 

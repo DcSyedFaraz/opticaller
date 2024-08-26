@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WebexController;
@@ -60,6 +61,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/subprojects/assign', [ProjectController::class, 'assign'])->name('projects.assign');
     Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
     Route::resource('users', UsersController::class);
+    Route::resource('statistics', StatisticsController::class);
 
     // Settings
     Route::get('/settings', function () {
@@ -77,12 +79,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
 });
 Route::middleware(['auth'])->group(function () {
-    Route::get('/new/dashboard', [UsersController::class, 'dash'])->name('dash');
+    Route::get('/address/dashboard', [UsersController::class, 'dash'])->name('dash');
 
     // Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
     // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
     Route::post('/break-end/{id}', [TimeTrackingController::class, 'break_end'])->name('break.end');
     Route::post('/stop-tracking', [TimeTrackingController::class, 'stopTracking'])->name('stop.tracking');
+
 
 });
 

@@ -31,11 +31,13 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = Auth::user();
+        $logintime = $user?->logintimes()->login_time ?? '';
         $role = $user?->getRoleNames();
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
+                'logintime' => $logintime,
                 'roles' => $role,
             ],
             'flash' => [

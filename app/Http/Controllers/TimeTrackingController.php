@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\GlobalLockedFields;
+use App\Models\NotReached;
 use App\Services\AddressService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -35,20 +36,24 @@ class TimeTrackingController extends Controller
         return response()->json($timeLog);
     }
 
-    public function break_end(Request $request, $id)
+    public function break_end(Request $request, $id): void
     {
-        $timeLog = Activity::find($id);
-        $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
-        $totalTime = $timeLog->ending_time->diffInSeconds($timeLog->starting_time);
-        $timeLog->total_duration = $totalTime;
+        // dd($request->all(), $id);
+        $timeLog = new Activity();
+        $timeLog->user_id = auth()->id();
+        $timeLog->address_id = $id;
+        $timeLog->activity_type = 'break';
+        // $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
+        // $totalTime = $timeLog->ending_time->diffInSeconds($timeLog->starting_time);
+        $timeLog->total_duration = $request->break_duration;
         $timeLog->save();
 
-        return response()->json($timeLog);
+        // return response()->json($timeLog);
     }
 
     public function stopTracking(Request $request)
     {
-        // dd($request->total_duration);
+        // dd($request->notreached);
         DB::beginTransaction();
 
         $validatedData = $request->validate([
@@ -103,12 +108,27 @@ class TimeTrackingController extends Controller
 
         // dd($request->all());
         // Save the address data
-        $address = Address::find($validatedData['address']['id']);
-        $address->update($validatedData['address']);
+        $addressID = $validatedData['address']['id'];
+        $address = Address::find($addressID);
+        if ($validatedData['address']['feedback'] == 'Delete Address') {
 
-        if ($address->follow_up_date) {
-            $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+            $address->delete();
+            
+        } else {
+            $address->update($validatedData['address']);
 
+            if ($request->notreached == true) {
+                NotReached::create([
+                    'address_id' => $address->id,
+                ]);
+                $address->follow_up_date = null;
+                $address->feedback = null;
+            }
+
+            if ($address->follow_up_date) {
+                $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+
+            }
             $address->seen = 0;
             $address->save();
         }
@@ -117,21 +137,30 @@ class TimeTrackingController extends Controller
 
         $seconds = $validatedData['total_duration'];
 
-        $hours = floor($seconds / 3600);
-        $minutes = floor(($seconds % 3600) / 60);
-        $remainingSeconds = $seconds % 60;
+        // $hours = floor($seconds / 3600);
+        // $minutes = floor(($seconds % 3600) / 60);
+        // $remainingSeconds = $seconds % 60;
 
         $timeLog = new Activity();
         // $timeLog->ending_time = Carbon::now()->format('Y-m-d H:i:s');
         // $effectiveTime = $timeLog->calculateEffectiveTime();
-        $timeLog->user_id = auth()->id();
-        $timeLog->address_id = $validatedData['address']['id'];
+        $timeLog->activity_type = 'call';
 
-        $timeLog->total_duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $remainingSeconds);
+        $timeLog->user_id = auth()->id();
+        $timeLog->address_id = $addressID;
+
+        // $timeLog->total_duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $remainingSeconds);
+        $timeLog->total_duration = $seconds;
         $timeLog->save();
 
+        // Check if any of the notes are provided in the request
+        if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
+            $timeLog->notes()->create([
+                'personal_notes' => $validatedData['personal_notes'] ?? null,
+                'interest_notes' => $validatedData['interest_notes'] ?? null,
+            ]);
+        }
 
-        $timeLog->notes()->Create($validatedData);
 
         DB::commit();
 

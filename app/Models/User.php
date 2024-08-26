@@ -48,5 +48,13 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(SubProject::class, 'sub_project_user');
     }
+    public function logintime()
+    {
+        return $this->hasOne(LoginTime::class, 'user_id');
+    }
+    public function logintimes()
+    {
+        return $this->hasMany(LoginTime::class, 'user_id')->orderBy('id','desc')->first();
+    }
 
 }

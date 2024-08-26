@@ -26,7 +26,7 @@ class UsersController extends Controller
         $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
         // Return the address with Inertia
-        return Inertia::render('Users/dash', ['address' => $address, 'lockfields' => $globalLockedFields]);
+        return Inertia::render('Users/AddressDash', ['address' => $address, 'lockfields' => $globalLockedFields]);
     }
 
     public function index(Request $request)

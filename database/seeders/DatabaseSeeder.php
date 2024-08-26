@@ -37,6 +37,6 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Project::factory(5)->create();
         SubProject::factory(5)->create();
-        \App\Models\Address::factory(40)->create();
+        \App\Models\Address::factory(5)->create();
     }
 }

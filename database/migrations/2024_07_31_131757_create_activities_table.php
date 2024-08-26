@@ -14,12 +14,12 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('address_id')->constrained()->onDelete('cascade');
-            $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
+            // $table->foreignId('project_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('activity_type')->default('call');
             $table->string('starting_time')->nullable();
             $table->string('ending_time')->nullable();
             $table->string('total_duration')->nullable();
-            // $table->timestamps();
+            $table->timestamps();
         });
     }
 
