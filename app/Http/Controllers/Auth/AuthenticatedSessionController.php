@@ -50,6 +50,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $lastLogin = Auth::user()->logintime()->orderBy('id','desc')->first();
+
+        if ($lastLogin) {
+            $lastLogin->update(['logout_time' => now()]);
+        }
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

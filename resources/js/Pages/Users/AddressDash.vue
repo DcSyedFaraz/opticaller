@@ -346,17 +346,17 @@
                                     <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
                                     <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
                                 </div>
-                                <p class="text-sm text-gray-700 font-bold">
-                                    {{ item.notes?.personal_notes?.slice(0, 50) }}{{ item.notes?.personal_notes?.length
-            > 50 ? '...'
-            : '' }}
-                                </p>
+                                <p class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                    {{ item.notes?.personal_notes?.slice(0, 50) }}{{ item.notes?.personal_notes?.length > 50 ? '...' : '' }}
+                                  </p>
+
+
                             </div>
                             <div class="">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
                                 </div>
-                                <p class="text-sm  font-bold">
+                                <p class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
                                     {{ item.notes?.interest_notes?.slice(0, 50) }}{{ item.notes?.interest_notes?.length
             > 50 ? '...'
             : '' }}

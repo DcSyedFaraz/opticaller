@@ -3,6 +3,10 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Activity;
+use App\Models\Address;
+use App\Models\LoginTime;
+use App\Models\Project;
 use App\Models\SubProject;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -20,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
 
         $admin = User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'Test Admin',
             'email' => 'admin@gmail.com',
             'password' => bcrypt('12345678'),
         ]);
@@ -33,10 +37,12 @@ class DatabaseSeeder extends Seeder
         ]);
         $user->assignRole('user');
         User::factory()->count(5)->admin()->create();
-        User::factory()->count(50)->user()->create();
+        User::factory()->count(5)->user()->create();
 
-        \App\Models\Project::factory(5)->create();
+        Project::factory(5)->create();
         SubProject::factory(5)->create();
-        \App\Models\Address::factory(5)->create();
+        Address::factory(50)->create();
+        Activity::factory(50)->create();
+        LoginTime::factory(50)->create();
     }
 }
