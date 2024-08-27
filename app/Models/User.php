@@ -54,7 +54,16 @@ class User extends Authenticatable
     }
     public function logintimes()
     {
-        return $this->hasMany(LoginTime::class, 'user_id')->orderBy('id','desc')->first();
+        return $this->hasMany(LoginTime::class, 'user_id')->orderBy('id', 'desc')->first();
     }
+    public function loginTimess()
+    {
+        return $this->hasMany(LoginTime::class, 'user_id');
+    }
+    public function activities()
+    {
+        return $this->hasMany(Activity::class, 'user_id');
+    }
+
 
 }
