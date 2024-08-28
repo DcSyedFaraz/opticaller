@@ -49,7 +49,8 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('addresses', AddressController::class);
 
-    Route::get('/addresses/next', [AddressController::class, 'nextAddress'])->name('addresses.next');
+    Route::get('/callback', [AddressController::class, 'callback'])->name('callback');
+    Route::post('/callback', [AddressController::class, 'callbackMail'])->name('callback.post');
 
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');

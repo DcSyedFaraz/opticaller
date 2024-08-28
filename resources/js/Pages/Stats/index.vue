@@ -1,6 +1,6 @@
 <template>
 
-    <Head title="Addresses" />
+    <Head title="Statistics" />
     <AuthenticatedLayout>
 
         <div class="p-6 bg-gray-100 min-h-screen">
@@ -241,7 +241,7 @@
                     <div class="flex items-center justify-between">
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Total Logged-In Time</h3>
-                            <p class="text-2xl font-bold ">{{ data.total_logged_in_time }}</p>
+                            <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time) }}</p>
                         </div>
                         <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -256,7 +256,8 @@
                     <div class="flex items-center justify-between">
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
-                            <p class="text-2xl font-bold ">{{ data.addressProces }}</p>
+                            <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
+                                    data.totalBreak) }}</p>
                         </div>
                         <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -356,15 +357,17 @@ export default {
                 labels,
                 datasets: [
                     {
-                        label: 'Daily Call-out Volume',
+                        label: '',
                         data,
-                        backgroundColor: 'rgba(68, 84, 195,0.1)',
-                        borderColor: 'rgba(68, 84, 195,0.9)',
+                        tension: 0.5,
+                        // backgroundColor: 'rgba(68, 84, 195,0.1)',
+                        borderColor: '#77A697',
                         borderWidth: 5,
                         pointStyle: 'circle',
-                        pointRadius: 0,
+                        pointRadius: 1,
+                        pointHitRadius: 70,
                         pointBorderColor: 'transparent',
-                        pointBackgroundColor: 'rgba(68, 84, 195,0.8)',
+                        pointBackgroundColor: '#A7704A',
                     },
 
                 ]
@@ -372,23 +375,23 @@ export default {
             };
         },
         formatSeconds(seconds) {
+            if (seconds < 0) {
+                seconds = 0;
+            }
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
-            const remainingSeconds = seconds % 60;
+            const remainingSeconds = Math.floor(seconds % 60); // Only using integer seconds for hh:mm:ss format
 
-            if (hours > 0) {
-                return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes} minute${minutes > 1 ? 's' : ''} and ${remainingSeconds.toFixed(2)} second${remainingSeconds > 1 ? 's' : ''}`;
-            } else if (minutes > 0) {
-                return `${minutes} minute${minutes > 1 ? 's' : ''} and ${remainingSeconds.toFixed(2)} second${remainingSeconds > 1 ? 's' : ''}`;
-            } else {
-                return `${remainingSeconds.toFixed(2)} second${remainingSeconds > 1 ? 's' : ''}`;
-            }
+            // Helper function to pad numbers with leading zero if less than 10
+            const pad = (num) => String(num).padStart(2, '0');
+
+            return `${pad(hours)}:${pad(minutes)}:${pad(remainingSeconds)}`;
         },
         setChartOptions() {
             const fontFamily = 'Montserrat';
             const fontSize = 13;
             const fontColor = '#8e9cad';
-            const gridLineColor = 'rgba(193, 184, 184, 0.1)';
+            const gridLineColor = '#77A697';
             const zeroLineColor = '#000';
 
             return {
@@ -397,38 +400,37 @@ export default {
                 tooltips: {
                     // mode: 'index',
                     titleFontSize: 12,
-                    titleFontColor: 'rgba(0,0,0,0.9)',
-                    bodyFontColor: 'rgba(0,0,0,0.9)',
-                    backgroundColor: '#fff',
+                    titleFontColor: '#77A697',
+                    bodyFontColor: '#77A697',
+                    backgroundColor: '#77A697',
                     bodyFontFamily: 'Montserrat',
                     cornerRadius: 0,
                     intersect: true,
                 },
-                legend: {
-                    display: false,
-                    labels: {
-                        usePointStyle: true,
-                        fontFamily,
-                    },
+                plugins: {
+                    legend: {
+                        display: false,
+                    }
                 },
+
                 scales: {
                     x: {
                         display: true,
                         ticks: {
                             display: true,
-                            fontColor: "#8e9cad",
+                            fontColor: "#77A697",
                             fontSize: "13",
                         },
                         scaleLabel: {
                             display: true,
                             labelString: 'Months',
                             fontSize: "15",
-                            fontColor: "#8e9cad",
+                            fontColor: "#77A697",
                         },
                         gridLines: {
                             display: true,
                             drawBorder: false,
-                            color: 'rgba(193, 184, 184,0.1)',
+                            color: '#77A697',
                             zeroLineColor: '#000'
                         }
                     },
@@ -439,7 +441,7 @@ export default {
                             fontColor,
                             fontSize,
                             maxRotation: 0,
-                            stepSize: 100,
+                            stepSize: 2,
                             min: 0,
                             max: 500,
                         },
@@ -451,7 +453,7 @@ export default {
                         },
                         gridLines: {
                             display: true,
-                            drawBorder: false,
+                            drawBorder: true,
                             color: gridLineColor,
                             zeroLineColor,
                         },

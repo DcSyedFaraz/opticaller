@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CallbackMail;
 use App\Models\Address;
 use App\Models\GlobalLockedFields;
 use App\Models\Project;
@@ -9,6 +10,7 @@ use App\Models\SubProject;
 use App\Models\User;
 use DB;
 use Illuminate\Http\Request;
+use Mail;
 
 class AddressController extends Controller
 {
@@ -148,17 +150,47 @@ class AddressController extends Controller
             return redirect()->back()->withErrors(['error' => 'Address creation failed: ' . $e->getMessage()]);
         }
     }
-    public function nextAddress()
+    public function callback()
     {
-        $address = Address::where('user_id', auth()->id())
-            ->whereNull('feedback')
-            ->orderBy('id')
-            ->first();
-
-        if ($address) {
-            return redirect()->route('addresses.show', $address);
-        }
-
-        return redirect()->route('addresses.index')->with('message', 'No more addresses to display.');
+        return inertia('Addresses/callBack');
     }
+    public function callbackMail(Request $request)
+    {
+        // Validate the incoming request
+        $validatedData = $request->validate([
+            'project' => 'required|email',
+            'salutation' => 'required|string|max:255',
+            'firstName' => 'required|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'phoneNumber' => 'required|string|max:20',
+            'notes' => 'required|string',
+        ]);
+
+        $address = new \App\Models\CallbackMail();
+        $address->project = $validatedData['project'];
+        $address->salutation = $validatedData['salutation'];
+        $address->first_name = $validatedData['firstName'];
+        $address->last_name = $validatedData['lastName'];
+        $address->phone_number = $validatedData['phoneNumber'];
+        $address->notes = $validatedData['notes'];
+        $address->user_id = auth()->id();
+        $address->save();
+
+        $user = auth()->user();
+        $details = [
+            'senderName' => $user->name,
+            'senderId' => $user->id,
+            'salutation' => $validatedData['salutation'],
+            'firstName' => $validatedData['firstName'],
+            'lastName' => $validatedData['lastName'],
+            'phoneNumber' => $validatedData['phoneNumber'],
+            'notes' => $validatedData['notes'],
+        ];
+
+        Mail::to($validatedData['project'])->send(new CallbackMail($details));
+
+        // Return inertia response
+        return inertia('Addresses/callBack');
+    }
+
 }
