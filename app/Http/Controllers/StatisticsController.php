@@ -81,7 +81,7 @@ class StatisticsController extends Controller
                 return $carry + $loginDuration;
             }, 0);
 
-        $totalLoggedInTimeFormatted = gmdate('H:i:s', $totalLoggedInTime);
+        $totalLoggedInTimeFormatted = $totalLoggedInTime;
 
         // Count addresses and feedbacks within the date range
         $updatedAddressesToday = Address::whereBetween('updated_at', [$startDate, $endDate])->count();
