@@ -60,7 +60,7 @@
                 </div>
                 <div class="grid grid-cols-1">
 
-                    <div class="grid grid-cols-3 border my-3 h-[5.25rem] rounded-md p-4 shadow shadow-secondary">
+                    <div class="grid grid-cols-3 border my-3 mb-1 rounded-md p-4 shadow shadow-secondary">
                         <div class="col-span-2">
                             <p class="text-[#424E79] font-sans text-sm">Login Time</p>
                             <h1 class="text-[#424E79] font-sans font-extrabold text-xl">{{ new
@@ -76,7 +76,7 @@
                     </div>
 
                     <!-- Success Call-Out Rate -->
-                    <div class="bg-white p-2 rounded-lg shadow flex h-[13rem] items-center justify-center">
+                    <div class="bg-white p-2 rounded-lg shadow flex mt-1 items-center justify-center">
                         <div class="flex flex-col items-center">
                             <h4 class="text-gray-600 mb-2">Success Call-Out Rate</h4>
                             <!-- <ProgressBar :value="successRate" class="w-24 h-24" /> -->

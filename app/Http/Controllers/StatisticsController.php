@@ -120,6 +120,107 @@ class StatisticsController extends Controller
             'data' => $data,
         ]);
     }
+    public function dashboard(Request $request)
+    {
+        $user = auth()->user(); // Get the authenticated user
+
+        // Retrieve date range from request or set default
+        $startDate = $request->input('startDate') ? Carbon::parse($request->input('startDate')) : Carbon::now()->subHours(24);
+        $endDate = $request->input('endDate') ? Carbon::parse($request->input('endDate'))->endOfDay() : Carbon::now();
+
+        // Today's Call-Out Count for the authenticated user
+        $todaysCallOutCount = Activity::where('activity_type', 'call')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        // Today's Completed Addresses for the authenticated user
+        $todaysCompletedAddresses = Activity::where('activity_type', 'call')
+            ->where('user_id', $user->id)
+            ->whereBetween('updated_at', [$startDate, $endDate])
+            ->count();
+
+        // Average Address Processing Time for the last 7 days
+        $last7Days = Carbon::now()->subDays(7);
+        $averageProcessingTime = Activity::where('activity_type', 'call')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$last7Days, Carbon::now()])
+            ->avg('total_duration') ?? 0;
+
+        // Today's Break Times and comparison for the last 7 days
+        $todaysBreakTime = Activity::where('activity_type', 'break')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('total_duration');
+
+        $last7DaysBreakTimes = Activity::where('activity_type', 'break')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$last7Days, Carbon::now()])
+            ->get(['created_at', 'total_duration']);
+
+        $breakTimeGraphData = $last7DaysBreakTimes->groupBy(function ($date) {
+            return Carbon::parse($date->created_at)->format('Y-m-d'); // grouping by dates
+        })->map(function ($row) {
+            return $row->sum('total_duration');
+        });
+
+        // Yesterday's Working Hours
+        $yesterdayStart = Carbon::yesterday()->startOfDay();
+        $yesterdayEnd = Carbon::yesterday()->endOfDay();
+        $yesterdayWorkingHours = LoginTime::where('user_id', $user->id)
+            ->whereBetween('login_time', [$yesterdayStart, $yesterdayEnd])
+            ->whereNotNull('logout_time')
+            ->get()
+            ->reduce(function ($carry, $loginTime) {
+                $loginDuration = Carbon::parse($loginTime->logout_time)->diffInSeconds(Carbon::parse($loginTime->login_time));
+                return $carry + $loginDuration;
+            }, 0);
+
+        // Notifications for the user
+        // $notifications = Notification::where('user_id', $user->id)
+        //     ->where('created_at', '>=', Carbon::now()->subDays(7))
+        //     ->get();
+
+        // Data for Graph Performance Chart
+        $callVolumeGraphData = Activity::where('activity_type', 'call')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$last7Days, Carbon::now()])
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('count', 'date');
+
+        // Data for Today’s Success Rate Graph
+        $subProjectIds = $user->subProjects()->pluck('sub_project_id');
+        $successfulCalls = Address::whereIn('sub_project_id', $subProjectIds)
+            ->where('feedback', 'Interested')
+            ->whereBetween('updated_at', [$startDate, $endDate])
+            ->count();
+        $notReachedCalls = Address::whereIn('sub_project_id', $subProjectIds)
+            ->where('feedback', 'Not Interested')
+            ->whereBetween('updated_at', [$startDate, $endDate])
+            ->count();
+
+        $totalCalls = $successfulCalls + $notReachedCalls;
+        $successRate = $totalCalls > 0 ? ($successfulCalls / $totalCalls) * 100 : 0;
+
+        // Preparing data for the frontend
+        $data = [
+            'todaysCallOutCount' => $todaysCallOutCount,
+            'todaysCompletedAddresses' => $todaysCompletedAddresses,
+            'averageProcessingTime' => $averageProcessingTime,
+            'todaysBreakTime' => $todaysBreakTime,
+            'breakTimeGraphData' => $breakTimeGraphData,
+            'yesterdayWorkingHours' => $yesterdayWorkingHours,
+            // 'notifications' => $notifications,
+            'callVolumeGraphData' => $callVolumeGraphData,
+            'successRate' => $successRate,
+        ];
+        // dd($data);
+        return Inertia::render('Dashboard', [
+            'data' => $data,
+        ]);
+    }
 
 
 }
