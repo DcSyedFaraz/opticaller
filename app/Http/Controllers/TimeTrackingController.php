@@ -51,6 +51,12 @@ class TimeTrackingController extends Controller
         // return response()->json($timeLog);
     }
 
+    public function seen($id): void
+    {
+        $address = Address::find($id);
+        $address->seen = 0;
+        $address->save();
+    }
     public function stopTracking(Request $request)
     {
         // dd($request->notreached);

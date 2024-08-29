@@ -9,8 +9,27 @@
                     <div class="grid col-span-3">
                         <h3 class="text-sm font-semibold mb-4">Today's Call-Out Count</h3>
                         <div class="flex items-center">
-                            <p class="text-4xl font-bold  mr-2">{{ data.todaysCallOutCount }}</p>
+                            <p class="text-4xl font-bold  mr-2">{{ data.todaysCallOutCount }}/100</p>
                         </div>
+                    </div>
+                    <div class="grid mt-3">
+                        <svg width="40" height="54" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M27.4444 16.8889V10.5556H21.1111V6.33333H27.4444V0H31.6667V6.33333H38V10.5556H31.6667V16.8889H27.4444ZM35.7833 38C31.3852 38 27.0398 37.0416 22.7472 35.1247C18.4546 33.2078 14.5491 30.4894 11.0306 26.9694C7.51204 23.4495 4.79433 19.544 2.87744 15.2528C0.960555 10.9616 0.00140741 6.61622 0 2.21667C0 1.58333 0.211111 1.05556 0.633333 0.633333C1.05556 0.211111 1.58333 0 2.21667 0H10.7667C11.2593 0 11.6991 0.167481 12.0861 0.502444C12.4731 0.837407 12.7019 1.23289 12.7722 1.68889L14.1444 9.07778C14.2148 9.64074 14.1972 10.1157 14.0917 10.5028C13.9861 10.8898 13.7926 11.2241 13.5111 11.5056L8.39167 16.6778C9.09537 17.9796 9.93067 19.2371 10.8976 20.4503C11.8644 21.6635 12.9291 22.8338 14.0917 23.9611C15.1824 25.0519 16.3259 26.0638 17.5222 26.9969C18.7185 27.93 19.9852 28.7829 21.3222 29.5556L26.2833 24.5944C26.6 24.2778 27.0138 24.0406 27.5247 23.883C28.0356 23.7254 28.5366 23.681 29.0278 23.75L36.3111 25.2278C36.8037 25.3685 37.2083 25.624 37.525 25.9941C37.8417 26.3643 38 26.7773 38 27.2333V35.7833C38 36.4167 37.7889 36.9444 37.3667 37.3667C36.9444 37.7889 36.4167 38 35.7833 38Z"
+                                fill="#77A697" />
+                        </svg>
+
+
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <!-- <div class="my-2 flex items-center">
+                        <i class="pi pi-angle-up text-[#945F3A] mr-1"></i>
+                        <p class="text-sm text-[#945F3A]">43.2 than last month</p>
+                    </div> -->
+                    <div class="w-full h-2 bg-[#8EC6B4] rounded-full">
+                        <div class="h-2 bg-[#77A697] rounded-full"
+                            :style="{ width: `${(data.todaysCallOutCount / 100) * 100}%` }"></div>
                     </div>
                 </div>
             </div>
@@ -21,8 +40,30 @@
                     <div class="grid col-span-3">
                         <h3 class="text-sm font-semibold mb-4">Today’s Completed Addresses</h3>
                         <div class="flex items-center">
-                            <p class="text-4xl font-bold  mr-2">{{ data.todaysCompletedAddresses }}</p>
+                            <p class="text-4xl font-bold  mr-2">{{ data.todaysCompletedAddresses }}/60</p>
                         </div>
+                    </div>
+                    <div class="grid mt-3">
+                        <svg width="40" height="54" viewBox="0 0 44 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M29.5436 43.0008L25.3541 38.8113L25.1773 38.6345L25.0005 38.8113L22.6235 41.1883L22.4467 41.3651L22.6235 41.5418L29.3668 48.2851L29.5436 48.4619L29.7203 48.2851L43.2069 34.7986L43.3837 34.6218L43.2069 34.445L40.8299 32.068L40.6531 31.8912L40.4763 32.068L29.5436 43.0008Z"
+                                fill="#383838" stroke="#383838" stroke-width="0.5" />
+                            <path
+                                d="M34.6019 5.71285H34.6011H29.7937L29.7937 4.27703L29.7937 4.27628C29.7908 3.31685 29.4084 2.39752 28.73 1.7191C28.0515 1.04067 27.1322 0.658262 26.1728 0.655396H26.172L12.6855 0.655394L12.6847 0.655397C11.7253 0.658262 10.806 1.04067 10.1276 1.7191C9.44912 2.39752 9.06672 3.31685 9.06385 4.27628V4.27703V5.71285L4.2564 5.71285L4.25565 5.71285C3.29622 5.71571 2.37689 6.09812 1.69847 6.77655C1.02004 7.45498 0.637632 8.3743 0.634766 9.33374V9.33448L0.634765 44.7366L0.634767 44.7374C0.637632 45.6968 1.02004 46.6162 1.69847 47.2946C2.37689 47.973 3.29622 48.3554 4.25565 48.3583H4.2564H19.4288H19.6788V48.1083V44.7366V44.4866H19.4288H4.5064V9.58448H9.06385V14.3919V14.6419H9.31385H29.5437H29.7937V14.3919V9.58448H34.3511V27.8785V28.1285H34.6011H37.9727H38.2227V27.8785V9.33448V9.33374C38.2199 8.3743 37.8375 7.45498 37.159 6.77655C36.4806 6.09812 35.5613 5.71571 34.6019 5.71285ZM25.922 10.7703H12.9355V4.52703H25.922V10.7703Z"
+                                fill="#383838" stroke="#383838" stroke-width="0.5" />
+                        </svg>
+
+
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <!-- <div class="my-2 flex items-center">
+                        <i class="pi pi-angle-up text-[#945F3A] mr-1"></i>
+                        <p class="text-sm text-[#945F3A]">43.2 than last month</p>
+                    </div> -->
+                    <div class="w-full h-2 bg-[#A6A2A0] rounded-full">
+                        <div class="h-2 bg-[#383838] rounded-full"
+                            :style="{ width: `${(data.todaysCompletedAddresses / 60) * 100}%` }"></div>
                     </div>
                 </div>
             </div>
@@ -31,7 +72,7 @@
             <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between">
                 <div class="grid grid-cols-4">
                     <div class="grid col-span-3">
-                        <h3 class="text-sm font-semibold mb-4">Yesturday’s Break Times</h3>
+                        <h3 class="text-sm font-semibold mb-4">Yesterday’s Break Times</h3>
                         <div class="flex items-center">
                             <p class="text-4xl font-bold  mr-2">{{ formatTime(data.todaysBreakTime) }}</p>
                         </div>
@@ -56,10 +97,10 @@
                 </div>
 
                 <div class="mt-2">
-                    <div class="my-2 flex items-center">
+                    <!-- <div class="my-2 flex items-center">
                         <i class="pi pi-angle-up text-[#945F3A] mr-1"></i>
                         <p class="text-sm text-[#945F3A]">43.2 than last month</p>
-                    </div>
+                    </div> -->
                     <div class="w-full h-2 bg-[#E4A57B] rounded-full">
                         <div class="h-2 bg-[#945F3A] rounded-full" style="width: 70%"></div>
                     </div>
@@ -84,12 +125,8 @@
                 <!-- Login Time -->
                 <div class="grid grid-cols-3 border mt-1  h-[5rem] rounded-md p-4 shadow shadow-secondary">
                     <div class="col-span-2">
-                        <p class=" font-sans text-sm">Yesturday’s Working Hours</p>
-                        <h1 class=" font-sans font-extrabold text-2xl">{{ new
-                                Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
-                                    hour: '2-digit', minute:
-                                        '2-digit', hour12: true
-                                }) }}</h1>
+                        <p class=" font-sans text-sm">Yesterday’s Working Hours</p>
+                        <h1 class=" font-sans font-extrabold text-2xl">{{ formatTime(data.yesterdayWorkingHours) }}</h1>
                     </div>
                     <div class="col-span-1">
                         <span class=" pi pi-clock !text-[3rem] text-[#818FA0] ml-2" data-pc-section="icon"></span>
@@ -177,11 +214,11 @@
                         <div>
                             <h2 class="text-gray-600 text-sm font-medium">Today's Call-Out Volume</h2>
                             <div class="grid items-center mt-2">
-                                <span class="text-4xl font-semibold text-gray-800">6,29</span>
-                                <div class="flex items-center mt-1 text-sm text-red-500">
+                                <span class="text-4xl font-semibold text-gray-800">{{ data.todaysCallOutCount }}</span>
+                                <!-- <div class="flex items-center mt-1 text-sm text-red-500">
                                     <i class="pi pi-arrow-down text-red-500 mr-1"></i>
                                     <span>-2.4%</span> <span class="ml-2 text-bold text-[#818FA0]">than yesterday</span>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div>
@@ -195,11 +232,13 @@
                         <div>
                             <h2 class="text-gray-600 text-sm font-medium">Average weekly address processing time</h2>
                             <div class="grid items-center mt-2">
-                                <span class="text-4xl font-semibold text-gray-800">{{ data.averageProcessingTime }}</span>
-                                <div class="flex items-center mt-1 text-sm text-red-500">
+                                <span class="text-4xl font-semibold text-gray-800">{{
+                                formatTime(data.averageProcessingTime)
+                            }}</span>
+                                <!-- <div class="flex items-center mt-1 text-sm text-red-500">
                                     <i class="pi pi-arrow-down text-red-500 mr-1"></i>
                                     <span>-2.4%</span> <span class="ml-2 text-bold text-[#818FA0]">than yesterday</span>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div>
@@ -215,42 +254,41 @@
 
         <!-- Buttons at the bottom -->
         <div class="flex justify-center my-4">
-            <button class="bg-primary  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg"><span class="mr-1">
-                    <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M21.1876 4.3261L22.2749 4.61979C23.6045 4.97951 24.8166 5.68146 25.7902 6.65563C26.7638 7.62981 27.4649 8.84216 27.8236 10.1718L28.1163 11.2576L25.944 11.8439L25.6503 10.758C25.3939 9.80828 24.893 8.94233 24.1975 8.24655C23.5019 7.55076 22.636 7.04946 21.6862 6.79265L20.6001 6.49783L21.1876 4.3261ZM4.24637 4.56578H13.9033L15.5769 12.0937L13.4835 14.1867C14.7144 16.1019 16.3431 17.7298 18.259 18.96L20.3525 16.8681L27.8822 18.5414V28.196H26.7567C22.4238 28.2034 18.1818 26.9542 14.5448 24.5997C11.863 22.8645 9.5791 20.5812 7.84351 17.9C5.48851 14.2639 4.23898 10.0229 4.24637 5.69103V4.56578ZM6.52779 6.81628C6.71745 10.327 7.82295 13.7269 9.73438 16.678C11.297 19.0916 13.353 21.1471 15.7671 22.7093C18.7189 24.6203 22.1196 25.7255 25.6311 25.9151V20.3463L21.0694 19.3335L18.6226 21.781L17.8763 21.3567C15.043 19.747 12.6973 17.4019 11.0872 14.5692L10.6629 13.8232L13.1109 11.3769L12.098 6.81628H6.52779ZM20.1589 8.12719L21.2461 8.42088C21.911 8.60074 22.517 8.95172 23.0038 9.4388C23.4906 9.92589 23.8412 10.5321 24.0205 11.1969L24.3132 12.2827L22.1409 12.869L21.8472 11.7831C21.7702 11.4982 21.6198 11.2384 21.4111 11.0297C21.2023 10.821 20.9425 10.6707 20.6575 10.5937L19.5714 10.3L20.1589 8.12719Z"
-                            fill="white" />
-                    </svg>
+            <Link :href="route('dash')" class="bg-primary  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg"><span
+                class="mr-1">
+                <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M21.1876 4.3261L22.2749 4.61979C23.6045 4.97951 24.8166 5.68146 25.7902 6.65563C26.7638 7.62981 27.4649 8.84216 27.8236 10.1718L28.1163 11.2576L25.944 11.8439L25.6503 10.758C25.3939 9.80828 24.893 8.94233 24.1975 8.24655C23.5019 7.55076 22.636 7.04946 21.6862 6.79265L20.6001 6.49783L21.1876 4.3261ZM4.24637 4.56578H13.9033L15.5769 12.0937L13.4835 14.1867C14.7144 16.1019 16.3431 17.7298 18.259 18.96L20.3525 16.8681L27.8822 18.5414V28.196H26.7567C22.4238 28.2034 18.1818 26.9542 14.5448 24.5997C11.863 22.8645 9.5791 20.5812 7.84351 17.9C5.48851 14.2639 4.23898 10.0229 4.24637 5.69103V4.56578ZM6.52779 6.81628C6.71745 10.327 7.82295 13.7269 9.73438 16.678C11.297 19.0916 13.353 21.1471 15.7671 22.7093C18.7189 24.6203 22.1196 25.7255 25.6311 25.9151V20.3463L21.0694 19.3335L18.6226 21.781L17.8763 21.3567C15.043 19.747 12.6973 17.4019 11.0872 14.5692L10.6629 13.8232L13.1109 11.3769L12.098 6.81628H6.52779ZM20.1589 8.12719L21.2461 8.42088C21.911 8.60074 22.517 8.95172 23.0038 9.4388C23.4906 9.92589 23.8412 10.5321 24.0205 11.1969L24.3132 12.2827L22.1409 12.869L21.8472 11.7831C21.7702 11.4982 21.6198 11.2384 21.4111 11.0297C21.2023 10.821 20.9425 10.6707 20.6575 10.5937L19.5714 10.3L20.1589 8.12719Z"
+                        fill="white" />
+                </svg>
 
-                </span> Start Call</button>
-            <button class="bg-[#383838]  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg"><span class="mr-1">
-                    <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M19.949 24.8817L15.9702 28.8604L11.9915 24.8817" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M15.9702 20.2398V28.8604" stroke="white" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M18.6152 7.62619L21.9384 10.9561L18.6152 14.3315" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M10.0027 10.9567H21.9383" stroke="white" stroke-width="2" stroke-linecap="round" />
-                    </svg>
+            </span> Start Call</Link>
+            <Link :href="route('dash')" class="bg-[#383838]  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg">
+            <span class="mr-1">
+                <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M19.949 24.8817L15.9702 28.8604L11.9915 24.8817" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M15.9702 20.2398V28.8604" stroke="white" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M18.6152 7.62619L21.9384 10.9561L18.6152 14.3315" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M10.0027 10.9567H21.9383" stroke="white" stroke-width="2" stroke-linecap="round" />
+                </svg>
 
-                </span> Follow-Ups</button>
-            <button class="bg-secondary  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg"><span class="mr-1">
-                    <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M19.949 24.8817L15.9702 28.8604L11.9915 24.8817" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M15.9702 20.2398V28.8604" stroke="white" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                        <path d="M18.6152 7.62619L21.9384 10.9561L18.6152 14.3315" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M10.0027 10.9567H21.9383" stroke="white" stroke-width="2" stroke-linecap="round" />
-                    </svg>
+            </span> Follow-Ups</Link>
+            <Link :href="route('statistics.index')"
+                class="bg-secondary  text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg"><span class="mr-1">
+                <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M26.3802 24.8419C26.9637 23.9135 27.3086 22.8393 27.3086 21.6722C27.3086 18.3698 24.6428 15.704 21.3404 15.704C18.0381 15.704 15.3723 18.3698 15.3723 21.6722C15.3723 24.9745 18.0381 27.6403 21.3272 27.6403C22.4943 27.6403 23.5818 27.2955 24.4969 26.7119L28.6348 30.8498L30.5181 28.9665L26.3802 24.8419ZM21.3404 24.9878C20.4611 24.9878 19.6177 24.6385 18.9959 24.0167C18.3741 23.3949 18.0248 22.5515 18.0248 21.6722C18.0248 20.7928 18.3741 19.9495 18.9959 19.3277C19.6177 18.7059 20.4611 18.3565 21.3404 18.3565C22.2198 18.3565 23.0631 18.7059 23.6849 19.3277C24.3067 19.9495 24.6561 20.7928 24.6561 21.6722C24.6561 22.5515 24.3067 23.3949 23.6849 24.0167C23.0631 24.6385 22.2198 24.9878 21.3404 24.9878ZM20.863 13.7147C19.8816 13.7412 18.9399 13.9534 18.0779 14.3115L17.3484 13.2107L12.3087 21.4069L8.31665 16.7385L3.50236 24.444L1.34058 22.8923L7.97183 12.2823L11.9506 16.9242L17.2556 8.30357L20.863 13.7147ZM24.298 14.3778C23.4492 14.0064 22.5341 13.781 21.5792 13.7279L28.3696 2.99857L30.5181 4.56355L24.298 14.3778Z"
+                        fill="white" />
+                </svg>
 
-                </span> Statistics</button>
+
+
+            </span> Statistics</Link>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -296,10 +334,10 @@ export default {
                 },
             },
             secchartData: {
-                labels: Array(10).fill(''), // Dummy data labels
+                labels: Object.keys(this.data.processingTimeGraphData), // Dummy data labels
                 datasets: [
                     {
-                        data: [1, 3, 2, 5, 3, 6, 4, 7, 5, 4], // Dummy data
+                        data: Object.values(this.data.processingTimeGraphData), // Dummy data
                         fill: true,
                         borderColor: '#77A697',
                         backgroundColor: '#E2FFFF',
@@ -311,6 +349,28 @@ export default {
             },
             secchartOptions: {
                 plugins: {
+                    // tooltip: {
+                    //     callbacks: {
+                    //         label: function (tooltipItem, data) {
+                    //             let seconds = tooltipItem.yLabel;
+                    //             seconds = parseInt(seconds, 10);
+                    //             if (isNaN(seconds) || seconds === null || seconds === undefined) {
+                    //                 return seconds; // Return default value if seconds is invalid
+                    //             }
+                    //             let hours = Math.floor(seconds / 3600);
+                    //             let minutes = Math.floor((seconds % 3600) / 60);
+                    //             seconds = seconds % 60;
+
+                    //             // Format to two digits for each unit
+                    //             let formattedTime =
+                    //                 ('0' + hours).slice(-2) + ':' +
+                    //                 ('0' + minutes).slice(-2) + ':' +
+                    //                 ('0' + seconds).slice(-2);
+
+                    //             return seconds;
+                    //         },
+                    //     },
+                    // },
                     legend: {
                         display: false,
                     },
@@ -327,6 +387,7 @@ export default {
         };
     },
     computed: {
+
         callVolumeGraphData() {
             // Preparing data for call volume graph
             return {
@@ -368,29 +429,35 @@ export default {
         }
     },
     methods: {
+        padZero(value) {
+            return (value < 10 ? '0' : '') + value;
+        },
         formatTime(seconds) {
-            // Helper method to format seconds into hh:mm:ss
+            // Ensure seconds is an integer
+            seconds = Math.floor(seconds);
+
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
             const secs = seconds % 60;
+
             return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         },
+
     },
 
     mounted() {
-        const progress = 44;
         const radius = 54;
         const circumference = 2 * Math.PI * radius;
+
+        // Update the offset calculation to use the successRate from the data
+        const progress = this.data.successRate;
         const offset = circumference - (progress / 100) * circumference;
 
         this.$refs.progressCircleFill.style.strokeDasharray = `${circumference}`;
         this.$refs.progressCircleFill.style.strokeDashoffset = `${offset}`;
-        this.$nextTick(() => {
-            const progressCircleFill = this.$refs.progressCircleFill
-            progressCircleFill.style.strokeDashoffset = this.strokeDashoffset
-        });
 
 
+        console.log(this.data);
     },
 };
 </script>

@@ -46,13 +46,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/callback', [AddressController::class, 'callback'])->name('callback');
+    Route::post('/callback', [AddressController::class, 'callbackMail'])->name('callback.post');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('addresses', AddressController::class);
 
-    Route::get('/callback', [AddressController::class, 'callback'])->name('callback');
-    Route::post('/callback', [AddressController::class, 'callbackMail'])->name('callback.post');
 
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
     // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
     Route::post('/break-end/{id}', [TimeTrackingController::class, 'break_end'])->name('break.end');
+    Route::post('/seen/{id}', [TimeTrackingController::class, 'seen'])->name('seen');
     Route::post('/stop-tracking', [TimeTrackingController::class, 'stopTracking'])->name('stop.tracking');
 
 

@@ -77,12 +77,12 @@
                     <Textarea v-model="newAddress.personal_notes" class="w-full" />
                     <Message v-if="errors.personal_notes" severity="error" class="mt-2">{{ errors.personal_notes }}</Message>
                 </div> -->
-                <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
+                <!-- <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="interest_notes">Interest Notes</InputLabel>
                     <Textarea v-model="newAddress.interest_notes" class="w-full" />
                     <Message v-if="errors.interest_notes" severity="error" class="mt-2">{{ errors.interest_notes }}
                     </Message>
-                </div>
+                </div> -->
                 <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
                     <InputLabel for="feedback">Feedback</InputLabel>
                     <Select v-model="newAddress.feedback" :options="feedbackOptions" optionValue="label"

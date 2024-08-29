@@ -140,19 +140,33 @@ class StatisticsController extends Controller
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
 
-        // Average Address Processing Time for the last 7 days
+        // Average weekly address processing time for the last 7 days
         $last7Days = Carbon::now()->subDays(7);
         $averageProcessingTime = Activity::where('activity_type', 'call')
             ->where('user_id', $user->id)
             ->whereBetween('created_at', [$last7Days, Carbon::now()])
             ->avg('total_duration') ?? 0;
 
-        // Today's Break Times and comparison for the last 7 days
+        // Average weekly address processing time for the last 7 days (for graph)
+        $weeklyProcessingTimes = Activity::where('activity_type', 'call')
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$last7Days, Carbon::now()])
+            ->get(['created_at', 'total_duration']);
+
+        $processingTimeGraphData = $weeklyProcessingTimes->groupBy(function ($date) {
+            return Carbon::parse($date->created_at)->format('Y-m-d'); // grouping by dates
+        })->map(function ($row) {
+            return $row->avg('total_duration');
+        });
+
+
+        // Today's Break Times
         $todaysBreakTime = Activity::where('activity_type', 'break')
             ->where('user_id', $user->id)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_duration');
 
+        // Break Time Data for the last 7 days (for graph)
         $last7DaysBreakTimes = Activity::where('activity_type', 'break')
             ->where('user_id', $user->id)
             ->whereBetween('created_at', [$last7Days, Carbon::now()])
@@ -176,12 +190,7 @@ class StatisticsController extends Controller
                 return $carry + $loginDuration;
             }, 0);
 
-        // Notifications for the user
-        // $notifications = Notification::where('user_id', $user->id)
-        //     ->where('created_at', '>=', Carbon::now()->subDays(7))
-        //     ->get();
-
-        // Data for Graph Performance Chart
+        // Call Volume Data for the last 7 days (for graph)
         $callVolumeGraphData = Activity::where('activity_type', 'call')
             ->where('user_id', $user->id)
             ->whereBetween('created_at', [$last7Days, Carbon::now()])
@@ -190,7 +199,7 @@ class StatisticsController extends Controller
             ->orderBy('date')
             ->pluck('count', 'date');
 
-        // Data for Today’s Success Rate Graph
+        // Today's Success Rate
         $subProjectIds = $user->subProjects()->pluck('sub_project_id');
         $successfulCalls = Address::whereIn('sub_project_id', $subProjectIds)
             ->where('feedback', 'Interested')
@@ -212,15 +221,17 @@ class StatisticsController extends Controller
             'todaysBreakTime' => $todaysBreakTime,
             'breakTimeGraphData' => $breakTimeGraphData,
             'yesterdayWorkingHours' => $yesterdayWorkingHours,
-            // 'notifications' => $notifications,
             'callVolumeGraphData' => $callVolumeGraphData,
             'successRate' => $successRate,
+            'processingTimeGraphData' => $processingTimeGraphData,
+
         ];
-        // dd($data);
+
         return Inertia::render('Dashboard', [
             'data' => $data,
         ]);
     }
+
 
 
 }

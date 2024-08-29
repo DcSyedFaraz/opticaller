@@ -34,7 +34,7 @@ const submit = () => {
     <Head title="Log in" />
     <div class="min-h-screen flex items-center justify-center bg-[#eae9e7] p-4">
         <div class="flex w-full max-w-5xl xl:h-[65vh]">
-            <Card class="flex-1 p-4 !rounded-r-none">
+            <Card class="flex-1 p-4 ">
                 <template #header>
                     <div class="text-center flex flex-col items-center justify-center">
                         <svg class="w-full max-w-xs xl:max-w-md lg:max-w-lg" width="320" height="63"
@@ -106,7 +106,7 @@ const submit = () => {
                                 <label for="remember" class="my-auto">Remember Me</label>
                             </div>
                             <div v-if="canResetPassword">
-                                <Link href="#" class="text-green-600">Forgot your password?</Link>
+                                <Link :href="route('password.request')" class="text-green-600">Forgot your password?</Link>
                             </div>
                         </div>
 
@@ -120,7 +120,8 @@ const submit = () => {
                 </template>
                 <template #footer>
                     <div class="text-center my-5">
-                        © Vim Solution GmbH
+                        <a href="https://www.vim-solution.com/impressum/ " target="_blank" rel="noopener noreferrer">©
+                            Vim Solution GmbH</a>
                     </div>
                 </template>
             </Card>
