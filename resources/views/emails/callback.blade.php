@@ -40,10 +40,10 @@
             </li>
         </ul>
 
-        
+        <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem; text-align: center;">Thank you for using our service!</p>
+
         </div>
 
-        <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem; text-align: center;">Thank you for using our service!</p>
     </div>
 
     <!-- Font Awesome for icons -->
