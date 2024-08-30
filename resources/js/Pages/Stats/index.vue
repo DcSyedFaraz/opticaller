@@ -5,144 +5,84 @@
 
         <div class="p-6 bg-gray-100 min-h-screen">
             <!-- Top Section -->
-            <div class="grid grid-cols-5 gap-4">
-                <div class="grid col-span-2 ">
-                    <div class="flex flex-col my-2 space-x-4 shadow-secondary  bg-white p-2 rounded-lg shadow">
+            <div class="grid grid-cols-1 xl:grid-cols-5 gap-4">
+                <div class="grid col-span-1 xl:col-span-2">
+                    <div class="flex flex-col my-2 space-x-4 shadow-secondary bg-white p-2 rounded-lg shadow">
                         <div class="border-b-2 p-1">
-                            <span class="mx-4 font-extrabold ">
+                            <span class="mx-4 font-extrabold">
                                 Select Date Range
                             </span>
                         </div>
-                        <div class="m-2 grid grid-cols-2">
+                        <div class="m-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div class="grid grid-cols-1">
-
                                 <DatePicker v-model="startDate" @date-select="onDateChange" iconPos="left" showIcon
-                                    fluid placeholder="MM/DD/YY" class="w-full " />
+                                    fluid placeholder="MM/DD/YY" class="w-full" />
                             </div>
-                            <div class="grid grid-cols-1 mx-2">
-
-                                <DatePicker v-model="endDate" @date-select="onDateChange" iconPos="left" showIcon fluid
-                                    placeholder="MM/DD/YY" class="w-full" />
+                            <div class="grid grid-cols-1">
+                                <DatePicker v-model="endDate" @date-select="onDateChange" iconPos="left" showIcon
+                                    fluid placeholder="MM/DD/YY" class="w-full" />
                             </div>
                         </div>
                     </div>
 
                     <!-- Top Performer Card -->
-                    <div class="bg-primary text-white p-4 rounded-lg shadow  flex items-center justify-center flex-col">
-                        <div class="grid grid-cols-2">
+                    <div class="bg-primary text-white p-4 rounded-lg shadow flex items-center justify-center flex-col mt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2">
                             <div class="grid grid-cols-1 text-center">
                                 <h2 class="text-xl font-bold">Top Performer</h2>
                                 <p class="text-2xl font-bold">{{ this.data.employeeLeaderboard }}</p>
                                 <p class="text-xs text-center mt-2">
-                                    Ranking of employees based on performance metrics like calls completed, customer
-                                    interest
-                                    rate, etc.
+                                    Ranking of employees based on performance metrics like calls completed, customer interest rate,
+                                    etc.
                                 </p>
-
                             </div>
-                            <div class="grid grid-cols-1">
+                            <div class="grid grid-cols-1 mt-4 md:mt-0">
                                 <img src="images/award.png" alt="">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid col-span-2">
-                    <div class="bg-white p-4 rounded-lg shadow">
+                <div class="grid col-span-1 xl:col-span-2 w-full overflow-x-auto">
+                    <div class="bg-white p-4 rounded-lg shadow mt-4 xl:mt-0">
                         <div class="border-b-2 p-1">
-                            <span class="mx-4 font-extrabold ">
+                            <span class="mx-4 font-extrabold">
                                 Daily Call-Out Volume
                             </span>
                         </div>
-                        <Chart type="line" class="mt-5 " :height="235" :options="chartOptions" :data="chartData" />
+                        <Chart type="line" class="mt-5 w-full h-[235px]"  :options="chartOptions" :data="chartData" />
                     </div>
-
                 </div>
-                <div class="grid grid-cols-1">
-
-                    <div class="grid grid-cols-3 border my-3 mb-1 rounded-md p-4 shadow shadow-secondary">
+                <div class="grid lg:grid-cols-2 xl:grid-cols-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 border my-3 mb-1 rounded-md p-4 shadow shadow-secondary">
                         <div class="col-span-2">
                             <p class="text-[#424E79] font-sans text-sm">Login Time</p>
-                            <h1 class="text-[#424E79] font-sans font-extrabold text-xl">{{ new
-                                    Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
-                                        hour: '2-digit', minute:
-                                            '2-digit', hour12: true
-                                    }) }}</h1>
+                            <h1 class="text-[#424E79] font-sans font-extrabold text-xl">
+                                {{ new Date($page.props.auth.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) }}
+                            </h1>
                         </div>
                         <div class="col-span-1">
-                            <span class=" pi pi-clock !text-[3rem] text-primary ml-2" data-pc-section="icon"></span>
+                            <span class="pi pi-clock !text-[3rem] text-primary ml-2" data-pc-section="icon"></span>
                         </div>
-
                     </div>
 
                     <!-- Success Call-Out Rate -->
                     <div class="bg-white p-2 rounded-lg shadow flex mt-1 items-center justify-center">
                         <div class="flex flex-col items-center">
                             <h4 class="text-gray-600 mb-2">Success Call-Out Rate</h4>
-                            <!-- <ProgressBar :value="successRate" class="w-24 h-24" /> -->
                             <div class="circular-progress-bar">
                                 <svg class="progress-circle" width="120" height="120">
-                                    <circle class="progress-circle-bg" cx="60" cy="60" r="50" fill="none"
-                                        stroke-width="10" />
-                                    <!-- Add ref here -->
-                                    <circle ref="progressCircleFill" class="progress-circle-fill" cx="60" cy="60" r="50"
-                                        fill="none" stroke-width="10" />
+                                    <circle class="progress-circle-bg" cx="60" cy="60" r="50" fill="none" stroke-width="10" />
+                                    <circle ref="progressCircleFill" class="progress-circle-fill" cx="60" cy="60" r="50" fill="none" stroke-width="10" />
                                 </svg>
                                 <span class="progress-text">{{ this.data.successRateData.toFixed(2) }}%</span>
                             </div>
-
                         </div>
                     </div>
                 </div>
-
             </div>
 
-
-            <!-- User Productivity and Call Statistics Table -->
-            <div class="bg-white p-4 rounded-lg shadow mt-6">
-                <div class="border-b-2 p-1">
-                    <span class="mx-4 font-extrabold ">
-                        User Productivity and Call Statistics
-                    </span>
-                </div>
-                <DataTable :value="userData" class="p-datatable-sm " paginator :rows="10"
-                    :rowsPerPageOptions="[5, 10, 20, 50]" v-model:filters="filters"
-                    :globalFilterFields="['user_name', 'total_logged_in_time', 'total_break_time', 'addresses_processed', 'average_processing_time', 'total_effective_working_time']">
-                    <template #header>
-                        <div class="flex justify-end my-3">
-                            <IconField>
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters.global.value" placeholder="Keyword Search" />
-                            </IconField>
-                        </div>
-                    </template>
-                    <Column field="user_name" header="Name"></Column>
-                    <Column field="total_logged_in_time" header="Logged-In Time">
-                        <template #body="slotProps">
-                            {{ formatSeconds(slotProps.data.total_logged_in_time) }}
-                        </template>
-                    </Column>
-                    <Column field="total_break_time" header="Break Time">
-                        <template #body="slotProps">
-                            {{ formatSeconds(slotProps.data.total_break_time) }}
-                        </template>
-                    </Column>
-                    <Column field="addresses_processed" header="Addresses Processed"></Column>
-                    <Column field="average_processing_time" header="Average Processing Time">
-                        <template #body="slotProps">
-                            {{ formatSeconds(slotProps.data.average_processing_time) }}
-                        </template>
-                    </Column>
-                    <Column field="total_effective_working_time" header="Total Effective Working Time">
-                        <template #body="slotProps">
-                            {{ formatSeconds(slotProps.data.total_effective_working_time) }}
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-            <div class="grid grid-cols-3 my-4 gap-4 w-full">
+            <div class="grid md:grid-cols-3 grid-cols-1 my-4 gap-4 w-full">
 
                 <div class="rounded-md bg-[#A7704A] p-4 text-white">
                     <div class="flex items-center justify-between">
@@ -198,9 +138,54 @@
                 </div>
 
             </div>
-            <div class="grid grid-cols-4 my-4 gap-4 w-full">
+            <!-- User Productivity and Call Statistics Table -->
+            <div class="bg-white p-4 rounded-lg shadow mt-6">
+                <div class="border-b-2 p-1">
+                    <span class="mx-4 font-extrabold ">
+                        User Productivity and Call Statistics
+                    </span>
+                </div>
+                <DataTable :value="userData" class="p-datatable-sm " paginator :rows="10"
+                    :rowsPerPageOptions="[5, 10, 20, 50]" v-model:filters="filters"
+                    :globalFilterFields="['user_name', 'total_logged_in_time', 'total_break_time', 'addresses_processed', 'average_processing_time', 'total_effective_working_time']">
+                    <template #header>
+                        <div class="md:flex hidden justify-end my-3">
+                            <IconField>
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters.global.value" placeholder="Keyword Search" />
+                            </IconField>
+                        </div>
+                    </template>
+                    <Column field="user_name" header="User Name"></Column>
+                    <Column field="total_logged_in_time" header="Logged-In Time">
+                        <template #body="slotProps">
+                            {{ formatSeconds(slotProps.data.total_logged_in_time) }}
+                        </template>
+                    </Column>
+                    <Column field="total_break_time" header="Break Time">
+                        <template #body="slotProps">
+                            {{ formatSeconds(slotProps.data.total_break_time) }}
+                        </template>
+                    </Column>
+                    <Column field="addresses_processed" header="Addresses Processed"></Column>
+                    <Column field="average_processing_time" header="Average Processing Time">
+                        <template #body="slotProps">
+                            {{ formatSeconds(slotProps.data.average_processing_time) }}
+                        </template>
+                    </Column>
+                    <Column field="total_effective_working_time" header="Total Effective Working Time">
+                        <template #body="slotProps">
+                            {{ formatSeconds(slotProps.data.total_effective_working_time) }}
+                        </template>
+                    </Column>
+                </DataTable>
+            </div>
 
-                <div class="rounded-md bg-[#A7704A] p-4 text-white">
+            <div class="grid md:grid-cols-4 grid-cols-1 my-4 gap-4 w-full">
+
+                <div class="rounded-md bg-[#383838] p-4 text-white">
                     <div class="flex items-center justify-between">
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Average Call Time:</h3>
@@ -237,7 +222,7 @@
 
                     </div>
                 </div>
-                <div class="rounded-md bg-[#77A697] p-4 text-white">
+                <div class="rounded-md bg-[#383838] p-4 text-white">
                     <div class="flex items-center justify-between">
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Total Logged-In Time</h3>
@@ -252,7 +237,7 @@
 
                     </div>
                 </div>
-                <div class="rounded-md bg-[#77A697] p-4 text-white">
+                <div class="rounded-md bg-[#383838] p-4 text-white">
                     <div class="flex items-center justify-between">
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>

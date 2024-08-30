@@ -98,7 +98,7 @@ export default {
                     outlined: true
                 },
                 accept: () => {
-                    Inertia.delete(route('users.destroy', id), {
+                    this.$inertia.delete(route('users.destroy', id), {
                         onSuccess: () => {
                             this.$toast.add({ severity: 'success', summary: 'Success', detail: 'User deleted successfully', life: 3000 });
                         }
