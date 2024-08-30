@@ -12,7 +12,7 @@
                             <p class="text-4xl font-bold mr-2">{{ data.todaysCallOutCount }}/100</p>
                         </div>
                     </div>
-                    <div class="grid mt-3">
+                    <div class="flex justify-end  mt-3 ">
                         <svg width="40" height="54" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M27.4444 16.8889V10.5556H21.1111V6.33333H27.4444V0H31.6667V6.33333H38V10.5556H31.6667V16.8889H27.4444ZM35.7833 38C31.3852 38 27.0398 37.0416 22.7472 35.1247C18.4546 33.2078 14.5491 30.4894 11.0306 26.9694C7.51204 23.4495 4.79433 19.544 2.87744 15.2528C0.960555 10.9616 0.00140741 6.61622 0 2.21667C0 1.58333 0.211111 1.05556 0.633333 0.633333C1.05556 0.211111 1.58333 0 2.21667 0H10.7667C11.2593 0 11.6991 0.167481 12.0861 0.502444C12.4731 0.837407 12.7019 1.23289 12.7722 1.68889L14.1444 9.07778C14.2148 9.64074 14.1972 10.1157 14.0917 10.5028C13.9861 10.8898 13.7926 11.2241 13.5111 11.5056L8.39167 16.6778C9.09537 17.9796 9.93067 19.2371 10.8976 20.4503C11.8644 21.6635 12.9291 22.8338 14.0917 23.9611C15.1824 25.0519 16.3259 26.0638 17.5222 26.9969C18.7185 27.93 19.9852 28.7829 21.3222 29.5556L26.2833 24.5944C26.6 24.2778 27.0138 24.0406 27.5247 23.883C28.0356 23.7254 28.5366 23.681 29.0278 23.75L36.3111 25.2278C36.8037 25.3685 37.2083 25.624 37.525 25.9941C37.8417 26.3643 38 26.7773 38 27.2333V35.7833C38 36.4167 37.7889 36.9444 37.3667 37.3667C36.9444 37.7889 36.4167 38 35.7833 38Z"
@@ -37,7 +37,7 @@
                             <p class="text-4xl font-bold mr-2">{{ data.todaysCompletedAddresses }}/60</p>
                         </div>
                     </div>
-                    <div class="grid mt-3">
+                    <div class="flex justify-end  mt-3">
                         <svg width="40" height="54" viewBox="0 0 44 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M29.5436 43.0008L25.3541 38.8113L25.1773 38.6345L25.0005 38.8113L22.6235 41.1883L22.4467 41.3651L22.6235 41.5418L29.3668 48.2851L29.5436 48.4619L29.7203 48.2851L43.2069 34.7986L43.3837 34.6218L43.2069 34.445L40.8299 32.068L40.6531 31.8912L40.4763 32.068L29.5436 43.0008Z"
@@ -65,7 +65,7 @@
                             <p class="text-4xl font-bold mr-2">{{ formatTime(data.todaysBreakTime) }}</p>
                         </div>
                     </div>
-                    <div class="xl:grid mt-3 hidden">
+                    <div class="xl:flex justify-end mt-3 hidden">
                         <svg width="40" height="54" viewBox="0 0 40 54" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.5 17H37.5" stroke="#945F3A" stroke-width="4" stroke-linecap="round" />
                             <path
@@ -81,7 +81,7 @@
                     </div>
                 </div>
 
-                <div class="mt-2">
+                <div class="">
                     <div class="w-full h-2 bg-[#E4A57B] rounded-full">
                         <div class="h-2 bg-[#945F3A] rounded-full" style="width: 70%"></div>
                     </div>
@@ -100,8 +100,8 @@
                                         '2-digit', hour12: true
                                 }) }}</h1>
                     </div>
-                    <div class="col-span-1">
-                        <span class="pi pi-clock !text-[3rem] text-[#77A697] ml-2" data-pc-section="icon"></span>
+                    <div class="col-span-1 text-end">
+                        <span class="pi pi-clock  !text-[3rem] text-[#77A697] ml-2" data-pc-section="icon"></span>
                     </div>
                 </div>
 
@@ -111,16 +111,16 @@
                         <p class="font-sans text-sm">Yesterday’s Working Hours</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ formatTime(data.yesterdayWorkingHours) }}</h1>
                     </div>
-                    <div class="col-span-1">
+                    <div class="col-span-1 text-end">
                         <span class="pi pi-clock !text-[3rem] text-[#818FA0] ml-2" data-pc-section="icon"></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 p-6">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-6">
             <!-- Notifications -->
-            <div class="bg-white p-4 rounded-lg shadow-md md:flex justify-between hidden md:col-span-2 ">
+            <div class="bg-white p-4 rounded-lg shadow-md xl:flex justify-between hidden md:col-span-2 ">
                 <div>
                     <h3 class="text-lg font-semibold mb-4">Notifications</h3>
                     <p class="text-gray-600 mb-6">Alerts for follow-up, assign projects or system updates. Only show if
@@ -163,7 +163,7 @@
             </div>
 
             <!-- Today's Success Call-Out Rate -->
-            <div class="bg-white p-2 rounded-lg shadow flex items-center justify-center w-full md:h-full h-[14rem]">
+            <div class="bg-white p-2 rounded-lg shadow flex items-center justify-center w-full xl:h-full h-[14rem]">
                 <div class="flex flex-col items-center w-full h-full">
                     <h4 class="text-gray-600 mb-2 text-center">Success Call-Out Rate</h4>
                     <div class="circular-progress-bar relative flex items-center justify-center w-full h-full">
@@ -224,7 +224,7 @@
             </span> Start Call</Link>
 
             <Link :href="route('dash')"
-                class="bg-[#383838] text-white flex px-[5rem] py-3 text-xl mx-2 rounded-lg mb-2">
+                class="bg-[#383838] text-white flex px-[4rem] py-3 text-xl mx-2 rounded-lg mb-2">
             <span class="mr-1">
                 <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
