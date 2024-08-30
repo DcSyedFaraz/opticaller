@@ -60,7 +60,7 @@ class AddressController extends Controller
     {
         $validated = $request->validate([
             'locked_fields' => 'array',
-            'locked_fields.*' => 'string|in:company_name,salutation,first_name,last_name,street_address,postal_code,city,website,phone_number,email_address_new,country',
+            'locked_fields.*' => 'string|in:company_name,salutation,first_name,last_name,street_address,postal_code,city,website,phone_number,email_address_new,country,contact_id',
         ]);
 
         $globalLockedFields = GlobalLockedFields::firstOrCreate();

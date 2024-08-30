@@ -64,7 +64,7 @@ class AddressService
         $addressesPerPage = 1;
 
         // Fetch addresses dynamically
-        $addresses = Address::with('calLogs.notes', 'subproject.projects')
+        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users')
             ->whereIn('sub_project_id', $subProjectIds)
             ->where('seen', 0)
             ->where('updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at

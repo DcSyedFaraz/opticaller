@@ -4,10 +4,9 @@
 
     <AuthenticatedLayout>
         <div class="container mx-auto px-4 py-6">
-            <Card
-                class="bg-white rounded-lg !shadow-md  p-6 !shadow-secondary top">
+            <Card class="bg-white rounded-lg !shadow-md  p-6 !shadow-secondary top">
                 <template #header>
-                    <h2 class="text-2xl font-bold text-gray-700 text-center mb-6">Settings</h2>
+                    <p class="text-2xl font-bold text-gray-700 text-center mb-6">Settings</p>
                 </template>
                 <template #content>
                     <Accordion value="0">
@@ -15,13 +14,16 @@
                         <AccordionPanel value="0" class="!border-none">
                             <AccordionHeader>User Management</AccordionHeader>
                             <AccordionContent>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     <Card v-for="card in users" :key="card.id"
-                                        class="my-2 p-4 !shadow-md !shadow-secondary">
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
-                                            <h2 class="font-bold">{{ card.title }}</h2>
+                                            <p class="font-bold">{{ card.title }}</p>
                                         </template>
                                         <template #content class="my-2">
+                                            <p>{{ card.content }}</p>
+                                        </template>
+                                        <template #footer>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
                                                 <Button class="!bg-secondary !border-secondary" size="small">{{
@@ -38,13 +40,14 @@
                         <AccordionPanel value="1" class="!border-none">
                             <AccordionHeader>Assign Projects</AccordionHeader>
                             <AccordionContent>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     <Card v-for="card in projects_assign" :key="card.id"
-                                        class="my-2 p-4 !shadow-md !shadow-secondary">
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
-                                            <h2 class="font-bold">{{ card.title }}</h2>
+                                            <p class="font-bold">{{ card.title }}</p>
                                         </template>
                                         <template #content class="my-2">
+                                            <p>{{ card.content }}</p>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
                                                 <Button class="!bg-secondary !border-secondary" size="small">{{
@@ -61,13 +64,16 @@
                         <AccordionPanel value="2" class="!border-none">
                             <AccordionHeader>Project Settings</AccordionHeader>
                             <AccordionContent>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2  xl:grid-cols-3 gap-4">
                                     <Card v-for="card in projects" :key="card.id"
-                                        class="my-2 p-4 !shadow-md !shadow-secondary">
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary">
                                         <template #title>
-                                            <h2 class="font-bold">{{ card.title }}</h2>
+                                            <p class="font-bold">{{ card.title }}</p>
                                         </template>
                                         <template #content class="my-2">
+                                            <p>{{ card.content }}</p>
+                                        </template>
+                                        <template #footer>
                                             <div class="my-2">
                                                 <Button v-if="card.id === 5" @click="openFieldLockDialog"
                                                     class="!bg-secondary !border-secondary" size="small">
@@ -78,6 +84,7 @@
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
+
                                         </template>
                                     </Card>
                                 </div>
@@ -88,13 +95,51 @@
                         <AccordionPanel value="3" class="!border-none">
                             <AccordionHeader>Statistics & Reporting</AccordionHeader>
                             <AccordionContent>
-                                <p class="text-gray-600">Content for Statistics & Reporting</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    <Card v-for="card in stats" :key="card.id"
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary ">
+                                        <template #title>
+                                            <p class="font-bold text-wrap">{{ card.title }}</p>
+                                        </template>
+                                        <template #content class="my-2">
+                                            <p>{{ card.content }}</p>
+                                            <div class="my-2">
+
+                                                <Link :href="route(card.routeName)">
+                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                        card.buttonText }}</Button>
+                                                </Link>
+                                            </div>
+                                        </template>
+                                    </Card>
+                                </div>
+
                             </AccordionContent>
                         </AccordionPanel>
                         <AccordionPanel value="4" class="!border-none">
                             <AccordionHeader>Security Management</AccordionHeader>
                             <AccordionContent>
-                                <p class="text-gray-600">Content for Security Management</p>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                    <Card v-for="card in profile" :key="card.id"
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary">
+                                        <template #title>
+                                            <p class="font-bold">{{ card.title }}</p>
+                                        </template>
+                                        <template #content class="my-2">
+                                            <p>{{ card.content }}</p>
+                                            <div class="my-2">
+
+                                                <Link :href="route(card.routeName)">
+                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                        card.buttonText }}</Button>
+                                                </Link>
+                                            </div>
+                                        </template>
+                                    </Card>
+                                </div>
+
                             </AccordionContent>
                         </AccordionPanel>
                         <AccordionPanel value="5" class="!border-none">
@@ -127,18 +172,24 @@ export default {
     data() {
         return {
             users: [
-                { id: 1, title: 'Users Index', routeName: 'users.index', buttonText: 'View Details' },
-                { id: 2, title: 'User Create', routeName: 'users.create', buttonText: 'View Details' },
+                { id: 1, content: 'List of current users with options to edit, deactivate,or delete accounts.', title: 'Manage Existing Users', routeName: 'users.index', buttonText: 'Proceed' },
+                { id: 2, content: 'Form to input details like name, email, role, etc.', title: 'Add New User', routeName: 'users.create', buttonText: 'Proceed' },
             ],
             projects_assign: [
-                { id: 1, title: 'Assign Users', routeName: 'projects.assign', buttonText: 'View Details' },
+                { id: 1, content: 'Dropdown to assign address lists in relation with sub projects to employees.', title: 'Assign Projects', routeName: 'projects.assign', buttonText: 'Proceed' },
+            ],
+            stats: [
+                { id: 1, content: 'Visual charts displaying overall project performance, user activity, and call outcomes.', title: 'Performance Metrics', routeName: 'statistics.index', buttonText: 'Proceed' },
+            ],
+            profile: [
+                { id: 1, content: 'Option to update security settings, including password requirements and account lockout policies.', title: 'Password Protection', routeName: 'profile.edit', buttonText: 'Proceed' },
             ],
             projects: [
-                { id: 1, title: 'Projects Index/Create', routeName: 'projects.index', buttonText: 'View Details' },
-                { id: 2, title: 'Sub Project Index/Create', routeName: 'projects.create', buttonText: 'View Details' },
-                { id: 3, title: 'Addresses Index', routeName: 'addresses.index', buttonText: 'View Details' },
-                { id: 4, title: 'Addresses Create', routeName: 'addresses.create', buttonText: 'View Details' },
-                { id: 5, title: 'Fields Lock', routeName: '', buttonText: 'View Details' },
+                { id: 1, content: 'Interface to add or modify Projects options.', title: 'Projects Index/Create', routeName: 'projects.index', buttonText: 'Proceed' },
+                { id: 2, content: 'Interface to add or modify Sub Project options.', title: 'Sub Project Index/Create', routeName: 'projects.create', buttonText: 'Proceed' },
+                { id: 3, content: 'Interface to add or modify feedback options.', title: 'Feedback Customization', routeName: 'addresses.index', buttonText: 'Proceed' },
+                { id: 4, content: 'Interface to add or modify Addresses options.', title: 'Addresses Create', routeName: 'addresses.create', buttonText: 'Proceed' },
+                { id: 5, content: 'Option to lock specific fields to prevent user edits.', title: 'Fields Locking', routeName: '', buttonText: 'Proceed' },
             ],
             fieldLockDialogVisible: false,
             lockedFields: [], // Track locked fields
