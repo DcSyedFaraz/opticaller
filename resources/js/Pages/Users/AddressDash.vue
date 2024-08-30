@@ -364,13 +364,16 @@
         </div>
         <!-- Side Panel -->
         <div class="col-span-1 lg:w-2/3">
-          <Button
+          <!-- <Button
             label="Callback"
             icon="pi pi-phone"
             class="w-full my-2"
             size="large"
             @click="showCallbackForm = true"
-          />
+          /> -->
+          <Link :href="route('callback')" class="p-button p-component p-button-lg w-full my-2">
+            <i class="pi pi-phone !text-xl"></i> Callback
+        </Link>
           <Button
             @click="togglePause"
             :label="isPaused ? 'End Break' : 'Take Break'"
@@ -504,7 +507,7 @@
               </div>
             </div>
             <div v-else>
-              <div class="flex justify-center items-center h-screen">
+              <div class="flex justify-center items-center h-[12rem]">
                 <div class="text-lg text-gray-500">No history</div>
               </div>
             </div>
