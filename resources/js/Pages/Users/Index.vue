@@ -3,7 +3,7 @@
     <Head title="Users" />
     <AuthenticatedLayout>
         <div class=" mx-auto ">
-            <h1 class="text-2xl font-bold mb-4">User Management</h1>
+            <h1 class="text-2xl font-bold mb-4">Manage Existing Users</h1>
             <div class="flex mb-4">
                 <InputText v-model="filters.search" @input="getUsers" placeholder="Search..." class="mr-2" />
                 <Button @click="createUser" label="Create User" icon="pi pi-plus" />

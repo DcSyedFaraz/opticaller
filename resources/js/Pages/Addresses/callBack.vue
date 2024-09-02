@@ -60,8 +60,8 @@
             </div>
             <div class="flex justify-center mt-4">
                 <Button label="Save" icon="pi pi-save"
-                    class="!bg-[#77A697] !border-[#77A697] text-white !px-7 rounded mr-2" @click="saveForm" />
-                <Button label="Cancel" severity="contrast" class="!px-5" @click="cancelForm" />
+                    class="!bg-[#77A697] !border-[#77A697] text-white !px-[4rem] !rounded mr-2" @click="saveForm" />
+                <Button label="Cancel" severity="contrast" class="!px-[4rem] !rounded" @click="cancelForm" />
             </div>
         </div>
         <div v-if="isLoading" class="loading-overlay">
@@ -124,6 +124,7 @@ export default {
                 this.$inertia.post(route('callback.post'), this.formData, {
                     onSuccess: () => {
                         this.isLoading = false,
+                        this.$inertia.visit(route('dash'));
                             this.$toast.add({
                                 severity: 'success',
                                 summary: 'Success',

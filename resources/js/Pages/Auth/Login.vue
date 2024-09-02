@@ -6,6 +6,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+
 
 defineProps({
     canResetPassword: {
@@ -15,6 +17,7 @@ defineProps({
         type: String,
     },
 });
+const loading = ref(false);
 
 const form = useForm({
     email: '',
@@ -22,10 +25,15 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
+const submit = async () => {
+    loading.value = true;
+    try {
+        await form.post(route('login'), {
+            onFinish: () => form.reset('password'),
+        });
+    } finally {
+        loading.value = false;
+    }
 };
 </script>
 
@@ -34,7 +42,7 @@ const submit = () => {
     <Head title="Log in" />
     <div class="min-h-screen flex items-center justify-center bg-[#eae9e7] p-4">
         <div class="flex w-full max-w-5xl xl:h-[65vh]">
-            <Card class="flex-1 p-4 ">
+            <Card class="flex-1 p-4 mx-5 xl:mx-0">
                 <template #header>
                     <div class="text-center flex flex-col items-center justify-center">
                         <svg class="w-full max-w-xs xl:max-w-md lg:max-w-lg" width="320" height="63"
@@ -106,11 +114,12 @@ const submit = () => {
                                 <label for="remember" class="my-auto">Remember Me</label>
                             </div>
                             <div v-if="canResetPassword">
-                                <Link :href="route('password.request')" class="text-green-600">Forgot your password?</Link>
+                                <Link :href="route('password.request')" class="text-green-600">Forgot your password?
+                                </Link>
                             </div>
                         </div>
 
-                        <Button label="Sign In" icon="pi pi-sign-in" class="mt-4 !py-3 w-full !bg-black !border-black"
+                        <Button label="Sign In" :loading="loading" icon="pi pi-sign-in" class="mt-4 !py-3 w-full !bg-black !border-black"
                             @click="submit" />
 
                         <div v-if="status" class="mt-4">

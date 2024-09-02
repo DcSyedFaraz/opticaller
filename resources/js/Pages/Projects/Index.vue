@@ -1,11 +1,11 @@
 <template>
 
-    <Head title="Projects" />
+    <Head title="Project Management " />
 
     <AuthenticatedLayout>
 
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold leading-tight text-gray-900">Projects</h1>
+            <h1 class="text-3xl font-bold leading-tight text-gray-900">Project Management </h1>
             <form @submit.prevent="createProject" class="mt-8">
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-12">

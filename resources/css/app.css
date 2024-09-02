@@ -31,3 +31,21 @@
     z-index: 1000;
 }
 
+@media (min-width: 768px) {
+    #app>div {
+        height: calc(100vh - 100px);
+    }
+
+    #app>div>div {
+        height: calc(100vh - 150px);
+        overflow: hidden;
+    }
+
+    #app>div>main {
+        overflow-y: auto;
+    }
+
+    #app>div>div>aside>nav {
+        height: calc(100vh - 180px);
+    }
+}

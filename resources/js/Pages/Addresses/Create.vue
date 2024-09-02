@@ -1,6 +1,6 @@
 <template>
 
-    <Head title="Address" />
+    <Head title="Add New Address" />
     <AuthenticatedLayout>
         <div class="max-w-4xl mx-auto  sm:px-6 lg:px-8">
             <h1 class="text-2xl font-bold mb-8 text-center">Add New Address</h1>
