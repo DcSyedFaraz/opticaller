@@ -30,7 +30,7 @@ class CallbackMail extends Mailable
      */
     public function build()
     {
-        return $this->subject('New Callback Request')
+        return $this->subject('Rückruf bitte')
             ->view('emails.callback')
             ->with('details', $this->details);
     }

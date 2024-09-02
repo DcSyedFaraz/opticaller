@@ -16,22 +16,27 @@
                             <AccordionContent>
                                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     <Card v-for="card in users" :key="card.id"
-                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary">
+                                        class="mt-4 m-2 p-4 !shadow-md !shadow-secondary flex flex-col justify-between items-start">
                                         <template #title>
                                             <p class="font-bold">{{ card.title }}</p>
                                         </template>
-                                        <template #content class="my-2">
-                                            <p>{{ card.content }}</p>
+                                        <template #content>
+                                            <div class="my-2 flex-grow">
+                                                <p>{{ card.content }}</p>
+                                            </div>
                                         </template>
                                         <template #footer>
-                                            <div class="my-2">
+                                            <div class="mt-auto">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">{{
-                                        card.buttonText }}</Button>
+                                                <Button class="!bg-secondary !border-secondary" size="small">
+                                                    {{ card.buttonText }}
+                                                </Button>
                                                 </Link>
                                             </div>
                                         </template>
                                     </Card>
+
+
                                 </div>
                             </AccordionContent>
                         </AccordionPanel>
@@ -50,7 +55,7 @@
                                             <p>{{ card.content }}</p>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -76,11 +81,11 @@
                                         <template #footer>
                                             <div class="my-2">
                                                 <Button v-if="card.id === 5" @click="openFieldLockDialog"
-                                                    class="!bg-secondary !border-secondary" size="small">
+                                                    class="!bg-secondary !border-secondary !rounded" size="small">
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -107,7 +112,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -132,7 +137,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -185,10 +190,10 @@ export default {
                 { id: 1, content: 'Option to update security settings, including password requirements and account lockout policies.', title: 'Password Protection', routeName: 'profile.edit', buttonText: 'Proceed' },
             ],
             projects: [
-                { id: 1, content: 'Interface to add or modify Projects options.', title: 'Projects Index/Create', routeName: 'projects.index', buttonText: 'Proceed' },
-                { id: 2, content: 'Interface to add or modify Sub Project options.', title: 'Sub Project Index/Create', routeName: 'projects.create', buttonText: 'Proceed' },
+                { id: 1, content: 'Interface to add or modify Projects.', title: 'Project Management', routeName: 'projects.index', buttonText: 'Proceed' },
+                { id: 2, content: 'Interface to add or modify Sub Project.', title: 'Sub Project Management', routeName: 'projects.create', buttonText: 'Proceed' },
                 { id: 3, content: 'Interface to add or modify feedback options.', title: 'Feedback Customization', routeName: 'addresses.index', buttonText: 'Proceed' },
-                { id: 4, content: 'Interface to add or modify Addresses options.', title: 'Addresses Create', routeName: 'addresses.create', buttonText: 'Proceed' },
+                { id: 4, content: 'Interface to add or modify Addresses.', title: 'Add New Address', routeName: 'addresses.create', buttonText: 'Proceed' },
                 { id: 5, content: 'Option to lock specific fields to prevent user edits.', title: 'Fields Locking', routeName: '', buttonText: 'Proceed' },
             ],
             fieldLockDialogVisible: false,
@@ -249,5 +254,13 @@ export default {
     background-color: rgb(235 241 239 / var(--tw-bg-opacity)) !important;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+}
+
+@media only screen and (max-width: 768px) {
+
+    #app div.p-card-body,
+    #app .p-accordioncontent-content {
+        padding: 0;
+    }
 }
 </style>

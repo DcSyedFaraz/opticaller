@@ -1,11 +1,11 @@
 <template>
 
-    <Head title="Sub Projects" />
+    <Head title="Assign Projects" />
 
     <AuthenticatedLayout>
         <div class="container mx-auto py-8">
             <div class="bg-white shadow-md rounded-lg p-6">
-                <h2 class="text-2xl font-bold mb-4">Sub Projects</h2>
+                <h2 class="text-2xl font-bold mb-4">Assign Projects</h2>
                 <DataTable :value="subProjects" dataKey="id" class="w-full">
                     <Column header="Project Title" class="text-lg font-semibold">
                         <template #body="slotProps">

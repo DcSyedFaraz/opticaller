@@ -52,9 +52,7 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
-                </PrimaryButton>
+                <Button label=" Email Password Reset Link" class="!py-3" severity="contrast" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" />
             </div>
         </form>
     </GuestLayout>

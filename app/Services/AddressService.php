@@ -66,7 +66,7 @@ class AddressService
         // Fetch addresses dynamically
         $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users')
             ->whereIn('sub_project_id', $subProjectIds)
-            ->where('seen', 0)
+            // ->where('seen', 0)
             ->where('updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
             ->where(function ($query) {
                 // Combine conditions for addresses with or without notreached entries

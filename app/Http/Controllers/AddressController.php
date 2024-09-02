@@ -183,7 +183,7 @@ class AddressController extends Controller
             'notes' => $validatedData['notes'],
         ];
 
-        Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
+        // Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
 
         // Return inertia response
         return inertia('Addresses/callBack');

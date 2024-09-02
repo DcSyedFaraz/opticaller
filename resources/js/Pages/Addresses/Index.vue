@@ -1,10 +1,10 @@
 <template>
 
-    <Head title="Addresses" />
+    <Head title="Feedback Customization" />
     <AuthenticatedLayout>
 
         <div class="flex justify-between">
-            <h1 class="text-2xl font-bold">Addresses</h1>
+            <h1 class="text-2xl font-bold">Feedback Customization</h1>
             <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button" type="button">Create
             New</Link>
         </div>

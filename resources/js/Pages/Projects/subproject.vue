@@ -1,11 +1,11 @@
 <template>
 
-    <Head title="Sub Projects" />
+    <Head title="Sub Project Management" />
 
     <AuthenticatedLayout>
 
         <div class="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold leading-tight text-gray-900">Sub subprojects</h1>
+            <h1 class="text-3xl font-bold leading-tight text-gray-900">Sub Project Management</h1>
             <form @submit.prevent="createProject" class="mt-8">
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-12">
@@ -19,7 +19,7 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
-                        <InputLabel for="Projects">Projects</InputLabel>
+                        <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="newProject.project_id" :options="projects" optionValue="id" optionLabel="title"
                             placeholder="Select Project" class="w-full" />
                     </div>
@@ -65,7 +65,7 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <div class="field">
-                        <InputLabel for="Projects">Projects</InputLabel>
+                        <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="editProjectData.project_id" :options="projects" optionValue="id" optionLabel="title"
                             placeholder="Select Project" class="w-full" />
                     </div>
