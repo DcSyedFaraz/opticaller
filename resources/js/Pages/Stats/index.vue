@@ -58,7 +58,7 @@
                 <div class="grid sm:grid-cols-2 md:grid-cols-1">
                     <div class="grid grid-cols-1 sm:grid-cols-3 border  mb-3 rounded-md p-4 shadow bg-white">
                         <div class="col-span-2">
-                            <p class="text-[#424E79] font-sans text-sm">Login Time</p>
+                            <p class=" font-extrabold">Login Time</p>
                             <h1 class="text-[#424E79] font-sans font-extrabold text-xl">
                                 {{ new Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
                                     hour: '2-digit',
@@ -74,7 +74,7 @@
                     <!-- Success Call-Out Rate -->
                     <div class="bg-white p-2 rounded-lg shadow flex mt-3 items-center justify-center">
                         <div class="flex flex-col items-center">
-                            <h4 class="text-gray-600 mb-2">Success Call-Out Rate</h4>
+                            <h4 class=" mb-2 text-lg font-extrabold">Success Call-Out Rate</h4>
                             <div class="circular-progress-bar">
                                 <svg class="progress-circle" width="120" height="120">
                                     <circle class="progress-circle-bg" cx="60" cy="60" r="50" fill="none"

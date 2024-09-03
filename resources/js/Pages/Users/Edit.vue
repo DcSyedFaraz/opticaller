@@ -37,8 +37,7 @@
                         class="mt-1 block w-full"></Select>
                     <div v-if="errors.roles" class="text-red-500 text-sm">{{ errors.roles }}</div>
                 </div>
-                <Button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update</Button>
+                <Button type="submit" class="!bg-[#383838] text-white !py-3 !px-[3rem] !rounded !border-[#383838]">Update</Button>
             </form>
         </div>
     </AuthenticatedLayout>

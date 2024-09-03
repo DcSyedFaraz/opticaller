@@ -11,7 +11,9 @@
 .p-select-option.p-select-option-selected {
     color: white !important;
 }
-
+.p-paginator-page.p-paginator-page-selected{
+    @apply !bg-[#383838];
+}
 .p-inputtext, .p-select , .p-textarea,
 .p-datepicker-dropdown,
 .p-select:not(.p-disabled).p-focus {

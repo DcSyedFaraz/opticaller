@@ -189,7 +189,7 @@
                 <div class="bg-white shadow-lg rounded-lg mb-5 p-4 border border-green-200">
                     <div class="grid grid-cols-2 items-center justify-between">
                         <div>
-                            <h2 class="text-gray-600 font-semibold text-sm ">Today's Call-Out Volume</h2>
+                            <h2 class=" font-extrabold text-sm ">Today's Call-Out Volume</h2>
                             <div class="grid items-center mt-2">
                                 <span class="text-4xl font-semibold text-gray-800">{{ data.todaysCallOutCount }}</span>
                             </div>
@@ -202,7 +202,7 @@
                 <div class="bg-white shadow-lg rounded-lg mt-1 p-4 border border-green-200">
                     <div class="grid grid-cols-2 items-center justify-between">
                         <div>
-                            <h2 class="text-gray-600 text-sm font-semibold">Average weekly address processing time</h2>
+                            <h2 class=" text-sm font-extrabold">Average weekly address processing time</h2>
                             <div class="grid items-center mt-2">
                                 <span class="text-4xl font-semibold text-gray-800">{{
                                 formatTime(data.averageProcessingTime) }}</span>
