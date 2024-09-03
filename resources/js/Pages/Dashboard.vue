@@ -2,7 +2,7 @@
 
     <Head title="Dashboard" />
     <AuthenticatedLayout>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-3">
             <!-- Today's Call-Out Count -->
             <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between">
                 <div class="grid grid-cols-4">
@@ -91,7 +91,7 @@
             <!-- Additional Content for Mobile Responsiveness -->
             <div class="grid grid-cols-1 ">
                 <!-- Login Time -->
-                <div class="grid grid-cols-3 border mb-1  rounded-md p-4 shadow shadow-secondary">
+                <div class="grid grid-cols-3 border mb-1  rounded-md p-4 shadow ">
                     <div class="col-span-2">
                         <p class="font-sans text-sm">Login Time</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ new
@@ -106,7 +106,7 @@
                 </div>
 
                 <!-- Yesterday’s Working Hours -->
-                <div class="grid grid-cols-3 border mt-2  rounded-md p-4 shadow shadow-secondary">
+                <div class="grid grid-cols-3 border mt-2  rounded-md p-4 shadow ">
                     <div class="col-span-2">
                         <p class="font-sans text-sm">Yesterday’s Working Hours</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ formatTime(data.yesterdayWorkingHours) }}</h1>
@@ -118,40 +118,52 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-6 !pt-4">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-3 !pt-4">
             <!-- Notifications -->
             <div class="bg-white p-4 rounded-lg shadow-md xl:flex justify-between hidden md:col-span-2">
                 <div class="flex flex-col justify-between w-full">
-                  <div>
-                    <h3 class="text-lg font-semibold mb-4">Notifications</h3>
-                    <p class="text-gray-600 mb-6">
-                      Alerts for follow-up, assign projects or system updates. Only show if notifications are available.
-                    </p>
-                  </div>
-                  <div class="my-auto">
-                    <!-- Moved the Read button here -->
-                    <button class="bg-[#C88352] hover:bg-orange-600 text-white text-xl px-[5rem] h-[49px] py-2 rounded">Read</button>
-                  </div>
+                    <div >
+                        <h3 class="text-lg font-semibold mb-4">Notifications</h3>
+                        <p class="text-gray-600 mb-6">
+                            Alerts for follow-up, assign projects or system updates. Only show if notifications are
+                            available.
+                        </p>
+                    </div>
+                    <div class="my-auto">
+                        <!-- Moved the Read button here -->
+                        <button
+                            class="bg-[#C88352] hover:bg-orange-600 text-white text-xl px-[5rem] h-[49px] py-2 rounded">Read</button>
+                    </div>
                 </div>
-                <div class="flex flex-col justify-between w-full items-center">
-                  <div class="flex items-center space-x-2">
-                    <button type="button" class="p-button !bg-secondary !border-secondary p-component p-button-icon-only">
-                      <svg width="16" height="22" viewBox="0 0 16 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 16V21M5 9.76C4.9998 10.1321 4.89581 10.4967 4.69972 10.813C4.50363 11.1292 4.22321 11.3844 3.89 11.55L2.11 12.45C1.77679 12.6156 1.49637 12.8708 1.30028 13.187C1.10419 13.5033 1.0002 13.8679 1 14.24V15C1 15.2652 1.10536 15.5196 1.29289 15.7071C1.48043 15.8946 1.73478 16 2 16H14C14.2652 16 14.5196 15.8946 14.7071 15.7071C14.8946 15.5196 15 15.2652 15 15V14.24C14.9998 13.8679 14.8958 13.5033 14.6997 13.187C14.5036 12.8708 14.2232 12.6156 13.89 12.45L12.11 11.55C11.7768 11.3844 11.4964 11.1292 11.3003 10.813C11.1042 10.4967 11.0002 10.1321 11 9.76V6C11 5.73478 11.1054 5.48043 11.2929 5.29289C11.4804 5.10536 11.7348 5 12 5C12.5304 5 13.0391 4.78929 13.4142 4.41421C13.7893 4.03914 14 3.53043 14 3C14 2.46957 13.7893 1.96086 13.4142 1.58579C13.0391 1.21071 12.5304 1 12 1H4C3.46957 1 2.96086 1.21071 2.58579 1.58579C2.21071 1.96086 2 2.46957 2 3C2 3.53043 2.21071 4.03914 2.58579 4.41421C2.96086 4.78929 3.46957 5 4 5C4.26522 5 4.51957 5.10536 4.70711 5.29289C4.89464 5.48043 5 5.73478 5 6V9.76Z" stroke="white" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                    </button>
-                    <Button severity="contrast" icon="pi pi-heart" class="" />
-                    <Button icon="pi pi-trash" class="" />
-                  </div>
-                  <div class="my-auto flex justify-center">
-                    <!-- Moved the SVG here -->
-                    <svg width="105" height="111" viewBox="0 0 105 111" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M103.802 88.9738C100.404 86.0382 97.4296 82.6729 94.9581 78.9683C92.2598 73.8547 90.6426 68.2704 90.2013 62.5429V45.6736C90.2247 36.6775 86.8576 27.9829 80.7328 21.2232C74.608 14.4635 66.147 10.1041 56.9396 8.96397V4.55882C56.9396 3.34974 56.444 2.19019 55.5619 1.33525C54.6797 0.480303 53.4833 0 52.2357 0C50.9882 0 49.7918 0.480303 48.9096 1.33525C48.0275 2.19019 47.5319 3.34974 47.5319 4.55882V9.03227C38.4069 10.2545 30.0482 14.6403 24.0039 21.3773C17.9595 28.1143 14.6391 36.7459 14.6577 45.6736V62.5429C14.2164 68.2704 12.5992 73.8547 9.90101 78.9683C7.47291 82.6644 4.54599 86.0293 1.19799 88.9738C0.822141 89.2938 0.520918 89.6877 0.314357 90.1293C0.107796 90.5709 0.00063351 91.0501 0 91.5349V96.1791C0 97.0848 0.371224 97.9534 1.03201 98.5938C1.69279 99.2342 2.589 99.594 3.52349 99.594H101.477C102.411 99.594 103.307 99.2342 103.968 98.5938C104.629 97.9534 105 97.0848 105 96.1791V91.5349C104.999 91.0501 104.892 90.5709 104.686 90.1293C104.479 89.6877 104.178 89.2938 103.802 88.9738ZM7.32886 92.7643C10.6071 89.695 13.4936 86.2556 15.9262 82.5198C19.325 76.3439 21.3081 69.5298 21.7399 62.5429V45.6736C21.6002 41.6715 22.2929 37.6831 23.7767 33.9458C25.2605 30.2086 27.5051 26.799 30.3769 23.92C33.2486 21.041 36.6888 18.7515 40.4926 17.1879C44.2963 15.6242 48.3858 14.8184 52.5176 14.8184C56.6494 14.8184 60.7389 15.6242 64.5426 17.1879C68.3464 18.7515 71.7866 21.041 74.6584 23.92C77.5301 26.799 79.7747 30.2086 81.2586 33.9458C82.7424 37.6831 83.435 41.6715 83.2953 45.6736V62.5429C83.7272 69.5298 85.7103 76.3439 89.1091 82.5198C91.5417 86.2556 94.4281 89.695 97.7064 92.7643H7.32886Z" fill="#77A697" />
-                      <path d="M52.6745 110.999C54.8941 110.95 57.0241 110.141 58.6877 108.716C60.3513 107.291 61.4414 105.342 61.7651 103.213H43.2316C43.5644 105.4 44.7055 107.395 46.4425 108.827C48.1795 110.259 50.3942 111.031 52.6745 110.999Z" fill="#77A697" />
-                    </svg>
-                  </div>
+                <div class="flex flex-col justify-end w-full items-end">
+                    <div class="flex items-center space-x-2">
+                        <button type="button"
+                            class="p-button !bg-secondary !border-secondary p-component p-button-icon-only">
+                            <svg width="16" height="22" viewBox="0 0 16 22" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M8 16V21M5 9.76C4.9998 10.1321 4.89581 10.4967 4.69972 10.813C4.50363 11.1292 4.22321 11.3844 3.89 11.55L2.11 12.45C1.77679 12.6156 1.49637 12.8708 1.30028 13.187C1.10419 13.5033 1.0002 13.8679 1 14.24V15C1 15.2652 1.10536 15.5196 1.29289 15.7071C1.48043 15.8946 1.73478 16 2 16H14C14.2652 16 14.5196 15.8946 14.7071 15.7071C14.8946 15.5196 15 15.2652 15 15V14.24C14.9998 13.8679 14.8958 13.5033 14.6997 13.187C14.5036 12.8708 14.2232 12.6156 13.89 12.45L12.11 11.55C11.7768 11.3844 11.4964 11.1292 11.3003 10.813C11.1042 10.4967 11.0002 10.1321 11 9.76V6C11 5.73478 11.1054 5.48043 11.2929 5.29289C11.4804 5.10536 11.7348 5 12 5C12.5304 5 13.0391 4.78929 13.4142 4.41421C13.7893 4.03914 14 3.53043 14 3C14 2.46957 13.7893 1.96086 13.4142 1.58579C13.0391 1.21071 12.5304 1 12 1H4C3.46957 1 2.96086 1.21071 2.58579 1.58579C2.21071 1.96086 2 2.46957 2 3C2 3.53043 2.21071 4.03914 2.58579 4.41421C2.96086 4.78929 3.46957 5 4 5C4.26522 5 4.51957 5.10536 4.70711 5.29289C4.89464 5.48043 5 5.73478 5 6V9.76Z"
+                                    stroke="white" stroke-width="1.33333" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                        <Button severity="contrast" icon="pi pi-heart" class="" />
+                        <Button icon="pi pi-trash" class="" />
+                    </div>
+                    <div class="my-auto flex justify-center">
+                        <!-- Moved the SVG here -->
+                        <svg width="105" height="111" viewBox="0 0 105 111" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M103.802 88.9738C100.404 86.0382 97.4296 82.6729 94.9581 78.9683C92.2598 73.8547 90.6426 68.2704 90.2013 62.5429V45.6736C90.2247 36.6775 86.8576 27.9829 80.7328 21.2232C74.608 14.4635 66.147 10.1041 56.9396 8.96397V4.55882C56.9396 3.34974 56.444 2.19019 55.5619 1.33525C54.6797 0.480303 53.4833 0 52.2357 0C50.9882 0 49.7918 0.480303 48.9096 1.33525C48.0275 2.19019 47.5319 3.34974 47.5319 4.55882V9.03227C38.4069 10.2545 30.0482 14.6403 24.0039 21.3773C17.9595 28.1143 14.6391 36.7459 14.6577 45.6736V62.5429C14.2164 68.2704 12.5992 73.8547 9.90101 78.9683C7.47291 82.6644 4.54599 86.0293 1.19799 88.9738C0.822141 89.2938 0.520918 89.6877 0.314357 90.1293C0.107796 90.5709 0.00063351 91.0501 0 91.5349V96.1791C0 97.0848 0.371224 97.9534 1.03201 98.5938C1.69279 99.2342 2.589 99.594 3.52349 99.594H101.477C102.411 99.594 103.307 99.2342 103.968 98.5938C104.629 97.9534 105 97.0848 105 96.1791V91.5349C104.999 91.0501 104.892 90.5709 104.686 90.1293C104.479 89.6877 104.178 89.2938 103.802 88.9738ZM7.32886 92.7643C10.6071 89.695 13.4936 86.2556 15.9262 82.5198C19.325 76.3439 21.3081 69.5298 21.7399 62.5429V45.6736C21.6002 41.6715 22.2929 37.6831 23.7767 33.9458C25.2605 30.2086 27.5051 26.799 30.3769 23.92C33.2486 21.041 36.6888 18.7515 40.4926 17.1879C44.2963 15.6242 48.3858 14.8184 52.5176 14.8184C56.6494 14.8184 60.7389 15.6242 64.5426 17.1879C68.3464 18.7515 71.7866 21.041 74.6584 23.92C77.5301 26.799 79.7747 30.2086 81.2586 33.9458C82.7424 37.6831 83.435 41.6715 83.2953 45.6736V62.5429C83.7272 69.5298 85.7103 76.3439 89.1091 82.5198C91.5417 86.2556 94.4281 89.695 97.7064 92.7643H7.32886Z"
+                                fill="#77A697" />
+                            <path
+                                d="M52.6745 110.999C54.8941 110.95 57.0241 110.141 58.6877 108.716C60.3513 107.291 61.4414 105.342 61.7651 103.213H43.2316C43.5644 105.4 44.7055 107.395 46.4425 108.827C48.1795 110.259 50.3942 111.031 52.6745 110.999Z"
+                                fill="#77A697" />
+                        </svg>
+                    </div>
                 </div>
-              </div>
+            </div>
 
 
             <!-- Today's Success Call-Out Rate -->
@@ -460,7 +472,7 @@ export default {
     background: #fff;
 }
 
-#app>div>main>div.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4.gap-6.p-6>div.grid.grid-cols-1>div.grid.grid-cols-3.border.mb-1.rounded-md.p-4.shadow.shadow-secondary {
+#app>div>main>div.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4.gap-6.p-6>div.grid.grid-cols-1>div.grid.grid-cols-3.border.mb-1.rounded-md.p-4.shadow. {
     margin-bottom: 20px;
 }
 
