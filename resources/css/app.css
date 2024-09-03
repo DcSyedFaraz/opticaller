@@ -37,7 +37,7 @@
     }
 
     .new {
-        height: calc(100vh - 150px);
+        height: calc(100vh - 150px) !important;
         overflow: hidden;
     }
 
