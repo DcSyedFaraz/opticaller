@@ -28,7 +28,7 @@
                                         <template #footer>
                                             <div class="mt-auto">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !px-[4rem]" >
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 </Link>
@@ -55,7 +55,7 @@
                                             <p>{{ card.content }}</p>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -85,7 +85,7 @@
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -112,7 +112,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -137,7 +137,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>

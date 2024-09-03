@@ -19,6 +19,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
+
         <Head title="Confirm Password" />
 
         <div class="mb-4 text-sm text-gray-600">
@@ -28,22 +29,15 @@ const submit = () => {
         <form @submit.prevent="submit">
             <div>
                 <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    autofocus
-                />
+                <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required
+                    autocomplete="current-password" autofocus />
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
             <div class="flex justify-end mt-4">
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Confirm
-                </PrimaryButton>
+                <Button type="submit" label="Confirm" class="!bg-[#383838] text-white flex !ms-4 !py-3 !rounded !mb-2"
+                    severity="contrast" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" />
+
             </div>
         </form>
     </GuestLayout>
