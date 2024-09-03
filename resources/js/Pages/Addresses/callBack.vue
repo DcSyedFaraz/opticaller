@@ -9,7 +9,7 @@
                 <div class="grid grid-cols-1 gap-4">
                     <!-- Select Project Select -->
                     <div class="flex flex-col">
-                        <label for="project" class="text-sm font-bold text-gray-700 mb-1">Select Project <span
+                        <label for="project" class=" text-gray-700 mb-1 font-extrabold text-lg">Select Project <span
                                 class="text-red-600 font-bold">*</span></label>
                         <Select id="project" v-model="formData.project" :options="projects" optionLabel="name"
                             optionValue="email" placeholder="--Select--" required />
@@ -17,7 +17,7 @@
 
                     <!-- Salutation Input -->
                     <div class="flex flex-col">
-                        <label for="salutation" class="text-sm font-bold text-gray-700 mb-1">Salutation <span
+                        <label for="salutation" class=" text-gray-700 mb-1 font-extrabold text-lg">Salutation <span
                                 class="text-red-600 font-bold">*</span></label>
                         <InputText id="salutation" v-model="formData.salutation" placeholder="Salutation" required
                             class="p-inputtext-sm" />
@@ -25,7 +25,7 @@
 
                     <!-- First Name Input -->
                     <div class="flex flex-col">
-                        <label for="firstName" class="text-sm font-bold text-gray-700 mb-1">First Name <span
+                        <label for="firstName" class=" text-gray-700 mb-1 font-extrabold text-lg">First Name <span
                                 class="text-red-600 font-bold">*</span></label>
                         <InputText id="firstName" v-model="formData.firstName" placeholder="First Name" required
                             class="p-inputtext-sm" />
@@ -33,7 +33,7 @@
 
                     <!-- Last Name Input -->
                     <div class="flex flex-col">
-                        <label for="lastName" class="text-sm font-bold text-gray-700 mb-1">Last Name <span
+                        <label for="lastName" class=" text-gray-700 mb-1 font-extrabold text-lg">Last Name <span
                                 class="text-red-600 font-bold">*</span></label>
                         <InputText id="lastName" v-model="formData.lastName" placeholder="Last Name" required
                             class="p-inputtext-sm" />
@@ -41,7 +41,7 @@
 
                     <!-- Phone Number Input -->
                     <div class="flex flex-col">
-                        <label for="phoneNumber" class="text-sm font-bold text-gray-700 mb-1">Phone Number <span
+                        <label for="phoneNumber" class=" text-gray-700 mb-1 font-extrabold text-lg">Phone Number <span
                                 class="text-red-600 font-bold">*</span></label>
                         <InputText id="phoneNumber" v-model="formData.phoneNumber" placeholder="+42" required
                             class="p-inputtext-sm" />
@@ -49,7 +49,7 @@
 
                     <!-- Notes Textarea -->
                     <div class="flex flex-col">
-                        <label for="notes" class="text-sm font-bold text-gray-700 mb-1">Notes: <span
+                        <label for="notes" class=" text-gray-700 mb-1 font-extrabold text-lg">Notes: <span
                                 class="text-red-600 font-bold">*</span></label>
                         <Textarea id="notes" v-model="formData.notes" placeholder="Text here" rows="3" required
                             class="p-inputtext-sm" />
@@ -61,7 +61,7 @@
             <div class="flex justify-center mt-4">
                 <Button label="Save" icon="pi pi-save"
                     class="!bg-[#77A697] !border-[#77A697] text-white !px-[4rem] !rounded mr-2" @click="saveForm" />
-                <Button label="Cancel" severity="contrast" class="!px-[4rem] !rounded" @click="cancelForm" />
+                <Button label="Cancel" severity="contrast" class="!bg-[#383838] !px-[4rem] text-white flex  !py-3 !rounded " @click="cancelForm" />
             </div>
         </div>
         <div v-if="isLoading" class="loading-overlay">

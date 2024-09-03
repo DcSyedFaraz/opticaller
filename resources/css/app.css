@@ -12,7 +12,7 @@
     color: white !important;
 }
 
-.p-inputtext,
+.p-inputtext, .p-select , .p-textarea,
 .p-datepicker-dropdown,
 .p-select:not(.p-disabled).p-focus {
     --tw-border-opacity: 1 !important;
@@ -36,7 +36,7 @@
         height: calc(100vh - 100px);
     }
 
-    #app>div>div {
+    .new {
         height: calc(100vh - 150px);
         overflow: hidden;
     }
