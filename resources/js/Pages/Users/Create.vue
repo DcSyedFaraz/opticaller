@@ -1,10 +1,10 @@
 <template>
 
-    <Head title="Users" />
+    <Head title="Add New User" />
     <AuthenticatedLayout>
 
         <div class="container mx-auto px-4 py-8">
-            <h1 class="text-2xl font-bold mb-4">Create User</h1>
+            <h1 class="text-2xl font-bold mb-4">Add New User</h1>
             <form @submit.prevent="submit">
                 <div class="mb-4">
                     <label for="name" class="block text-gray-700">Name</label>
