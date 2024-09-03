@@ -167,7 +167,7 @@
 
 
             <!-- Today's Success Call-Out Rate -->
-            <div class="bg-white p-2 rounded-lg shadow flex items-center justify-center w-full xl:h-full h-[14rem]">
+            <div class="bg-white p-2 rounded-lg shadow flex xl:col-span-1 col-span-2 items-center justify-center w-full xl:h-full h-[14rem]">
                 <div class="flex flex-col items-center w-full h-full">
                     <h4 class="text-gray-600 mb-2 text-center">Today`s Success Call-Out Rate</h4>
                     <div class="circular-progress-bar relative flex items-center justify-center w-full h-full">
@@ -186,7 +186,7 @@
             </div>
 
             <div class="col-span-2">
-                <div class="bg-white shadow-lg rounded-lg mb-1 p-4 border border-green-200">
+                <div class="bg-white shadow-lg rounded-lg mb-5 p-4 border border-green-200">
                     <div class="grid grid-cols-2 items-center justify-between">
                         <div>
                             <h2 class="text-gray-600 text-sm font-medium">Today's Call-Out Volume</h2>
