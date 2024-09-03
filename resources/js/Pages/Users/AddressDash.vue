@@ -174,8 +174,7 @@
                 </div>
                 <div class="flex justify-center flex-wrap my-4">
                     <button @click="notreached = true; submitFeedback()"
-                    class="bg-primary justify-center text-white flex px-[5rem] py-3 text-xl mx-2 rounded mb-2 w-full"
-                    >
+                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -189,8 +188,7 @@
                         <span class="mx-2 my-1">Not Reached</span>
                     </button>
                     <button @click="showFollowModal = true" :disabled="this.localAddress.feedback != 'Follow-up'"
-                    class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[5rem] py-3 text-xl mx-2 rounded mb-2 w-full"
-                    >
+                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white" stroke-width="2"
@@ -207,11 +205,10 @@
                         <span class="mx-2 my-1">Follow-Ups</span>
                     </button>
                     <button @click="submitFeedback" :disabled="this.localAddress.feedback == 'Follow-up'"
-                    class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[5rem] py-3 text-xl mx-2 rounded mb-2 w-full"
-                    >
-                    <i class="pi pi-save !text-2xl"></i>
+                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
+                        <i class="pi pi-save !text-2xl"></i>
                         <span class="mx-2 my-1 text-center">
-                             Save Edits
+                            Save Edits
                         </span>
                     </button>
                 </div>
@@ -258,14 +255,14 @@
             size="large"
             @click="showCallbackForm = true"
           /> -->
-                <Link :href="route('callback')" class="p-button p-component p-button-lg w-full my-2">
+                <Link :href="route('callback')" class="p-button p-component p-button-lg w-full my-2 !rounded">
                 <i class="pi pi-phone !text-xl"></i> Callback
                 </Link>
                 <Button @click="togglePause" :label="isPaused ? 'End Break' : 'Take Break'"
                     :class="isPaused ? '!bg-red-500 !border-red-500' : '!bg-secondary !border-secondary'"
-                    class="w-full my-2" size="large">
+                    class="w-full my-2 !rounded" size="large">
                     <template #icon>
-                        <svg v-if="!isPaused" width="26" height="32" viewBox="0 0 26 37" fill="none"
+                        <svg v-if="!isPaused" width="26" height="23" viewBox="0 0 26 37" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.66064 12.0177H24.4261" stroke="white" stroke-width="3" stroke-linecap="round" />
                             <path

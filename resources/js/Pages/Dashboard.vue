@@ -93,7 +93,7 @@
                 <!-- Login Time -->
                 <div class="grid grid-cols-3 border mb-1  rounded-md p-4 shadow ">
                     <div class="col-span-2">
-                        <p class="font-sans text-sm">Login Time</p>
+                        <p class="font-sans font-semibold text-sm">Login Time</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ new
                                 Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
                                     hour: '2-digit', minute:
@@ -108,7 +108,7 @@
                 <!-- Yesterday’s Working Hours -->
                 <div class="grid grid-cols-3 border mt-2  rounded-md p-4 shadow ">
                     <div class="col-span-2">
-                        <p class="font-sans text-sm">Yesterday’s Working Hours</p>
+                        <p class="font-sans font-semibold text-sm">Yesterday’s Working Hours</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ formatTime(data.yesterdayWorkingHours) }}</h1>
                     </div>
                     <div class="col-span-1 text-end">
@@ -118,12 +118,12 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-3 !pt-4">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-3 ">
             <!-- Notifications -->
             <div class="bg-white p-4 rounded-lg shadow-md xl:flex justify-between hidden md:col-span-2">
                 <div class="flex flex-col justify-between w-full">
                     <div >
-                        <h3 class="text-lg font-semibold mb-4">Notifications</h3>
+                        <h3 class="text-sm font-semibold mb-4">Notifications</h3>
                         <p class="text-gray-600 mb-6">
                             Alerts for follow-up, assign projects or system updates. Only show if notifications are
                             available.
@@ -169,7 +169,7 @@
             <!-- Today's Success Call-Out Rate -->
             <div class="bg-white p-2 rounded-lg shadow flex xl:col-span-1 col-span-2 items-center justify-center w-full xl:h-full h-[14rem]">
                 <div class="flex flex-col items-center w-full h-full">
-                    <h4 class="text-gray-600 mb-2 text-center">Today`s Success Call-Out Rate</h4>
+                    <h4 class="text-gray-600 mb-2 font-semibold text-center">Today`s Success Call-Out Rate</h4>
                     <div class="circular-progress-bar relative flex items-center justify-center w-full h-full">
                         <svg class="progress-circle absolute inset-0 w-full h-full" viewBox="0 0 120 120"
                             preserveAspectRatio="xMidYMid meet">
@@ -180,7 +180,7 @@
                                 stroke-dashoffset="190" />
                         </svg>
                         <span class="progress-text absolute text-gray-800 font-semibold text-xl">{{
-                                data.successRate.toFixed(2) }}%</span>
+                            Math.round(data.successRate) }}%</span>
                     </div>
                 </div>
             </div>
@@ -189,7 +189,7 @@
                 <div class="bg-white shadow-lg rounded-lg mb-5 p-4 border border-green-200">
                     <div class="grid grid-cols-2 items-center justify-between">
                         <div>
-                            <h2 class="text-gray-600 text-sm font-medium">Today's Call-Out Volume</h2>
+                            <h2 class="text-gray-600 font-semibold text-sm ">Today's Call-Out Volume</h2>
                             <div class="grid items-center mt-2">
                                 <span class="text-4xl font-semibold text-gray-800">{{ data.todaysCallOutCount }}</span>
                             </div>
@@ -202,7 +202,7 @@
                 <div class="bg-white shadow-lg rounded-lg mt-1 p-4 border border-green-200">
                     <div class="grid grid-cols-2 items-center justify-between">
                         <div>
-                            <h2 class="text-gray-600 text-sm font-medium">Average weekly address processing time</h2>
+                            <h2 class="text-gray-600 text-sm font-semibold">Average weekly address processing time</h2>
                             <div class="grid items-center mt-2">
                                 <span class="text-4xl font-semibold text-gray-800">{{
                                 formatTime(data.averageProcessingTime) }}</span>

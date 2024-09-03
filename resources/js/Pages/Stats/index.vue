@@ -27,10 +27,10 @@
 
                     <!-- Top Performer Card -->
                     <div
-                        class="bg-primary text-white p-4 rounded-lg shadow flex items-center justify-center flex-col mt-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2">
-                            <div class="grid grid-cols-1 text-center">
-                                <h2 class="text-xl font-bold">Top Performer</h2>
+                        class="bg-primary text-white items-center p-4 rounded-lg shadow flex  justify-center flex-col mt-4">
+                        <div class="grid grid-cols-1 items-center md:grid-cols-2">
+                            <div class="grid grid-cols-1 items-center text-center">
+                                <h2 class="text-xl font-bold mb-4">Top Performer</h2>
                                 <p class="text-2xl font-bold">{{ this.data.employeeLeaderboard }}</p>
                                 <p class="text-xs text-center mt-2">
                                     Ranking of employees based on performance metrics like calls completed, customer
@@ -82,7 +82,7 @@
                                     <circle ref="progressCircleFill" class="progress-circle-fill" cx="60" cy="60" r="50"
                                         fill="none" stroke-width="10" />
                                 </svg>
-                                <span class="progress-text">{{ this.data.successRateData.toFixed(2) }}%</span>
+                                <span class="progress-text">{{ Math.round(data.successRateData) }}%</span>
                             </div>
                         </div>
                     </div>

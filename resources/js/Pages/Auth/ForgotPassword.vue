@@ -46,7 +46,7 @@ const submit = () => {
             </div>
 
             <div class="flex items-center justify-end mt-4">
-                <Button type="submit" label=" Email Password Reset Link" class="!bg-[#383838] text-white flex  !py-3 !rounded !mb-2" severity="contrast"
+                <Button type="submit" label="Email Password Reset Link" class="!bg-[#383838] text-white flex  !py-3 !rounded !mb-2" severity="contrast"
                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing" />
             </div>
         </form>
