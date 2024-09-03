@@ -28,7 +28,7 @@
                                         <template #footer>
                                             <div class="mt-auto">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary" size="small">
+                                                <Button class="!bg-secondary !border-secondary !px-[4rem]" >
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 </Link>
@@ -55,7 +55,7 @@
                                             <p>{{ card.content }}</p>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -81,11 +81,11 @@
                                         <template #footer>
                                             <div class="my-2">
                                                 <Button v-if="card.id === 5" @click="openFieldLockDialog"
-                                                    class="!bg-secondary !border-secondary !rounded" size="small">
+                                                    class="!bg-secondary !border-secondary !rounded !px-[4rem]" >
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -112,7 +112,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -137,7 +137,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-secondary !border-secondary !rounded" size="small">{{
+                                                <Button class="!bg-secondary !border-secondary !rounded !px-[4rem]" >{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -233,7 +233,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .settings-container {
     max-width: 800px;
     margin: 0 auto;
@@ -262,5 +262,21 @@ export default {
     #app .p-accordioncontent-content {
         padding: 0;
     }
+}
+
+.p-card {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+}
+
+.p-card-body {
+    height: 100% !important;
+    display: grid !important;
+    gap: 0 !important;
+}
+
+.p-card-footer {
+    align-self: end !important;
 }
 </style>
