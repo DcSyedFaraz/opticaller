@@ -472,7 +472,7 @@ export default {
     background: #fff;
 }
 
-#app>div>main>div.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4.gap-6.p-6>div.grid.grid-cols-1>div.grid.grid-cols-3.border.mb-1.rounded-md.p-4.shadow. {
+#app>div>main>div.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4.gap-6.p-6>div.grid.grid-cols-1>div.grid.grid-cols-3.border.mb-1.rounded-md.p-4.shadow {
     margin-bottom: 20px;
 }
 

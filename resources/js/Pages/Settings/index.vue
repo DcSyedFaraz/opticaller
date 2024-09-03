@@ -248,8 +248,7 @@ export default {
     margin-bottom: 0;
 }
 
-.p-accordionheader,
-.p-accordioncontent-content {
+.p-accordionheader {
     --tw-bg-opacity: 1 !important;
     background-color: rgb(235 241 239 / var(--tw-bg-opacity)) !important;
     margin-top: 0.5rem;

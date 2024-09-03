@@ -55,7 +55,7 @@
                         <Chart type="line" class="xl:mt-5 w-full h-[235px]" :options="chartOptions" :data="chartData" />
                     </div>
                 </div>
-                <div class="grid sm:grid-cols-2 lg:grid-cols-1">
+                <div class="grid sm:grid-cols-2 md:grid-cols-1">
                     <div class="grid grid-cols-1 sm:grid-cols-3 border  mb-3 rounded-md p-4 shadow bg-white">
                         <div class="col-span-2">
                             <p class="text-[#424E79] font-sans text-sm">Login Time</p>
