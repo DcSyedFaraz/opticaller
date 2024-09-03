@@ -6,7 +6,7 @@
             <h1 class="text-2xl font-bold mb-4">Manage Existing Users</h1>
             <div class="flex mb-4">
                 <InputText v-model="filters.search" @input="getUsers" placeholder="Search..." class="mr-2" />
-                <Button @click="createUser" label="Create User" icon="pi pi-plus" />
+                <Button @click="createUser" label="Create User" class="!bg-primary !border-primary" icon="pi pi-plus" />
             </div>
             <DataTable :value="users.data" responsiveLayout="scroll"
                 @sort="onSort" :sortField="filters.sortField" :sortOrder="filters.sortOrder">
@@ -19,7 +19,7 @@
                 </Column>
                 <Column header="Actions" class="flex">
                     <template #body="slotProps">
-                        <Button @click="editUser(slotProps.data.id)" icon="pi pi-pencil" class="p-link mx-2" />
+                        <Button @click="editUser(slotProps.data.id)" icon="pi pi-pencil" class="p-link !bg-primary !border-primary mx-2" />
                         <Button @click="deleteUser(slotProps.data.id)" icon="pi pi-trash" severity="danger"
                             class="p-link p-ml-2" />
                     </template>
