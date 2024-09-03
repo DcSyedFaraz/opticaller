@@ -3,9 +3,9 @@
     <Head title="Statistics" />
     <AuthenticatedLayout>
 
-        <div class=" mx-auto p-6 bg-white rounded-lg shadow-md shadow-secondary">
+        <div class=" mx-auto my-auto lg:h-screen h-[80vh] flex flex-col justify-center  p-6 bg-white rounded-lg shadow-md shadow-secondary">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Callback</h2>
-            <div class="p-4 border rounded-md shadow-sm shadow-secondary bg-gray-50">
+            <div class="p-4 border rounded-md shadow-sm shadow-secondary my-auto bg-gray-50">
                 <div class="grid grid-cols-1 gap-4">
                     <!-- Select Project Select -->
                     <div class="flex flex-col">
