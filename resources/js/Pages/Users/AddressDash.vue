@@ -172,9 +172,10 @@
                         </Card>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 justify-items-center my-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-1 justify-items-center my-4 mx-[6rem]">
                     <button @click="notreached = true; submitFeedback()"
-                        class="bg-[#A7704A] text-white font-bold py-2 px-[4rem] rounded text-center hover:bg-primary flex align-middle  mb-2 lg:mb-0">
+                    class="bg-[#A7704A] text-white w-full max-w-[12rem] font-bold py-2 rounded text-center hover:bg-primary mb-2 lg:mb-0 flex items-center justify-center"
+                    >
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -188,7 +189,8 @@
                         <span class=" my-1">Not Reached</span>
                     </button>
                     <button @click="showFollowModal = true" :disabled="this.localAddress.feedback != 'Follow-up'"
-                        class="bg-[#383838] text-white font-bold py-2 px-[3.5rem] rounded text-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed flex align-middle  mb-2 lg:mb-0">
+                    class="bg-[#383838] text-white w-full max-w-[12rem] font-bold py-2 rounded text-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed mb-2 lg:mb-0 flex items-center justify-center"
+                    >
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white" stroke-width="2"
@@ -205,7 +207,8 @@
                         <span class="mx-2 my-1">Follow-Ups</span>
                     </button>
                     <button @click="submitFeedback" :disabled="this.localAddress.feedback == 'Follow-up'"
-                        class="bg-secondary text-white font-bold py-2 px-[4rem] rounded text-center hover:bg-secondary/75 flex align-middle mx-2 disabled:bg-secondary/75 disabled:cursor-not-allowed">
+                    class="bg-secondary text-white w-full max-w-[12rem] font-bold py-2 rounded text-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
                         <span class="mx-2 my-1">
                             <i class="pi pi-save"></i> Save Edits
                         </span>
