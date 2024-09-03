@@ -72,7 +72,7 @@ const showingNavigationDropdown = ref(false);
     <div class="flex flex-col md:flex-row min-h-[75vh] bg-white">
         <!-- Sidebar -->
         <div
-            class="w-full md:w-20 md:ml-8 my-2 md:my-5 md:border md:h-screen bg-[#EBF1EF] rounded-none md:rounded-[3rem]">
+            class="w-full md:w-20 md:ml-8 my-2 md:my-5 md:border md:h-screen new bg-[#EBF1EF] rounded-none md:rounded-[3rem]">
             <aside class="flex justify-center md:block md:py-4">
                 <!-- Sidebar Menu -->
                 <nav class="flex md:flex-col justify-around md:justify-between md:h-screen gap-4 md:gap-8">

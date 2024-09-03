@@ -46,16 +46,16 @@
                 </div>
 
                 <div class="grid col-span-1 xl:col-span-2 w-full overflow-x-auto">
-                    <div class="bg-white p-4 rounded-lg shadow mt-4 xl:mt-0">
+                    <div class="bg-white p-4 rounded-lg shadow mt-2 xl:mt-0">
                         <div class="border-b-2 p-1">
                             <span class="mx-4 font-extrabold">
                                 Daily Call-Out Volume
                             </span>
                         </div>
-                        <Chart type="line" class="mt-5 w-full h-[235px]" :options="chartOptions" :data="chartData" />
+                        <Chart type="line" class="xl:mt-5 w-full h-[235px]" :options="chartOptions" :data="chartData" />
                     </div>
                 </div>
-                <div class="grid lg:grid-cols-2 xl:grid-cols-1">
+                <div class="grid sm:grid-cols-2 lg:grid-cols-1">
                     <div class="grid grid-cols-1 sm:grid-cols-3 border  mb-3 rounded-md p-4 shadow shadow-secondary">
                         <div class="col-span-2">
                             <p class="text-[#424E79] font-sans text-sm">Login Time</p>
@@ -146,7 +146,7 @@
 
             </div>
             <!-- User Productivity and Call Statistics Table -->
-            <div class="bg-white p-4 rounded-lg shadow mt-6">
+            <div class="bg-white p-4 rounded-lg shadow mt-2">
                 <div class="border-b-2 p-1">
                     <span class="mx-4 font-extrabold ">
                         User Productivity and Call Statistics
@@ -190,7 +190,7 @@
                 </DataTable>
             </div>
 
-            <div class="grid md:grid-cols-4 grid-cols-1 my-4 gap-4 w-full text-center">
+            <div class="grid xl:grid-cols-4 md:grid-cols-2 grid-cols-1 my-4 gap-4 w-full text-center">
 
                 <div class="rounded-md bg-[#383838] p-4 text-white text-center">
                     <div class=" items-center ">
