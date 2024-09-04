@@ -81,7 +81,7 @@
                                         <template #footer>
                                             <div class="my-2">
                                                 <Button v-if="card.id === 5" @click="openFieldLockDialog"
-                                                    class="!bg-secondary !border-secondary !rounded !px-[4rem]" >
+                                                    class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">

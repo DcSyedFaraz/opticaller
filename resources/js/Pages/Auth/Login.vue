@@ -6,7 +6,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useToast } from 'primevue/usetoast'
+
 
 
 defineProps({
@@ -18,6 +20,18 @@ defineProps({
     },
 });
 const loading = ref(false);
+const toast = useToast()
+
+onMounted(() => {
+    if (status) { // Use status.value to access reactive property
+        toast.add({
+            severity: 'info',
+            summary: 'Success',
+            detail: status,
+            life: 3000,
+        });
+    }
+});
 
 const form = useForm({
     email: '',
@@ -38,7 +52,7 @@ const submit = async () => {
 </script>
 
 <template>
-
+    <Toast />
     <Head title="Log in" />
     <div class="min-h-screen flex items-center justify-center bg-[#eae9e7] p-4">
         <div class="flex w-full max-w-5xl xl:h-[65vh]">
@@ -91,6 +105,11 @@ const submit = async () => {
                         </svg>
                         <p class="text-gray-500">Efficiency at Every Call</p>
                     </div>
+                    <div v-if="status" class="mt-4">
+                        <Message severity="info" text="status" :life="3000">
+                            {{ status }}
+                        </Message>
+                    </div>
                 </template>
                 <template #content>
                     <div class="p-fluid">
@@ -119,12 +138,10 @@ const submit = async () => {
                             </div>
                         </div>
 
-                        <Button label="Sign In" :loading="loading" icon="pi pi-sign-in" class="mt-4 !py-3 w-full !bg-black !border-black"
-                            @click="submit" />
+                        <Button label="Sign In" :loading="loading" icon="pi pi-sign-in"
+                            class="mt-4 !py-3 w-full !bg-black !border-black" @click="submit" />
 
-                        <div v-if="status" class="mt-4">
-                            <Message severity="info" text="status" />
-                        </div>
+
                     </div>
                 </template>
                 <template #footer>

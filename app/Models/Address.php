@@ -45,4 +45,10 @@ class Address extends Model
     {
         return $this->belongsTo(SubProject::class, 'sub_project_id');
     }
+    
+    public function project()
+    {
+        return $this->hasOneThrough(Project::class, SubProject::class, 'id', 'id', 'sub_project_id', 'project_id');
+    }
+
 }

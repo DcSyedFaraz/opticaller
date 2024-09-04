@@ -84,7 +84,6 @@ class AddressController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'required|email|max:255',
-            'priority' => 'required',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
@@ -122,7 +121,6 @@ class AddressController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'required|email|max:255',
-            'priority' => 'required',
             'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
             'follow_up_date' => 'nullable|date',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
@@ -183,7 +181,7 @@ class AddressController extends Controller
             'notes' => $validatedData['notes'],
         ];
 
-        // Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
+        Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
 
         // Return inertia response
         return inertia('Addresses/callBack');
