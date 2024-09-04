@@ -27,47 +27,14 @@ class AddressService
             return $dueAddress;
         }
 
-        // If no due address is found, handle session-based addresses
-        // if (!Session::has('addresses')) {
-        //     $addresses = Address::with('calLogs.notes', 'subproject.projects')
-        //     ->whereIn('sub_project_id', $subProjectIds)
-        //     ->where('seen', 0)
-        //     ->where(function ($query) {
-        //         // Condition for addresses with notreached entries
-        //         $query->whereHas('notreached', function ($q) {
-        //             $q->where('created_at', '<', Carbon::now()->subDay());
-        //         })
-        //         ->withCount(['notreached'])
-        //         ->having('notreached_count', '<=', 10)
-        //         // OR condition for addresses without notreached entries
-        //         ->orWhereDoesntHave('notreached');
-        //     })
-        //     ->orderBy('priority', 'desc')
-        //     ->get();
 
-        //     // dd($addresses);
-        //     Session::put('addresses', $addresses);
-        // }
-
-        // $storedAddresses = Session::get('addresses');
-        // $address = $storedAddresses->shift();
-
-        // Session::put('addresses', $storedAddresses);
-
-        // if ($storedAddresses->isEmpty()) {
-        //     Session::forget('addresses');
-        // }
-        // if ($address) {
-
-        //     $address->update(['seen' => 1]);
-        // }
         $addressesPerPage = 1;
 
         // Fetch addresses dynamically
-        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users')
+        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users', 'project')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
-            ->where('updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
+            ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
             ->where(function ($query) {
                 // Combine conditions for addresses with or without notreached entries
                 $query->whereHas('notreached', function ($q) {
@@ -77,9 +44,20 @@ class AddressService
                     ->having('notreached_count', '<=', 10)
                     ->orWhereDoesntHave('notreached');
             })
-            ->orderBy('priority', 'desc')
-            ->paginate($addressesPerPage);  // Use pagination to control the number of results per page
+            ->select('addresses.*')
+            ->selectSub(function ($query) use ($subProjectIds) {
+                return $query->from('projects')
+                    ->select('priority')
+                    ->whereIn('id', function ($q) use ($subProjectIds) {
+                        $q->select('project_id')->from('sub_projects')->whereIn('id', $subProjectIds);
+                    })->first();
+            }, 'project_priority') // Alias the subquery result as project_priority
+            ->orderBy('project_priority', 'desc')
 
+            ->paginate($addressesPerPage);
+
+        dd($addresses->first());
+        // Use pagination to control the number of results per page
         // Get the first address from the paginated results
         $address = $addresses->first();
 
@@ -92,7 +70,7 @@ class AddressService
         // For example, mark it as seen
         $address->seen = 1;
         $address->save();
-
+        // dd($address->project);
 
         return $address;
     }

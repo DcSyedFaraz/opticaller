@@ -98,9 +98,9 @@
                                             <label class="font-extrabold text-lg" for="country">
                                                 Country: <span class="text-red-600">*</span>
                                             </label>
-                                            <InputText id="country" v-model="localAddress.country"
-                                                placeholder="country name" class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('country')" />
+                                            <Select id="country" v-model="localAddress.country" filter
+                                                :options="country_names" placeholder="Select a country"
+                                                class="w-full !border-secondary" :disabled="isFieldLocked('country')" />
                                         </div>
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="website">
@@ -504,6 +504,8 @@
 
 <script>
 import moment from "moment";
+import country from 'country-list-js';
+
 
 
 export default {
@@ -545,6 +547,7 @@ export default {
             showNotesModal: false,
             showFollowModal: false,
             selectedNotes: '',
+            country_names: '',
             breakDuration: 0,
             notreached: false,
 
@@ -590,7 +593,9 @@ export default {
 
             this.startTracking();
         }
-        console.log(this.address, this.$page.props);
+        this.country_names = country.names();
+        // console.log(this.country_names, this.$page.props);
+        // console.log(this.country_names);
     },
     async beforeUnmount() {
         await axios.post(route('seen', this.localAddress.id));

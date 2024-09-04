@@ -14,14 +14,19 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <Textarea v-model="newProject.description" rows="5" cols="30"
-                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <InputLabel for="priority">Project Priority</InputLabel>
+                        <Select v-model="newProject.priority" :options="priorityOptions" optionValue="value"
+                            optionLabel="label" placeholder="Select Priority" class="w-full" />
+                        <div class="sm:col-span-12">
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <Textarea v-model="newProject.description" rows="5" cols="30"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        </div>
                     </div>
                 </div>
                 <div class="mt-8">
                     <Button type="submit" label="Add Project"
-                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
+                        class="inline-flex justify-center py-2 !px-[4rem] border border-transparent shadow-sm text-sm font-medium !rounded text-white " />
                 </div>
             </form>
             <DataTable :value="projects" responsiveLayout="scroll" class="mt-8">
@@ -32,10 +37,10 @@
                 <Column header="Actions"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
-                        <Button @click="editProject(slotProps.data)" severity="info" label="Edit"
-                            class="text-indigo-600 mx-2 hover:text-indigo-900" />
+                        <Button @click="editProject(slotProps.data)" label="Edit"
+                            class="!bg-[#3E3E3E] !border-[#3E3E3E] mx-2 !rounded !px-[2rem]" />
                         <Button @click="deleteProject(slotProps.data)" severity="danger" label="Delete"
-                            class="text-red-600 hover:text-red-900" />
+                            class="!rounded !px-[2rem]" />
                     </template>
                 </Column>
                 <template #empty>
@@ -53,12 +58,16 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <div class="field">
+                        <Select v-model="editProjectData.priority" :options="priorityOptions" optionValue="value"
+                            optionLabel="label" placeholder="Select Priority" class="w-full" />
+                    </div>
+                    <div class="field">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                         <Textarea v-model="editProjectData.description" rows="5" cols="30"
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <Button type="submit" label="Update" severity="success"
-                        class="mt-4 justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
+                        class="!bg-[#3E3E3E] !border-[#3E3E3E]" />
                 </form>
             </Dialog>
         </div>
@@ -73,6 +82,12 @@ export default {
     },
     data() {
         return {
+            priorityOptions: [
+                { label: 'Low', value: 1 },
+                { label: 'Medium', value: 2 },
+                { label: 'High', value: 3 },
+                { label: 'Critical', value: 4 },
+            ],
             newProject: {
                 title: '',
                 description: '',
@@ -97,7 +112,7 @@ export default {
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] , life: 3000 });
+                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key], life: 3000 });
                     });
                 },
             });
@@ -114,7 +129,7 @@ export default {
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key], life: 3000  });
+                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key], life: 3000 });
                     });
                 },
             });
