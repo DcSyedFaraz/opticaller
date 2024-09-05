@@ -80,7 +80,7 @@ class TimeTrackingController extends Controller
             'address.phone_number' => 'required|string',
             'address.email_address_system' => 'required|email',
             'address.email_address_new' => 'nullable|email',
-            'address.feedback' => 'nullable|string',
+            'address.feedback' => 'required|string',
             'address.follow_up_date' => 'nullable|date|after:today',
         ], [
             'personal_notes.string' => 'Personal notes must be a string',
@@ -107,6 +107,7 @@ class TimeTrackingController extends Controller
             'address.phone_number.required' => 'Phone number is required',
             'address.phone_number.string' => 'Phone number must be a string',
             'address.email_address_system.required' => 'Email address is required',
+            'address.feedback.required' => 'Feedback is required',
             'address.email_address_system.email' => 'Email address must be a valid email address',
             'address.email_address_new.email' => 'New email address must be a valid email address',
             'address.feedback.string' => 'Feedback must be a string',
@@ -123,7 +124,22 @@ class TimeTrackingController extends Controller
             $address->delete();
 
         } else {
-            $address->update($validatedData['address']);
+            // dd($validatedData['address']);
+            // $address->update($validatedData['address']);
+            $address->company_name = $validatedData['address']['company_name'];
+            $address->salutation = $validatedData['address']['salutation'];
+            $address->first_name = $validatedData['address']['first_name'];
+            $address->last_name = $validatedData['address']['last_name'];
+            $address->street_address = $validatedData['address']['street_address'];
+            $address->postal_code = $validatedData['address']['postal_code'];
+            $address->city = $validatedData['address']['city'];
+            $address->website = $validatedData['address']['website'];
+            $address->contact_id = $validatedData['address']['contact_id'];
+            $address->phone_number = $validatedData['address']['phone_number'];
+            $address->email_address_system = $validatedData['address']['email_address_system'];
+            $address->email_address_new = $validatedData['address']['email_address_new'];
+            $address->feedback = $validatedData['address']['feedback'];
+            $address->follow_up_date = $validatedData['address']['follow_up_date'];
 
             if ($request->notreached == true) {
                 NotReached::create([

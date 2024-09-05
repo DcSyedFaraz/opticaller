@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->string('country')->nullable();
             $table->string('website')->nullable();
             $table->string('phone_number')->nullable();
-            $table->string('email_address_system')->unique();
+            $table->string('email_address_system');
             $table->string('email_address_new')->nullable();
             // $table->text('personal_notes')->nullable();
             $table->string('feedback')->nullable();
