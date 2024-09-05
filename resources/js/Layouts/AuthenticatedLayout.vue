@@ -1,13 +1,16 @@
-<script setup>
-import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+<script>
+import { usePage } from '@inertiajs/vue3';
 
-const showingNavigationDropdown = ref(false);
+export default {
+
+    updated() {
+        if (this.$page.props.flash.message) {
+            this.$toast.add({ severity: 'success', summary: this.$page.props.flash.message, life: 3000 });
+            this.$page.props.flash.message = null;
+        }
+    },
+
+};
 </script>
 
 <template>
@@ -97,7 +100,7 @@ const showingNavigationDropdown = ref(false);
                         <i class="pi pi-map-marker !text-2xl"></i>
                     </NavLink>
 
-                    <NavLink v-if="$page.props.auth.roles[0] == 'admin'"  :persist="true" :href="route('settings.index')"
+                    <NavLink v-if="$page.props.auth.roles[0] == 'admin'" :persist="true" :href="route('settings.index')"
                         :active="route().current('settings.*') || route().current('users.*') || route().current('projects.*') || route().current('addresses.*') || route().current('profile.edit')">
                         <svg width="30" class="text-primary" height="31" viewBox="0 0 30 31" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -114,7 +117,8 @@ const showingNavigationDropdown = ref(false);
 
                     </NavLink>
 
-                    <NavLink v-if="$page.props.auth.roles[0] == 'admin'" :persist="true" :href="route('statistics.index')" :active="route().current('statistics.*')">
+                    <NavLink v-if="$page.props.auth.roles[0] == 'admin'" :persist="true"
+                        :href="route('statistics.index')" :active="route().current('statistics.*')">
                         <i class="pi pi-chart-bar !text-2xl"></i>
                     </NavLink>
 

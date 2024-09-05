@@ -10,6 +10,7 @@ use App\Services\AddressService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Redirect;
 use Session;
 use Spatie\Permission\Models\Role;
 
@@ -18,6 +19,24 @@ class UsersController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function toggleStatusget()
+    {
+        $users = User::all();
+        return Inertia::render('Settings/UserStatusToggle', [
+            'users' => $users
+        ]);
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        // dd($request->all());
+        $user = User::findOrFail($request->id);
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        return Redirect::back()->with('message', 'Userss status updated successfully!');
+    }
+
     public function dash()
     {
         $addressService = new AddressService();

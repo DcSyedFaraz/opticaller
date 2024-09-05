@@ -57,6 +57,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
 
+    Route::post('/toggle-status', [UsersController::class, 'toggleStatus'])->name('toggleStatus');
+    Route::get('/toggle-status', [UsersController::class, 'toggleStatusget'])->name('toggleStatus.get');
+
     Route::resource('projects', ProjectController::class);
     Route::post('/subprojects', [ProjectController::class, 'subprojects']);
     Route::put('/subprojects/{id}', [ProjectController::class, 'subprojectsUpdate']);

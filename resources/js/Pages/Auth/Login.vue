@@ -5,8 +5,8 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, onUpdated, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast'
 
 
@@ -22,14 +22,17 @@ defineProps({
 const loading = ref(false);
 const toast = useToast()
 
-onMounted(() => {
-    if (status) { // Use status.value to access reactive property
+onUpdated(() => {
+    console.log(usePage().props);
+
+    if (usePage().props.flash.message) { // Use status.value to access reactive property
         toast.add({
-            severity: 'info',
-            summary: 'Success',
-            detail: status,
+            severity: 'error',
+            summary: 'Error',
+            detail: usePage().props.flash.message,
             life: 3000,
         });
+        usePage().props.flash.message = null;
     }
 });
 
@@ -52,7 +55,8 @@ const submit = async () => {
 </script>
 
 <template>
-    <Toast />
+    <Toast ref="toast" />
+
     <Head title="Log in" />
     <div class="min-h-screen flex items-center justify-center bg-[#eae9e7] p-4">
         <div class="flex w-full max-w-5xl xl:h-[65vh]">

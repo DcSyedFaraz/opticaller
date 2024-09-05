@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,17 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $credentials = $request->only('email', 'password');
+
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Check if the user is inactive
+        if ($user && !$user->is_active) {
+
+            return redirect()->back()->with('message', 'Yours account is inactive.');
+
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();
@@ -50,7 +62,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $lastLogin = Auth::user()->logintime()->orderBy('id','desc')->first();
+        $lastLogin = Auth::user()->logintime()->orderBy('id', 'desc')->first();
 
         if ($lastLogin) {
             $lastLogin->update(['logout_time' => now()]);
