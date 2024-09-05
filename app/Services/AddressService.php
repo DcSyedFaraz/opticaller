@@ -44,7 +44,9 @@ class AddressService
                     ->having('notreached_count', '<=', 10)
                     ->orWhereDoesntHave('notreached');
             })
-
+            ->leftJoin('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
+            ->leftJoin('projects', 'sub_projects.project_id', '=', 'projects.id')
+            ->orderBy('projects.priority', 'desc')
             ->paginate($addressesPerPage);
 
         // dd($addresses->first());
@@ -59,7 +61,7 @@ class AddressService
 
         // Process the retrieved address
         // For example, mark it as seen
-        $address->seen = 1;
+        $address->seen += 1;
         $address->save();
         // dd($address->project);
 

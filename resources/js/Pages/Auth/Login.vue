@@ -55,7 +55,7 @@ const submit = async () => {
 </script>
 
 <template>
-    <Toast ref="toast" />
+    <Toast />
 
     <Head title="Log in" />
     <div class="min-h-screen flex items-center justify-center bg-[#eae9e7] p-4">
