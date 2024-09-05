@@ -44,19 +44,10 @@ class AddressService
                     ->having('notreached_count', '<=', 10)
                     ->orWhereDoesntHave('notreached');
             })
-            ->select('addresses.*')
-            ->selectSub(function ($query) use ($subProjectIds) {
-                return $query->from('projects')
-                    ->select('priority')
-                    ->whereIn('id', function ($q) use ($subProjectIds) {
-                        $q->select('project_id')->from('sub_projects')->whereIn('id', $subProjectIds);
-                    })->first();
-            }, 'project_priority') // Alias the subquery result as project_priority
-            ->orderBy('project_priority', 'desc')
 
             ->paginate($addressesPerPage);
 
-        dd($addresses->first());
+        // dd($addresses->first());
         // Use pagination to control the number of results per page
         // Get the first address from the paginated results
         $address = $addresses->first();

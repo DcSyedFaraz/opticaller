@@ -28,7 +28,7 @@
                                         <template #footer>
                                             <div class="mt-auto">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]">
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 </Link>
@@ -55,7 +55,7 @@
                                             <p>{{ card.content }}</p>
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -81,11 +81,11 @@
                                         <template #footer>
                                             <div class="my-2">
                                                 <Button v-if="card.id === 5" @click="openFieldLockDialog"
-                                                    class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >
+                                                    class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]">
                                                     {{ card.buttonText }}
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">
-                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -112,7 +112,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -137,7 +137,7 @@
                                             <div class="my-2">
 
                                                 <Link :href="route(card.routeName)">
-                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]" >{{
+                                                <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]">{{
                                         card.buttonText }}</Button>
                                                 </Link>
                                             </div>
@@ -187,7 +187,8 @@ export default {
                 { id: 1, content: 'Visual charts displaying overall project performance, user activity, and call outcomes.', title: 'Performance Metrics', routeName: 'statistics.index', buttonText: 'Proceed' },
             ],
             profile: [
-                { id: 1, content: 'Option to update security settings, including password requirements and account lockout policies.', title: 'Password Protection', routeName: 'profile.edit', buttonText: 'Proceed' },
+                { id: 1, content: 'Option to update security settings, including password requirements.', title: 'Password protection', routeName: 'profile.edit', buttonText: 'Proceed' },
+                { id: 2, content: 'Option to update security settings, including account lockout policies.', title: 'Account lockout ', routeName: 'toggleStatus.get', buttonText: 'Proceed' },
             ],
             projects: [
                 { id: 1, content: 'Interface to add or modify Projects.', title: 'Project Management', routeName: 'projects.index', buttonText: 'Proceed' },

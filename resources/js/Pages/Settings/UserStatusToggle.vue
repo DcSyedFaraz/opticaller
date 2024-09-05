@@ -1,0 +1,102 @@
+<template>
+
+    <Head title="Account lockout" />
+
+    <AuthenticatedLayout>
+        <div class="max-w-7xl mx-auto p-6 lg:p-8">
+            <h2 class="text-2xl font-semibold mb-4 text-primary">Account lockout</h2>
+            <DataTable :value="users" class="!p-datatable-striped" v-model:filters="filters" :globalFilterFields="['name', 'email']"
+                :paginator="true" :rows="10" responsiveLayout="scroll">
+                <template #header>
+                    <div class="flex justify-end">
+                        <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters.global.value" placeholder="Keyword Search" />
+                        </IconField>
+                    </div>
+                </template>
+                <template #empty> <span class="text-center">
+                    <i class="pi pi-info-circle" />
+                    <span > No users found.</span>
+                </span> </template>
+
+                <Column field="name" header="Name" />
+                <Column field="email" header="Email" />
+                <Column header="Status">
+                    <template #body="slotProps">
+                        <span :class="slotProps.data.is_active ? 'text-success' : 'text-secondary'">
+                            <Badge v-if="slotProps.data.is_active" value="Active" size="large" severity="success">
+                            </Badge>
+                            <Badge v-else value="Inactive" size="large" severity="danger"></Badge>
+
+                            <!-- {{ slotProps.data.is_active ? 'Active' : 'Inactive' }} -->
+                        </span>
+                    </template>
+                </Column>
+                <Column header="Action">
+                    <template #body="slotProps">
+                        <Button :label="slotProps.data.is_active ? 'Deactivate' : 'Activate'"
+                            :class="` ${slotProps.data.is_active ? '!bg-red-500 hover:!bg-red-700 !border-red-500 hover:!border-red-700 text-white' : '!bg-green-500 hover:!bg-green-700 !border-green-500 hover:!border-green-700 text-white'}`"
+                            @click="openConfirmationDialog(slotProps.data)" />
+                    </template>
+                </Column>
+            </DataTable>
+
+            <!-- Confirmation Dialog for Toggling User Status -->
+            <Dialog v-model:visible="confirmDialogVisible" header="Confirmation" :closable="false"
+                :style="{ width: '350px' }">
+                <p class="text-secondary">Are you sure you want to change the status of this user?</p>
+                <template #footer>
+                    <Button label="Cancel" icon="pi pi-times"
+                        class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem] text-secondary"
+                        @click="confirmDialogVisible = false" />
+                    <Button label="Yes" icon="pi pi-check"
+                        class="!bg-primary !border-primary !rounded  !px-[4rem] text-primary"
+                        @click="toggleUserStatus" />
+                </template>
+            </Dialog>
+        </div>
+    </AuthenticatedLayout>
+</template>
+
+<script>
+import { FilterMatchMode } from '@primevue/core/api';
+
+export default {
+    props: {
+        users: Array,
+    },
+    data() {
+        return {
+            filters: {
+                global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+
+            },
+            selectedUser: null,
+            confirmDialogVisible: false,
+        };
+    },
+
+    methods: {
+
+        openConfirmationDialog(user) {
+            this.selectedUser = user;
+            this.confirmDialogVisible = true;
+        },
+        toggleUserStatus() {
+            if (this.selectedUser) {
+                this.$inertia.post(route('toggleStatus'), { id: this.selectedUser.id });
+                this.confirmDialogVisible = false;
+            }
+        },
+    },
+};
+</script>
+
+<style scoped>
+.p-datatable .p-datatable-thead>tr>th {
+    text-align: left;
+}
+</style>
