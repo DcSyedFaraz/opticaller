@@ -44,6 +44,7 @@ class AddressService
                     ->having('notreached_count', '<=', 10)
                     ->orWhereDoesntHave('notreached');
             })
+            ->select('addresses.*')
             ->leftJoin('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
             ->leftJoin('projects', 'sub_projects.project_id', '=', 'projects.id')
             ->orderBy('projects.priority', 'desc')

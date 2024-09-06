@@ -38,6 +38,7 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'priority' => 'required',
+            'color' => 'required',
         ]);
 
         Project::create($validatedData);
@@ -94,6 +95,7 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'priority' => 'required',
+            'color' => 'required',
         ]);
 
         $project->update($validatedData);

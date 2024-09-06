@@ -12,8 +12,8 @@
                         Sub Project Title: {{ localAddress.subproject?.title }}
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
-                        <div
-                            class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-lg md:text-xl font-medium text-white ring-1 ring-inset ring-primary mb-1">
+                        <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
+                            class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-lg md:text-xl font-medium text-white ring-1 ring-inset  mb-1">
                             Project Title: {{ localAddress.subproject?.projects?.title }}
                         </div>
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
@@ -594,13 +594,32 @@ export default {
             this.startTracking();
         }
         this.country_names = country.names();
-        // console.log(this.country_names, this.$page.props);
+        // console.log(this.country_names, this.$page.pro   ps);
         // console.log(this.country_names);
     },
-    async beforeUnmount() {
-        await axios.post(route('seen', this.localAddress.id));
-    },
+    // async beforeUnmount() {
+    //     await axios.post(route('seen', this.localAddress.id));
+    // },
     methods: {
+        getBorderClass(color) {
+            const colorMap = {
+                '#509EE9': 'ring-[#509EE9] bg-[#509EE9]',
+                '#2CA77F': 'ring-[#2CA77F] bg-[#2CA77F]',
+                '#A72C53': 'ring-[#A72C53] bg-[#A72C53]',
+                '#6A1C5C': 'ring-[#6A1C5C] bg-[#6A1C5C]',
+                '#2D0C17': 'ring-[#2D0C17] bg-[#2D0C17]',
+                '#1C356A': 'ring-[#1C356A] bg-[#1C356A]',
+                '#EC1E85': 'ring-[#EC1E85] bg-[#EC1E85]',
+                '#4757BC': 'ring-[#4757BC] bg-[#4757BC]',
+                '#ED6659': 'ring-[#ED6659] bg-[#ED6659]',
+                '#E4B53E': 'ring-[#E4B53E] bg-[#E4B53E]',
+                '#5C6A1C': 'ring-[#5C6A1C] bg-[#5C6A1C]',
+                '#6E0B0B': 'ring-[#6E0B0B] bg-[#6E0B0B]',
+            };
+
+            // Return mapped class or a default if color not found
+            return colorMap[color] || 'border-primary ring-primary';
+        },
         formatnewDate(date) {
             return moment(date).format("MMM D dddd");
         },
@@ -725,7 +744,9 @@ export default {
                         this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[field][0], life: 4000 });
                     }
                 } else {
+                    const errors = error.response.data.details;
                     console.error('Error submitting feedback:', error);
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: errors, life: 4000 });
                 }
             }
             // if (res.data) {
