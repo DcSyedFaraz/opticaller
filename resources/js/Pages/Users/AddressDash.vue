@@ -13,7 +13,7 @@
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
                         <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
-                            class="inline-flex items-center rounded-md bg-primary px-2 py-1 text-lg md:text-xl font-medium text-white ring-1 ring-inset  mb-1">
+                            class="inline-flex items-center rounded-md  px-2 py-1 text-lg md:text-xl font-medium text-white ring-1 ring-inset  mb-1">
                             Project Title: {{ localAddress.subproject?.projects?.title }}
                         </div>
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">

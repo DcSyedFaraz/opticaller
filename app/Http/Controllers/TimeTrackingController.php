@@ -126,41 +126,43 @@ class TimeTrackingController extends Controller
 
             if ($validatedData['address']['feedback'] == 'Delete Address') {
                 $address->delete();
-                DB::commit();
-                return response()->json(['message' => 'Address deleted successfully']);
+                // DB::commit();
+                // return response()->json(['message' => 'Address deleted successfully']);
+            } else {
+
+                $address->update($validatedData['address']);
+
+                if ($request->notreached == true) {
+                    NotReached::create(['address_id' => $address->id]);
+                    $address->follow_up_date = null;
+                    $address->feedback = null;
+                }
+
+                if ($address->follow_up_date) {
+                    $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+                }
+
+                $address->seen = 0;
+                $address->save();
+
+                $seconds = $validatedData['total_duration'];
+                $timeLog = new Activity();
+                $timeLog->activity_type = 'call';
+                $timeLog->user_id = auth()->id();
+                $timeLog->address_id = $addressID;
+                $timeLog->total_duration = $seconds;
+                $timeLog->save();
+
+                if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
+                    $timeLog->notes()->create([
+                        'personal_notes' => $validatedData['personal_notes'] ?? null,
+                        'interest_notes' => $validatedData['interest_notes'] ?? null,
+                    ]);
+                }
+
             }
-
-            $address->update($validatedData['address']);
-
-            if ($request->notreached == true) {
-                NotReached::create(['address_id' => $address->id]);
-                $address->follow_up_date = null;
-                $address->feedback = null;
-            }
-
-            if ($address->follow_up_date) {
-                $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
-            }
-
-            $address->seen = 0;
-            $address->save();
-
-            $seconds = $validatedData['total_duration'];
-            $timeLog = new Activity();
-            $timeLog->activity_type = 'call';
-            $timeLog->user_id = auth()->id();
-            $timeLog->address_id = $addressID;
-            $timeLog->total_duration = $seconds;
-            $timeLog->save();
-
-            if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
-                $timeLog->notes()->create([
-                    'personal_notes' => $validatedData['personal_notes'] ?? null,
-                    'interest_notes' => $validatedData['interest_notes'] ?? null,
-                ]);
-            }
-
             DB::commit();
+
 
             $addressService = new AddressService();
             $address = $addressService->getDueAddress();
