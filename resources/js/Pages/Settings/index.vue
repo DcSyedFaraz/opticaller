@@ -192,7 +192,7 @@ export default {
             ],
             projects: [
                 { id: 1, content: 'Interface to add or modify Projects.', title: 'Project Management', routeName: 'projects.index', buttonText: 'Proceed' },
-                { id: 2, content: 'Interface to add or modify Sub Project.', title: 'Sub Project Management', routeName: 'projects.create', buttonText: 'Proceed' },
+                { id: 2, content: 'Interface to add or modify Sub Projects.', title: 'Sub Project Management', routeName: 'projects.create', buttonText: 'Proceed' },
                 { id: 3, content: 'Interface to add or modify feedback options.', title: 'Feedback Customization', routeName: 'addresses.index', buttonText: 'Proceed' },
                 { id: 4, content: 'Interface to add or modify Addresses.', title: 'Add New Address', routeName: 'addresses.create', buttonText: 'Proceed' },
                 { id: 5, content: 'Option to lock specific fields to prevent user edits.', title: 'Fields Locking', routeName: '', buttonText: 'Proceed' },
