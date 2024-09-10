@@ -618,7 +618,7 @@ export default {
             };
 
             // Return mapped class or a default if color not found
-            return colorMap[color] || 'border-primary ring-primary';
+            return colorMap[color] || 'bg-primary ring-primary';
         },
         formatnewDate(date) {
             return moment(date).format("MMM D dddd");
