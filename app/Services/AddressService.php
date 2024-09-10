@@ -23,7 +23,8 @@ class AddressService
             ->first();
 
         if ($dueAddress) {
-            $dueAddress->update(['seen' => 1]);
+            $dueAddress->increment('seen');
+            $dueAddress->save();
             return $dueAddress;
         }
 
