@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->string('follow_up_date')->nullable();
             $table->string('contact_id')->nullable();
             $table->foreignId('sub_project_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
-            $table->integer('priority')->default(0);
+            // $table->integer('priority')->default(0);
             $table->integer('seen')->default(0);
             // $table->json('locked_fields')->nullable();
             $table->timestamps();
