@@ -2,17 +2,88 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AddressResource;
 use App\Models\Address;
+use App\Models\Project;
+use App\Models\SubProject;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
+use Validator;
 
 class ApiController extends Controller
 {
-    public function index()
+    public function subprojects(Request $request)
     {
-        $addresses = Address::all()->makeHidden(['created_at', 'updated_at', 'deleted_at', 'seen']);
-        return response()->json($addresses);
+        $validatedData = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'project_id' => 'required|exists:projects,id',
+        ]);
+        if ($validatedData->fails()) {
+            return response()->json(['error' => $validatedData->messages()], 422);
+        }
+        $subProject = SubProject::create([
+            'project_id' => $request->input('project_id'),
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+        ]);
+
+        return response()->json($subProject);
+    }
+    public function projects(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'priority' => 'required',
+            'color' => 'nullable',
+        ]);
+        if ($validatedData->fails()) {
+            return response()->json(['error' => $validatedData->messages()], 422);
+        }
+        $project = Project::create([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'priority' => $request->input('priority'),
+        ]);
+
+
+        return response()->json($project);
+    }
+    public function index(Request $request)
+    {
+        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        // Fetch search parameters
+        $contactId = $request->input('contact_id');
+        $emailAddress = $request->input('email_address_system');
+        $companyName = $request->input('company_name');
+        $limit = $request->input('limit', 500);
+
+        // Initialize query
+        $query = Address::query();
+
+        // Apply filters based on search parameters
+        if ($contactId) {
+            $query->where('contact_id', $contactId);
+        }
+
+        if ($emailAddress) {
+            $query->where('email_address_system', $emailAddress);
+        }
+
+        if ($companyName) {
+            // Partial search for company name
+            $query->where('company_name', 'like', "%$companyName%");
+        }
+
+        // Get the results
+        $addresses = $query->limit($limit)->get();
+
+        // Return the results as JSON (for API) or as a view (for web)
+        return AddressResource::collection($addresses)->collection;
     }
     public function store(Request $request)
     {
@@ -20,7 +91,7 @@ class ApiController extends Controller
 
         try {
             // Validate incoming request
-            $validatedData = $request->validate([
+            $validatedData = Validator::make($request->all(), [
                 'addresses' => 'required|array',
                 'addresses.*.company_name' => 'required|string|max:255',
                 'addresses.*.email_address_system' => 'required|email|max:255',
@@ -41,9 +112,12 @@ class ApiController extends Controller
                 'addresses.*.priority' => 'nullable|integer',
                 'addresses.*.seen' => 'nullable|integer',
             ]);
-
+            if ($validatedData->fails()) {
+                return response()->json(['error' => $validatedData->messages()], 422);
+            }
+            $data = $request->all();
             // Loop through each address and save it
-            foreach ($validatedData['addresses'] as $addressData) {
+            foreach ($data['addresses'] as $addressData) {
                 Address::create([
                     'company_name' => $addressData['company_name'],
                     'salutation' => $addressData['salutation'] ?? null,
