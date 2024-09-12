@@ -108,6 +108,8 @@ class ApiController extends Controller
                 'addresses.*.feedback' => 'nullable|string',
                 'addresses.*.follow_up_date' => 'nullable|string',
                 'addresses.*.contact_id' => 'nullable|string',
+                'addresses.*.linkedin' => 'nullable|string',
+                'addresses.*.logo' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
                 'addresses.*.priority' => 'nullable|integer',
                 'addresses.*.seen' => 'nullable|integer',

@@ -27,6 +27,8 @@ return new class extends Migration {
             // $table->text('personal_notes')->nullable();
             $table->string('feedback')->nullable();
             $table->string('follow_up_date')->nullable();
+            $table->string('linkedin')->nullable();
+            $table->string('logo')->nullable();
             $table->string('contact_id')->nullable();
             $table->foreignId('sub_project_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
             // $table->integer('priority')->default(0);
