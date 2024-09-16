@@ -32,6 +32,7 @@ class AddressResource extends JsonResource
             'follow_up_date' => $this->follow_up_date,
             'contact_id' => $this->contact_id,
             'sub_project_id' => $this->sub_project_id,
+            'notes' => $this->notes,
             'sub_project_title' => optional($this->subproject)->title,
             'project_id' => optional($this->project)->id,
             'project_title' => optional($this->project)->title,
