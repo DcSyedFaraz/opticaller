@@ -20,6 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/get_addresses', [ApiController::class, 'index']);
+Route::get('/get_projects', [ApiController::class, 'getProjectsAndSubprojects']);
 Route::post('/store_addresses', [ApiController::class, 'store']);
-Route::post('/store_sub_project', [ApiController::class, 'subprojects']);
-Route::post('/store_project', [ApiController::class, 'projects']);
+Route::post('/store_project_sub_project', [ApiController::class, 'handleProjectsAndSubprojects']);
+// Route::post('/store_sub_project', [ApiController::class, 'subprojects']);
+// Route::post('/store_project', [ApiController::class, 'projects']);
