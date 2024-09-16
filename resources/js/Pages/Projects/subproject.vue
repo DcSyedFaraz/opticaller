@@ -42,9 +42,9 @@
                 <Column header="Actions"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
-                        <Button @click="editProject(slotProps.data)"  label="Edit"
-                        class="!bg-[#3E3E3E] !border-[#3E3E3E] mx-2 !rounded !px-[2rem]"/>
-                        <Button @click="deleteProject(slotProps.data)"  label="Delete"
+                        <Button @click="editProject(slotProps.data)" label="Edit"
+                            class="!bg-[#3E3E3E] !border-[#3E3E3E] mx-2 !rounded !px-[2rem]" />
+                        <Button @click="deleteProject(slotProps.data)" label="Delete"
                             class="!bg-secondary mx-2 !border-secondary !rounded !px-[2rem]" />
                     </template>
                 </Column>
@@ -55,8 +55,8 @@
                 </template>
             </DataTable>
 
-            <Dialog v-model:visible="editDialogVisible" :style="{ width: '450px' }" header="Edit Sub Project" :modal="true"
-                class="p-fluid max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+            <Dialog v-model:visible="editDialogVisible" :style="{ width: '450px' }" header="Edit Sub Project"
+                :modal="true" class="p-fluid max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
                 <form @submit.prevent="updateProject" class="grid grid-cols-1 gap-4">
                     <div class="field">
                         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
@@ -70,8 +70,8 @@
                     </div>
                     <div class="field">
                         <InputLabel for="Projects">Project</InputLabel>
-                        <Select v-model="editProjectData.project_id" :options="projects" optionValue="id" optionLabel="title"
-                            placeholder="Select Project" class="w-full" />
+                        <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
+                            optionLabel="title" placeholder="Select Project" class="w-full" />
                     </div>
                     <Button type="submit" label="Update"
                         class="mt-4 justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
@@ -138,15 +138,32 @@ export default {
         },
 
         deleteProject(project) {
-            this.$inertia.delete(`/subprojects/${project.id}`, {
-                onSuccess: () => {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life: 3000 });
+            this.$confirm.require({
+                message: 'Are you sure you want to delete this sub project?',
+                header: 'Confirmation',
+                icon: 'pi pi-exclamation-triangle',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'success',
+
                 },
-                onError: (errors) => {
-                    Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
-                    });
+                acceptProps: {
+                    label: 'Yes',
+                    severity: 'danger',
+                    outlined: true
                 },
+                accept: () => {
+                    this.$inertia.delete(`/subprojects/${project.id}`, {
+                        onSuccess: () => {
+                            this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub Project deleted successfully', life: 3000 });
+                        },
+                        onError: (errors) => {
+                            Object.keys(errors).forEach(key => {
+                                this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
+                            });
+                        },
+                    })
+                }
             });
         },
     },
