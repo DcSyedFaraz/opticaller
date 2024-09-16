@@ -119,9 +119,11 @@ class ProjectController extends Controller
         $project->delete();
         return redirect()->route('projects.index')->with('success', 'Sub Project deleted successfully');
     }
-    public function subprojectsDelete(SubProject $project)
+    public function subprojectsDelete($id)
     {
+        $project = SubProject::findOrFail($id);
+        // dd($project);
         $project->delete();
-        return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
+        return redirect()->route('projects.create')->with('success', 'Project deleted successfully');
     }
 }

@@ -32,7 +32,7 @@
                 </template>
 
             </DataTable>
-            <ConfirmDialog></ConfirmDialog>
+          
             <Paginator :rows="users.per_page" :totalRecords="users.total" @page="onPage($event)" />
         </div>
     </AuthenticatedLayout>

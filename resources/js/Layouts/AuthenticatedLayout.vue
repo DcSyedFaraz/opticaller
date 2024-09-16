@@ -15,6 +15,7 @@ export default {
 
 <template>
     <Toast />
+    <ConfirmDialog></ConfirmDialog>
 
     <header class="flex justify-between items-center bg-[#EBF1EF] p-4 md:p-6">
         <div class="flex items-center">
