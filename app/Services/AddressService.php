@@ -35,7 +35,14 @@ class AddressService
         $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users', 'project')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
-            ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
+            // ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
+            ->where(function($query) {
+                $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
+                      ->orWhere(function($subQuery) {
+                          $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
+                                   ->whereNull('addresses.feedback');
+                      });
+            })
             ->where(function ($query) {
                 // Combine conditions for addresses with or without notreached entries
                 $query->whereHas('notreached', function ($q) {

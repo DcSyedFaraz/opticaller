@@ -31,6 +31,10 @@
             </form>
 
             <DataTable :value="subprojects" responsiveLayout="scroll" class="mt-8">
+                <Column field="id" header="id"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
+                <!-- <Column field="project_id" header="project_id"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column> -->
                 <Column field="title" header="Title"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column field="description" header="Description"
@@ -39,9 +43,9 @@
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
                         <Button @click="editProject(slotProps.data)"  label="Edit"
-                            class="" />
+                        class="!bg-[#3E3E3E] !border-[#3E3E3E] mx-2 !rounded !px-[2rem]"/>
                         <Button @click="deleteProject(slotProps.data)"  label="Delete"
-                            class="!bg-secondary mx-2 !border-secondary" />
+                            class="!bg-secondary mx-2 !border-secondary !rounded !px-[2rem]" />
                     </template>
                 </Column>
                 <template #empty>

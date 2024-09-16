@@ -143,6 +143,16 @@
                         <Card class="shadow-md">
                             <template #content>
                                 <div class="grid">
+                                    <div class="grid grid-cols-1">
+                                        <div class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                            <label for="notes" class="font-extrabold text-lg">
+                                                Notes: <span class="text-red-600">*</span>
+                                            </label>
+                                            <InputText id="notes" v-model="localAddress.notes"
+                                                class="w-full !border-secondary"
+                                                disabled />
+                                        </div>
+                                    </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="feedback">

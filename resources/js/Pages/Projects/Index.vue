@@ -40,6 +40,8 @@
                 </div>
             </form>
             <DataTable :value="projects" responsiveLayout="scroll" class="mt-8">
+                <Column field="id" header="ID"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column field="title" header="Title"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column field="description" header="Description"
