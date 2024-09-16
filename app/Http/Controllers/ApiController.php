@@ -13,44 +13,113 @@ use Validator;
 
 class ApiController extends Controller
 {
-    public function subprojects(Request $request)
+    // public function subprojects(Request $request)
+    // {
+    //     $validatedData = Validator::make($request->all(), [
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'project_id' => 'required|exists:projects,id',
+    //     ]);
+    //     if ($validatedData->fails()) {
+    //         return response()->json(['error' => $validatedData->messages()], 422);
+    //     }
+    //     $subProject = SubProject::create([
+    //         'project_id' => $request->input('project_id'),
+    //         'title' => $request->input('title'),
+    //         'description' => $request->input('description'),
+    //     ]);
+
+    //     return response()->json($subProject);
+    // }
+    // public function projects(Request $request)
+    // {
+    //     $validatedData = Validator::make($request->all(), [
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'required|string',
+    //         'priority' => 'required',
+    //         'color' => 'nullable',
+    //     ]);
+    //     if ($validatedData->fails()) {
+    //         return response()->json(['error' => $validatedData->messages()], 422);
+    //     }
+    //     $project = Project::create([
+    //         'title' => $request->input('title'),
+    //         'description' => $request->input('description'),
+    //         'priority' => $request->input('priority'),
+    //     ]);
+
+
+    //     return response()->json($project);
+    // }
+    public function handleProjectsAndSubprojects(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'project_id' => 'required|exists:projects,id',
+            'project_title' => 'required|string|max:255',
+            'project_description' => 'required|string',
+            // 'project_priority' => 'required',
+            'subproject_title' => 'required|string|max:255',
+            'subproject_description' => 'required|string',
         ]);
+
         if ($validatedData->fails()) {
             return response()->json(['error' => $validatedData->messages()], 422);
         }
-        $subProject = SubProject::create([
-            'project_id' => $request->input('project_id'),
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
+
+        DB::beginTransaction();
+        try {
+            $project = Project::firstOrCreate(
+                ['title' => $request->input('project_title')],
+                [
+                    'description' => $request->input('project_description'),
+                    // 'priority' => $request->input('project_priority'),
+                ]
+            );
+
+            $subProject = SubProject::firstOrCreate(
+                ['title' => $request->input('subproject_title')],
+                [
+                    'description' => $request->input('subproject_description'),
+                    'project_id' => $project->id,
+                ]
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'project' => $project,
+                'subproject' => $subProject,
+            ]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'An error occurred while processing your request', 'details' => $e->getMessage()], 500);
+        }
+    }
+    public function getProjectsAndSubprojects(Request $request)
+    {
+        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        $validatedData = Validator::make($request->all(), [
+            'limit' => 'nullable|integer|min:1',
         ]);
 
-        return response()->json($subProject);
-    }
-    public function projects(Request $request)
-    {
-        $validatedData = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'priority' => 'required',
-            'color' => 'nullable',
-        ]);
         if ($validatedData->fails()) {
             return response()->json(['error' => $validatedData->messages()], 422);
         }
-        $project = Project::create([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'priority' => $request->input('priority'),
+
+        $limit = $request->input('limit', 10);
+
+        $projects = Project::limit($limit)->get(); 
+        $subProjects = SubProject::limit($limit)->get(); 
+
+        return response()->json([
+            'projects' => $projects,
+            'subprojects' => $subProjects
         ]);
-
-
-        return response()->json($project);
     }
+
     public function index(Request $request)
     {
         if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {

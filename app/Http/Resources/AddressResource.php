@@ -35,7 +35,21 @@ class AddressResource extends JsonResource
             'sub_project_title' => optional($this->subproject)->title,
             'project_id' => optional($this->project)->id,
             'project_title' => optional($this->project)->title,
+            'activities' => $this->calLogs->map(function ($activity) {
+                $personalNotes = optional($activity->notes)->personal_notes;
+                $interestNotes = optional($activity->notes)->interest_notes;
 
+                // Skip activities where both notes are null
+                if (is_null($personalNotes) && is_null($interestNotes)) {
+                    return null;
+                }
+
+                return [
+                    'user_name' => optional($activity->users)->name,
+                    'personal_notes' => $personalNotes,
+                    'interest_notes' => $interestNotes,
+                ];
+            })->filter(),
         ];
     }
 }
