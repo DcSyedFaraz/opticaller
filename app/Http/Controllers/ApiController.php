@@ -111,8 +111,8 @@ class ApiController extends Controller
 
         $limit = $request->input('limit', 10);
 
-        $projects = Project::limit($limit)->get(); 
-        $subProjects = SubProject::limit($limit)->get(); 
+        $projects = Project::limit($limit)->get();
+        $subProjects = SubProject::limit($limit)->get();
 
         return response()->json([
             'projects' => $projects,
@@ -180,7 +180,7 @@ class ApiController extends Controller
                 'addresses.*.linkedin' => 'nullable|string',
                 'addresses.*.logo' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
-                'addresses.*.priority' => 'nullable|integer',
+                // 'addresses.*.priority' => 'nullable|integer',
                 'addresses.*.seen' => 'nullable|integer',
             ]);
             if ($validatedData->fails()) {
