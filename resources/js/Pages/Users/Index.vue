@@ -10,6 +10,7 @@
             </div>
             <DataTable :value="users.data" responsiveLayout="scroll"
                 @sort="onSort" :sortField="filters.sortField" :sortOrder="filters.sortOrder">
+                <Column field="id" header="ID" sortable></Column>
                 <Column field="name" header="Name" sortable></Column>
                 <Column field="email" header="Email" sortable></Column>
                 <Column field="roles" header="Roles">

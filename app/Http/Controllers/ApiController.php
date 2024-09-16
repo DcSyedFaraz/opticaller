@@ -179,6 +179,7 @@ class ApiController extends Controller
                 'addresses.*.contact_id' => 'nullable|string',
                 'addresses.*.linkedin' => 'nullable|string',
                 'addresses.*.logo' => 'nullable|string',
+                'addresses.*.notes' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
                 // 'addresses.*.priority' => 'nullable|integer',
                 'addresses.*.seen' => 'nullable|integer',
@@ -206,7 +207,7 @@ class ApiController extends Controller
                     'follow_up_date' => $addressData['follow_up_date'] ?? null,
                     'contact_id' => $addressData['contact_id'] ?? null,
                     'sub_project_id' => $addressData['sub_project_id'] ?? null,
-                    'priority' => $addressData['priority'] ?? 0,
+                    // 'priority' => $addressData['priority'] ?? 0,
                     'seen' => $addressData['seen'] ?? 0,
                 ]);
             }
