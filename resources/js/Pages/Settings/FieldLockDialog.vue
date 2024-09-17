@@ -40,7 +40,7 @@ export default {
     data() {
         return {
             fields: {
-                contact_id: 'Contact ID',
+                // contact_id: 'Contact ID',
                 company_name: 'Company Name',
                 salutation: 'Salutation',
                 first_name: 'First Name',

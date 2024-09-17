@@ -76,7 +76,7 @@ class TimeTrackingController extends Controller
                 'address.postal_code' => 'required|string',
                 'address.city' => 'required|string',
                 'address.website' => 'nullable|url',
-                'address.contact_id' => 'nullable|string',
+                // 'address.contact_id' => 'nullable|string',
                 'address.phone_number' => 'required|string',
                 'address.email_address_system' => 'required|email',
                 'address.email_address_new' => 'nullable|email',
