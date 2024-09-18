@@ -18,7 +18,7 @@
                         </div>
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
                             <InputText id="contact_id" v-model="localAddress.contact_id" placeholder="Contact ID"
-                                class="w-full !border-black" :disabled="isFieldLocked('contact_id')" />
+                                class="w-full !border-black" disabled />
                         </div>
                     </div>
                 </div>
@@ -149,8 +149,7 @@
                                                 Notes: <span class="text-red-600">*</span>
                                             </label>
                                             <InputText id="notes" v-model="localAddress.notes"
-                                                class="w-full !border-secondary"
-                                                disabled />
+                                                class="w-full !border-secondary" disabled />
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

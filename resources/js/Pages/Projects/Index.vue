@@ -194,19 +194,36 @@ export default {
                 },
             });
         },
-
         deleteProject(project) {
-            this.$inertia.delete(`/projects/${project.id}`, {
-                onSuccess: () => {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life: 3000 });
+            this.$confirm.require({
+                message: 'Are you sure you want to delete this project?',
+                header: 'Confirmation',
+                icon: 'pi pi-exclamation-triangle',
+                rejectProps: {
+                    label: 'Cancel',
+                    severity: 'success',
+
                 },
-                onError: (errors) => {
-                    Object.keys(errors).forEach(key => {
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
-                    });
+                acceptProps: {
+                    label: 'Yes',
+                    severity: 'danger',
+                    outlined: true
                 },
+                accept: () => {
+                    this.$inertia.delete(`/projects/${project.id}`, {
+                        onSuccess: () => {
+                            this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project deleted successfully', life: 3000 });
+                        },
+                        onError: (errors) => {
+                            Object.keys(errors).forEach(key => {
+                                this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[key] });
+                            });
+                        },
+                    })
+                }
             });
         },
+
     },
 };
 </script>
