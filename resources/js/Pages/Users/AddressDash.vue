@@ -399,8 +399,8 @@
                     <div class="space-y-2">
                         <div class="field">
                             <label for="follow_up_date">Follow-up Date:</label>
-                            <DatePicker id="follow_up_date" showTime hourFormat="12" placeholder="Follow up datetime"
-                                fluid v-model="localAddress.follow_up_date" class="w-full !border-secondary" />
+                            <DatePicker id="follow_up_date" showTime hourFormat="24" fluid placeholder="Follow up datetime"
+                                 v-model="localAddress.follow_up_date" class="w-full !border-secondary" />
                         </div>
                     </div>
                     <div class="flex justify-end">
