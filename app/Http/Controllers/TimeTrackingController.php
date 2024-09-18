@@ -8,6 +8,7 @@ use App\Models\GlobalLockedFields;
 use App\Models\NotReached;
 use App\Services\AddressService;
 use Carbon\Carbon;
+use Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -75,7 +76,7 @@ class TimeTrackingController extends Controller
                 'address.street_address' => 'required|string',
                 'address.postal_code' => 'required|string',
                 'address.city' => 'required|string',
-                'address.website' => 'nullable|url',
+                'address.website' => 'nullable',
                 'address.contact_id' => 'nullable|string',
                 'address.phone_number' => 'required|string',
                 'address.email_address_system' => 'required|email',
@@ -103,7 +104,6 @@ class TimeTrackingController extends Controller
                 'address.city.required' => 'City is required',
                 'address.city.string' => 'City must be a string',
                 'address.contact_id.string' => 'Contact ID must be a string',
-                'address.website.url' => 'Website must be a valid URL',
                 'address.phone_number.required' => 'Phone number is required',
                 'address.phone_number.string' => 'Phone number must be a string',
                 'address.email_address_system.required' => 'Email address is required',
@@ -123,7 +123,16 @@ class TimeTrackingController extends Controller
                 DB::rollBack();
                 return response()->json(['error' => 'Address not found'], 404);
             }
+            $feedbackOptions = ['Not Interested', 'Interested', 'Follow-up', 'Delete Address'];
 
+            // Check if the feedback is one of those options
+            if (in_array($validatedData['address']['feedback'], $feedbackOptions)) {
+                // Open the link
+                $response = Http::get('https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf', [
+                    'ID' => 209823409
+                ]);
+                // dd($response->successful());
+            }
             if ($validatedData['address']['feedback'] == 'Delete Address') {
                 $address->delete();
                 // DB::commit();
