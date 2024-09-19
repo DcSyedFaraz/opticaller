@@ -56,7 +56,7 @@
                                             <div class="my-2">
                                                 <Link :href="route(card.routeName)">
                                                 <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
-                                        card.buttonText }}</Button>
+                                                    card.buttonText }}</Button>
                                                 </Link>
                                             </div>
                                         </template>
@@ -86,7 +86,7 @@
                                                 </Button>
                                                 <Link v-else :href="route(card.routeName)">
                                                 <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
-                                        card.buttonText }}</Button>
+                                                    card.buttonText }}</Button>
                                                 </Link>
                                             </div>
 
@@ -113,7 +113,7 @@
 
                                                 <Link :href="route(card.routeName)">
                                                 <Button class="!bg-[#383838] !border-[#383838] !rounded  !px-[4rem]">{{
-                                        card.buttonText }}</Button>
+                                                    card.buttonText }}</Button>
                                                 </Link>
                                             </div>
                                         </template>
@@ -138,7 +138,7 @@
 
                                                 <Link :href="route(card.routeName)">
                                                 <Button class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem]">{{
-                                        card.buttonText }}</Button>
+                                                    card.buttonText }}</Button>
                                                 </Link>
                                             </div>
                                         </template>
@@ -193,7 +193,8 @@ export default {
             projects: [
                 { id: 1, content: 'Interface to add or modify Projects.', title: 'Project Management', routeName: 'projects.index', buttonText: 'Proceed' },
                 { id: 2, content: 'Interface to add or modify Sub Projects.', title: 'Sub Project Management', routeName: 'projects.create', buttonText: 'Proceed' },
-                { id: 3, content: 'Add or modify feedback options & addresses', title: 'Feedback Customization', routeName: 'addresses.index', buttonText: 'Proceed' },
+                { id: 3, content: 'Add or modify addresses', title: 'Address Customization', routeName: 'addresses.index', buttonText: 'Proceed' },
+                { id: 3, content: 'Add or modify feedback options', title: 'Feedback Customization', routeName: 'feedbacks.index', buttonText: 'Proceed' },
                 { id: 4, content: 'Interface to add or modify Addresses.', title: 'Add New Address', routeName: 'addresses.create', buttonText: 'Proceed' },
                 { id: 5, content: 'Option to lock specific fields to prevent user edits.', title: 'Fields Locking', routeName: '', buttonText: 'Proceed' },
             ],

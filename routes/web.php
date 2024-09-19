@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StatisticsController;
@@ -68,6 +69,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
     Route::resource('users', UsersController::class);
     Route::resource('statistics', StatisticsController::class);
+    Route::resource('feedbacks', FeedbackController::class)->except('store');
+    Route::post('/subprojects/{subProject}/feedbacks', [FeedbackController::class, 'store'])->name('feedbacks.store');
+
 
     // Settings
     Route::get('/settings', function () {

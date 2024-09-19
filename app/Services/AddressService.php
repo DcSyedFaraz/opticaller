@@ -13,7 +13,7 @@ class AddressService
         $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
         // Session::forget('addresses');
 
-        $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users')
+        $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
             ->whereIn('sub_project_id', $subProjectIds)
             ->where(function ($query) use ($now) {
                 $query->where('follow_up_date', '<=', $now)
@@ -32,16 +32,16 @@ class AddressService
         $addressesPerPage = 1;
 
         // Fetch addresses dynamically
-        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'calLogs.users', 'project')
+        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users', 'project')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
             // ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
-                      ->orWhere(function($subQuery) {
-                          $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
-                                   ->whereNull('addresses.feedback');
-                      });
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
+                            ->whereNull('addresses.feedback');
+                    });
             })
             ->where(function ($query) {
                 // Combine conditions for addresses with or without notreached entries

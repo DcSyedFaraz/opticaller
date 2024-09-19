@@ -378,9 +378,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                    + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -399,8 +399,9 @@
                     <div class="space-y-2">
                         <div class="field">
                             <label for="follow_up_date">Follow-up Date:</label>
-                            <DatePicker id="follow_up_date" showTime hourFormat="24" fluid placeholder="Follow up datetime"
-                                 v-model="localAddress.follow_up_date" class="w-full !border-secondary" />
+                            <DatePicker id="follow_up_date" showTime hourFormat="24" fluid
+                                placeholder="Follow up datetime" v-model="localAddress.follow_up_date"
+                                class="w-full !border-secondary" />
                         </div>
                     </div>
                     <div class="flex justify-end">
@@ -446,9 +447,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                    + ' Seconds' }} </span>
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -580,6 +581,14 @@ export default {
             ];
         },
         feedbackOptions() {
+            // Check if the subproject and its feedbacks are available
+            if (this.localAddress.subproject && this.localAddress.subproject.feedbacks) {
+                return this.localAddress.subproject.feedbacks.map(fb => ({
+                    label: fb.label,
+                    value: fb.value,
+                }));
+            }
+            // Fallback to a default option if no feedbacks are found
             return [
                 { label: 'Not interested', value: 'Not Interested' },
                 { label: 'Customer is interested', value: 'Interested' },
