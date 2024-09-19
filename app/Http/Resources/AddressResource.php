@@ -33,6 +33,7 @@ class AddressResource extends JsonResource
             'contact_id' => $this->contact_id,
             'sub_project_id' => $this->sub_project_id,
             'notes' => $this->notes,
+            'hubspot_tag' => $this->hubspot_tag,
             'sub_project_title' => optional($this->subproject)->title,
             'project_id' => optional($this->project)->id,
             'project_title' => optional($this->project)->title,

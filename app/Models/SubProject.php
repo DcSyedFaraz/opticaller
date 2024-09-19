@@ -16,7 +16,11 @@ class SubProject extends Model
     }
     public function projects()
     {
-        return $this->belongsTo(Project::class,'project_id');
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
     }
 
 }
