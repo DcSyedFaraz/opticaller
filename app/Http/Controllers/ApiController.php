@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AddressResource;
+use App\Models\Activity;
 use App\Models\Address;
 use App\Models\Project;
 use App\Models\SubProject;
@@ -13,44 +14,31 @@ use Validator;
 
 class ApiController extends Controller
 {
-    // public function subprojects(Request $request)
-    // {
-    //     $validatedData = Validator::make($request->all(), [
-    //         'title' => 'required|string|max:255',
-    //         'description' => 'required|string',
-    //         'project_id' => 'required|exists:projects,id',
-    //     ]);
-    //     if ($validatedData->fails()) {
-    //         return response()->json(['error' => $validatedData->messages()], 422);
-    //     }
-    //     $subProject = SubProject::create([
-    //         'project_id' => $request->input('project_id'),
-    //         'title' => $request->input('title'),
-    //         'description' => $request->input('description'),
-    //     ]);
+    public function deleteAddress(Request $request)
+    {
+        // Start a transaction
+        DB::beginTransaction();
 
-    //     return response()->json($subProject);
-    // }
-    // public function projects(Request $request)
-    // {
-    //     $validatedData = Validator::make($request->all(), [
-    //         'title' => 'required|string|max:255',
-    //         'description' => 'required|string',
-    //         'priority' => 'required',
-    //         'color' => 'nullable',
-    //     ]);
-    //     if ($validatedData->fails()) {
-    //         return response()->json(['error' => $validatedData->messages()], 422);
-    //     }
-    //     $project = Project::create([
-    //         'title' => $request->input('title'),
-    //         'description' => $request->input('description'),
-    //         'priority' => $request->input('priority'),
-    //     ]);
+        try {
+            // Delete the address
+            $address = Address::where('contact_id', $request->contact_id)->first();
+            if ($address) {
+                Activity::where('address_id', $address->id)->where('activity_type', 'call')->delete();
+                $address->delete();
+            }
 
+            // Delete call history associated with the customer
 
-    //     return response()->json($project);
-    // }
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json(['message' => 'Customer data deleted successfully.'], 200);
+        } catch (Exception $e) {
+            // Rollback the transaction on error
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to delete customer data.'], 500);
+        }
+    }
     public function handleProjectsAndSubprojects(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
