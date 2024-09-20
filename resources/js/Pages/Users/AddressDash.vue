@@ -213,7 +213,8 @@
                         </svg>
                         <span class="mx-2 my-1">Follow-Ups</span>
                     </button>
-                    <button @click="submitFeedback" :disabled="this.localAddress.feedback == 'Follow-up'"
+                    <button @click="saveEdits = true; submitFeedback()"
+                        :disabled="this.localAddress.feedback == 'Follow-up'"
                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <i class="pi pi-save !text-2xl"></i>
                         <span class="mx-2 my-1 text-center">
@@ -560,6 +561,7 @@ export default {
             country_names: '',
             breakDuration: 0,
             notreached: false,
+            saveEdits: false,
 
         };
     },
@@ -731,6 +733,7 @@ export default {
                     address: this.localAddress,
                     total_duration: this.countdown,
                     notreached: this.notreached,
+                    saveEdits: this.saveEdits,
                 });
                 this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 console.log(res.data);
