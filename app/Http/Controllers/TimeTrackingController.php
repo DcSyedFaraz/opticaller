@@ -123,12 +123,11 @@ class TimeTrackingController extends Controller
                 DB::rollBack();
                 return response()->json(['error' => 'Address not found'], 404);
             }
-            $feedbackOptions = ['Not Interested', 'Interested', 'Follow-up', 'Delete Address'];
 
             // Check if the feedback is one of those options
-            if (in_array($validatedData['address']['feedback'], $feedbackOptions)) {
-                // Open the link
-                $response = Http::get('https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf', [
+            if ($request->saveEdits == true) {
+
+                Http::get('https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf', [
                     'ID' => $validatedData['address']['contact_id']
                 ]);
                 // dd($response->successful() contact_id);

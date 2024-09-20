@@ -33,6 +33,7 @@ class AddressService
 
         // Fetch addresses dynamically
         $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users', 'project')
+            ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
             // ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
@@ -52,10 +53,8 @@ class AddressService
                     ->having('notreached_count', '<=', 10)
                     ->orWhereDoesntHave('notreached');
             })
+            ->orderBy('sub_projects.priority', 'desc')
             ->select('addresses.*')
-            ->leftJoin('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
-            ->leftJoin('projects', 'sub_projects.project_id', '=', 'projects.id')
-            ->orderBy('projects.priority', 'desc')
             ->paginate($addressesPerPage);
 
         // dd($addresses->first());

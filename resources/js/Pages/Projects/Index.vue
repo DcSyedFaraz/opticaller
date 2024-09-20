@@ -13,15 +13,11 @@
                         <InputText v-model="newProject.title" type="text"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
+
                     <div class="sm:col-span-12">
-                        <InputLabel for="priority">Project Priority</InputLabel>
-                        <Select v-model="newProject.priority" :options="priorityOptions" optionValue="value"
-                            optionLabel="label" placeholder="Select Priority" class="w-full" />
-                        <div class="sm:col-span-12">
-                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                            <Textarea v-model="newProject.description" rows="5" cols="30"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                        </div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <Textarea v-model="newProject.description" rows="5" cols="30"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
                         <label for="color" class="block text-sm font-medium text-gray-700">Select Color</label>
@@ -69,10 +65,7 @@
                         <InputText v-model="editProjectData.title" type="text"
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
-                    <div class="field">
-                        <Select v-model="editProjectData.priority" :options="priorityOptions" optionValue="value"
-                            optionLabel="label" placeholder="Select Priority" class="w-full" />
-                    </div>
+
                     <!-- Color Display and Selection -->
                     <div class="field">
                         <label for="color" class="block text-sm font-medium text-gray-700">Selected Color</label>

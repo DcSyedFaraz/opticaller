@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->id();
             $table->string('title');
             $table->string('color')->nullable();
-            $table->integer('priority')->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
         });

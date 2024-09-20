@@ -23,6 +23,11 @@
                         <Select v-model="newProject.project_id" :options="projects" optionValue="id" optionLabel="title"
                             placeholder="Select Project" class="w-full" />
                     </div>
+                    <div class="sm:col-span-12">
+                        <InputLabel for="priority">Priority</InputLabel>
+                        <Select v-model="newProject.priority" :options="priorityOptions" optionValue="value"
+                            optionLabel="label" placeholder="Select Priority" class="w-full" />
+                    </div>
                 </div>
                 <div class="mt-8">
                     <Button type="submit" label="Add Sub Project"
@@ -69,6 +74,10 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <div class="field">
+                        <Select v-model="editProjectData.priority" :options="priorityOptions" optionValue="value"
+                            optionLabel="label" placeholder="Select Priority" class="w-full" />
+                    </div>
+                    <div class="field">
                         <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
                             optionLabel="title" placeholder="Select Project" class="w-full" />
@@ -94,6 +103,12 @@ export default {
                 title: '',
                 description: '',
             },
+            priorityOptions: [
+                { label: 'Low', value: 1 },
+                { label: 'Medium', value: 2 },
+                { label: 'High', value: 3 },
+                { label: 'Critical', value: 4 },
+            ],
             editProjectData: {},
             editDialogVisible: false,
         };

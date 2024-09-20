@@ -37,7 +37,6 @@ class ProjectController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'priority' => 'required',
             'color' => 'required',
         ]);
 
@@ -49,6 +48,7 @@ class ProjectController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'priority' => 'nullable',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
         ]);
@@ -94,7 +94,6 @@ class ProjectController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'priority' => 'required',
             'color' => 'required',
         ]);
 
@@ -105,6 +104,7 @@ class ProjectController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'priority' => 'nullable',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
 
