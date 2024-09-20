@@ -55,7 +55,7 @@ class ProjectController extends Controller
 
         SubProject::create($validatedData);
 
-        return redirect()->route('projects.index')->with('success', 'Project created successfully');
+        return redirect()->route('projects.create')->with('success', 'Project created successfully');
     }
     public function assignUsers(Request $request, SubProject $subProject)
     {
@@ -117,7 +117,7 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         $project->delete();
-        return redirect()->route('projects.index')->with('success', 'Sub Project deleted successfully');
+        return redirect()->route('projects.create')->with('success', 'Sub Project deleted successfully');
     }
     public function subprojectsDelete($id)
     {

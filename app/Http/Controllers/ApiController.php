@@ -10,35 +10,59 @@ use App\Models\SubProject;
 use DB;
 use Exception;
 use Illuminate\Http\Request;
+use Log;
 use Validator;
 
 class ApiController extends Controller
 {
     public function deleteAddress(Request $request)
     {
-        // Start a transaction
+        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
         DB::beginTransaction();
 
         try {
-            // Delete the address
             $address = Address::where('contact_id', $request->contact_id)->first();
             if ($address) {
-                Activity::where('address_id', $address->id)->where('activity_type', 'call')->delete();
                 $address->delete();
+                DB::commit();
+
+                return response()->json(['message' => 'Address deleted successfully.'], 200);
             }
 
-            // Delete call history associated with the customer
-
-            // Commit the transaction
-            DB::commit();
-
-            return response()->json(['message' => 'Customer data deleted successfully.'], 200);
+            return response()->json(['message' => 'Address already deleted or not found.'], 200);
         } catch (Exception $e) {
-            // Rollback the transaction on error
             DB::rollBack();
-            return response()->json(['error' => 'Failed to delete customer data.'], 500);
+            Log::info('Failed to delete address.' . $e->getMessage());
+            return response()->json(['error' => 'Failed to delete address.' . $e->getMessage()], 500);
         }
     }
+    public function restoreAddress(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            $address = Address::onlyTrashed()->where('contact_id', $request->contact_id)->first();
+
+            if ($address) {
+                $address->restore();
+
+                DB::commit();
+
+                return response()->json(['message' => 'Address restored successfully.', 'restored_address' => $address], 200);
+            } else {
+                return response()->json(['error' => 'Address not found or already restored.'], 404);
+            }
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Failed to restore address: ' . $e->getMessage());
+
+            return response()->json(['error' => 'Failed to restore address: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function handleProjectsAndSubprojects(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
