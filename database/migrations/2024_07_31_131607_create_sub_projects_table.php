@@ -15,7 +15,6 @@ return new class extends Migration {
             $table->foreignId('project_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->integer('priority')->default(0);
             $table->timestamps();
         });
     }
