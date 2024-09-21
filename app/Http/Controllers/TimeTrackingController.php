@@ -63,11 +63,11 @@ class TimeTrackingController extends Controller
         DB::beginTransaction();
 
         try {
-            $validatedData = $request->validate([
+            $rules = [
                 'personal_notes' => 'nullable|string',
                 'interest_notes' => 'nullable|string',
                 'address' => 'required|array',
-                'total_duration' => 'required',
+                'total_duration' => 'required|integer', // assuming total_duration should be an integer
                 'address.id' => 'required|integer|exists:addresses,id',
                 'address.company_name' => 'required|string',
                 'address.salutation' => 'required|string',
@@ -76,44 +76,51 @@ class TimeTrackingController extends Controller
                 'address.street_address' => 'required|string',
                 'address.postal_code' => 'required|string',
                 'address.city' => 'required|string',
-                'address.website' => 'nullable',
+                'address.website' => 'nullable|string',
                 'address.contact_id' => 'nullable|string',
                 'address.phone_number' => 'required|string',
                 'address.email_address_system' => 'required|email',
                 'address.email_address_new' => 'nullable|email',
                 'address.feedback' => 'required|string',
                 'address.follow_up_date' => 'nullable|date|after:today',
-            ], [
-                'personal_notes.string' => 'Personal notes must be a string',
-                'interest_notes.string' => 'Interest notes must be a string',
-                'address.id.required' => 'Address ID is required',
-                'address.id.integer' => 'Address ID must be an integer',
-                'address.id.exists' => 'Address ID does not exist',
-                'address.company_name.required' => 'Company name is required',
-                'address.company_name.string' => 'Company name must be a string',
-                'address.salutation.required' => 'Salutation is required',
-                'address.salutation.string' => 'Salutation must be a string',
-                'address.first_name.required' => 'First name is required',
-                'address.first_name.string' => 'First name must be a string',
-                'address.last_name.required' => 'Last name is required',
-                'address.last_name.string' => 'Last name must be a string',
-                'address.street_address.required' => 'Street address is required',
-                'address.street_address.string' => 'Street address must be a string',
-                'address.postal_code.required' => 'Postal code is required',
-                'address.postal_code.string' => 'Postal code must be a string',
-                'address.city.required' => 'City is required',
-                'address.city.string' => 'City must be a string',
-                'address.contact_id.string' => 'Contact ID must be a string',
-                'address.phone_number.required' => 'Phone number is required',
-                'address.phone_number.string' => 'Phone number must be a string',
-                'address.email_address_system.required' => 'Email address is required',
-                'address.feedback.required' => 'Feedback is required',
-                'address.email_address_system.email' => 'Email address must be a valid email address',
-                'address.email_address_new.email' => 'New email address must be a valid email address',
-                'address.feedback.string' => 'Feedback must be a string',
-                'address.follow_up_date.after' => 'Follow up date must be after today',
-                'address.user_id.required' => 'User ID is required',
-            ]);
+            ];
+
+            // Apply validation only if saveEdits is true
+            if ($request->saveEdits) {
+                $validatedData = $request->validate($rules, [
+                    'personal_notes.string' => 'Personal notes must be a string',
+                    'interest_notes.string' => 'Interest notes must be a string',
+                    'address.id.required' => 'Address ID is required',
+                    'address.id.integer' => 'Address ID must be an integer',
+                    'address.id.exists' => 'Address ID does not exist',
+                    'address.company_name.required' => 'Company name is required',
+                    'address.company_name.string' => 'Company name must be a string',
+                    'address.salutation.required' => 'Salutation is required',
+                    'address.salutation.string' => 'Salutation must be a string',
+                    'address.first_name.required' => 'First name is required',
+                    'address.first_name.string' => 'First name must be a string',
+                    'address.last_name.required' => 'Last name is required',
+                    'address.last_name.string' => 'Last name must be a string',
+                    'address.street_address.required' => 'Street address is required',
+                    'address.street_address.string' => 'Street address must be a string',
+                    'address.postal_code.required' => 'Postal code is required',
+                    'address.postal_code.string' => 'Postal code must be a string',
+                    'address.city.required' => 'City is required',
+                    'address.city.string' => 'City must be a string',
+                    'address.contact_id.string' => 'Contact ID must be a string',
+                    'address.phone_number.required' => 'Phone number is required',
+                    'address.phone_number.string' => 'Phone number must be a string',
+                    'address.email_address_system.required' => 'Email address is required',
+                    'address.feedback.required' => 'Feedback is required',
+                    'address.email_address_system.email' => 'Email address must be a valid email address',
+                    'address.email_address_new.email' => 'New email address must be a valid email address',
+                    'address.feedback.string' => 'Feedback must be a string',
+                    'address.follow_up_date.after' => 'Follow up date must be after today',
+                ]);
+            } else {
+                // Handle non-validation case if necessary
+                $validatedData = $request->all();
+            }
 
             $addressID = $validatedData['address']['id'];
             // dd($validatedData['address']);

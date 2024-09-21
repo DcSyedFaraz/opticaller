@@ -45,7 +45,8 @@
                                             <label for="salutation" class="font-extrabold text-lg">
                                                 Salutation: <span class="text-red-600">*</span>
                                             </label>
-                                            <InputText id="salutation" v-model="localAddress.salutation"
+                                            <Select id="salutation" v-model="localAddress.salutation" placeholder="select salutation"
+                                                :options="salutationOptions" optionLabel="label" optionValue="value"
                                                 class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('salutation')" />
                                         </div>
@@ -379,9 +380,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                            + ' Seconds' }} </span>
+                item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                    + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -448,9 +449,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+                item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                    + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -467,7 +468,8 @@
                         </div>
                         <div class="field">
                             <label for="salutation">Salutation:</label>
-                            <InputText id="salutation" v-model="callbackForm.salutation" class="w-full" />
+                            <Select id="salutation" v-model="localAddress.salutation" :options="salutationOptions"
+                                optionLabel="label" class="w-full" />
                         </div>
                         <div class="field">
                             <label for="first_name">First Name:</label>
@@ -562,6 +564,11 @@ export default {
             breakDuration: 0,
             notreached: false,
             saveEdits: false,
+            salutationOptions: [
+                { label: 'Herr', value: 'Herr' },
+                { label: 'Frau', value: 'Frau' },
+                { label: 'Divers', value: 'Divers' },
+            ],
 
         };
     },
