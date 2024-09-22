@@ -23,9 +23,9 @@
                     </div>
                 </div>
                 <div class="border my-0 m-4 lg:mx-7 rounded-lg shadow shadow-secondary">
-                    <div class="border-b-2 p-3">
+                    <!-- <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-lg">Details</span>
-                    </div>
+                    </div> -->
 
                     <div class="grid">
                         <Card class="shadow-md">
@@ -137,9 +137,9 @@
                 </div>
                 <!-- Notes and Buttons remain unchanged as they have flexible widths -->
                 <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-blue-200">
-                    <div class="border-b-2 p-3">
+                    <!-- <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-lg">Notes</span>
-                    </div>
+                    </div> -->
                     <div class="grid">
                         <Card class="shadow-md">
                             <template #content>
@@ -219,7 +219,7 @@
                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <i class="pi pi-save !text-2xl"></i>
                         <span class="mx-2 my-1 text-center">
-                            Save Edits
+                            Save & Next
                         </span>
                     </button>
                 </div>
