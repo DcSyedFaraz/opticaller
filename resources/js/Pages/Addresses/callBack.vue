@@ -61,7 +61,8 @@
             <div class="flex justify-center mt-4">
                 <Button label="Save" icon="pi pi-save"
                     class="!bg-[#77A697] !border-[#77A697] text-white !px-[4rem] !rounded mr-2" @click="saveForm" />
-                <Button label="Cancel" severity="contrast" class="!bg-[#383838] !px-[4rem] text-white flex  !py-3 !rounded " @click="cancelForm" />
+                <Button label="Cancel" severity="contrast"
+                    class="!bg-[#383838] !px-[4rem] text-white flex  !py-3 !rounded " @click="cancelForm" />
             </div>
         </div>
         <div v-if="isLoading" class="loading-overlay">
@@ -124,13 +125,28 @@ export default {
                 this.$inertia.post(route('callback.post'), this.formData, {
                     onSuccess: () => {
                         this.isLoading = false,
-                        this.$inertia.visit(route('dash'));
-                            this.$toast.add({
-                                severity: 'success',
-                                summary: 'Success',
-                                detail: 'Form submitted successfully!',
-                                life: 3000,
-                            });
+                            // this.$inertia.visit(route('dash'), {
+                            //     preserveScroll: true,
+                            //     onSuccess: () => {
+                            //         this.$toast.add({
+                            //             severity: 'success',
+                            //             summary: 'Success',
+                            //             detail: 'Form submitted successfully!',
+                            //             life: 3000,
+                            //         });
+                            //     },
+                            // });
+
+                        //     this.$toast.add({
+                        //         severity: 'success',
+                        //         summary: 'Success',
+                        //         detail: 'Form submitted successfully!',
+                        //         life: 3000,
+                        //     });
+                        // setTimeout(() => {
+                        //     this.$inertia.visit(route('dash'));
+                        // }, 1000000);
+                        console.log('submitted');
                     },
                     onError: (errors) => {
                         this.isLoading = false,

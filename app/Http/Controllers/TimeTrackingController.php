@@ -76,6 +76,7 @@ class TimeTrackingController extends Controller
                 'address.street_address' => 'required|string',
                 'address.postal_code' => 'required|string',
                 'address.city' => 'required|string',
+                'address.country' => 'required|string',
                 'address.website' => 'nullable|string',
                 'address.contact_id' => 'nullable|string',
                 'address.phone_number' => 'required|string',
@@ -106,6 +107,7 @@ class TimeTrackingController extends Controller
                     'address.postal_code.required' => 'Postal code is required',
                     'address.postal_code.string' => 'Postal code must be a string',
                     'address.city.required' => 'City is required',
+                    'address.country.required' => 'country is required',
                     'address.city.string' => 'City must be a string',
                     'address.contact_id.string' => 'Contact ID must be a string',
                     'address.phone_number.required' => 'Phone number is required',
@@ -144,7 +146,24 @@ class TimeTrackingController extends Controller
                 // DB::commit();
                 // return response()->json(['message' => 'Address deleted successfully']);
             } else {
+                if (isset($validatedData['address']['cal_logs'])) {
+                    unset($validatedData['address']['cal_logs']);
 
+                }
+                if (isset($validatedData['address']['subproject'])) {
+                    unset($validatedData['address']['subproject']);
+
+                }
+                if (isset($validatedData['address']['feedbacks'])) {
+                    unset($validatedData['address']['feedbacks']);
+
+                }
+                if (isset($validatedData['address']['project'])) {
+                    unset($validatedData['address']['project']);
+
+                }
+                // dd($validatedData['address']);
+                // dd('d');
                 $address->update($validatedData['address']);
 
                 if ($request->notreached == true) {
@@ -187,6 +206,7 @@ class TimeTrackingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            // throw $e;
             return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }

@@ -184,7 +184,8 @@ class AddressController extends Controller
         Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
 
         // Return inertia response
-        return inertia('Addresses/callBack');
+        return redirect()->route('dash')->with('message', 'Call back sent successfully!');
+
     }
 
 }

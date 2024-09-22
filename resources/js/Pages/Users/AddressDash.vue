@@ -2,7 +2,7 @@
 
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-4 p-4"
+        <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-x-4 px-4"
             v-if="localAddress && localAddress.company_name">
             <!-- Main Panel -->
             <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
@@ -22,7 +22,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="border m-4 lg:m-7 rounded-lg shadow shadow-secondary">
+                <div class="border my-0 m-4 lg:mx-7 rounded-lg shadow shadow-secondary">
                     <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-lg">Details</span>
                     </div>
@@ -30,7 +30,7 @@
                     <div class="grid">
                         <Card class="shadow-md">
                             <template #content>
-                                <div class="grid grid-cols-1 mx-3 gap-4">
+                                <div class="grid grid-cols-1 mx-3">
                                     <div class="field">
                                         <label for="company_name" class="font-extrabold text-lg">
                                             Company Name: <span class="text-red-600">*</span>
@@ -40,14 +40,14 @@
                                             :disabled="isFieldLocked('company_name')" />
                                     </div>
 
-                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-4">
                                         <div class="field col-span-1 md:col-span-1 lg:col-span-1">
                                             <label for="salutation" class="font-extrabold text-lg">
                                                 Salutation: <span class="text-red-600">*</span>
                                             </label>
-                                            <Select id="salutation" v-model="localAddress.salutation" placeholder="select salutation"
-                                                :options="salutationOptions" optionLabel="label" optionValue="value"
-                                                class="w-full !border-secondary"
+                                            <Select id="salutation" v-model="localAddress.salutation"
+                                                placeholder="select salutation" :options="salutationOptions"
+                                                optionLabel="label" optionValue="value" class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('salutation')" />
                                         </div>
 
@@ -68,7 +68,7 @@
                                                 :disabled="isFieldLocked('last_name')" />
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-4">
                                         <div class="field md:col-span-2">
                                             <label class="font-extrabold text-lg" for="street_address">
                                                 Street and House Number:
@@ -94,10 +94,10 @@
                                                 class="w-full !border-secondary" :disabled="isFieldLocked('city')" />
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="country">
-                                                Country: <span class="text-red-600">*</span>
+                                                Country:
                                             </label>
                                             <Select id="country" v-model="localAddress.country" filter
                                                 :options="country_names" placeholder="Select a country"
@@ -105,13 +105,13 @@
                                         </div>
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="website">
-                                                Website: <span class="text-red-600">*</span>
+                                                Website:
                                             </label>
                                             <InputText id="website" v-model="localAddress.website"
                                                 class="w-full !border-secondary" :disabled="isFieldLocked('website')" />
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="phone_number">
                                                 Phone Number: <span class="text-red-600">*</span>
@@ -136,7 +136,7 @@
                     </div>
                 </div>
                 <!-- Notes and Buttons remain unchanged as they have flexible widths -->
-                <div class="border m-4 lg:m-7 rounded-lg shadow shadow-blue-200 pb-4">
+                <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-blue-200">
                     <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-lg">Notes</span>
                     </div>
@@ -147,13 +147,13 @@
                                     <div class="grid grid-cols-1">
                                         <div class="field col-span-1 md:col-span-1 lg:col-span-1">
                                             <label for="notes" class="font-extrabold text-lg">
-                                                Notes: <span class="text-red-600">*</span>
+                                                Notes:
                                             </label>
                                             <InputText id="notes" v-model="localAddress.notes"
                                                 class="w-full !border-secondary" disabled />
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="feedback">
                                                 Feedback: <span class="text-red-600">*</span>
@@ -164,7 +164,7 @@
                                         </div>
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="interest_notes">
-                                                Interest Notes: <span class="text-red-600">*</span>
+                                                Interest Notes:
                                             </label>
                                             <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="5"
                                                 class="w-full !border-secondary" />
@@ -172,7 +172,7 @@
                                     </div>
                                     <div class="field">
                                         <label class="font-extrabold text-lg" for="personal_notes">
-                                            Personal Notes: <span class="text-red-600">*</span>
+                                            Personal Notes:
                                         </label>
                                         <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="2"
                                             class="w-full !border-secondary" />
@@ -451,13 +451,13 @@
                                 {{
                 item.total_duration < 60 ? item.total_duration + ' Seconds' :
                     Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                    + ' Seconds' }} </span>
+                                    + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
             </Dialog>
 
-            <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
+            <!-- <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
                 :style="{ width: '90%', maxWidth: '36rem' }">
                 <div class="p-6 space-y-4">
                     <div class="space-y-2">
@@ -493,7 +493,7 @@
                             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
                     </div>
                 </div>
-            </Dialog>
+            </Dialog> -->
         </div>
 
         <div v-else
@@ -517,7 +517,7 @@
 
 <script>
 import moment from "moment";
-import country from 'country-list-js';
+// import country from 'country-list-js';
 
 
 
@@ -560,7 +560,7 @@ export default {
             showNotesModal: false,
             showFollowModal: false,
             selectedNotes: '',
-            country_names: '',
+            country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy'],
             breakDuration: 0,
             notreached: false,
             saveEdits: false,
@@ -620,9 +620,7 @@ export default {
 
             this.startTracking();
         }
-        this.country_names = country.names();
-        // console.log(this.country_names, this.$page.pro   ps);
-        // console.log(this.country_names);
+        // this.country_names = country.names();
     },
     // async beforeUnmount() {
     //     await axios.post(route('seen', this.localAddress.id));
@@ -830,7 +828,7 @@ export default {
 }
 
 .user-page {
-    padding: 20px;
+    padding: 0px 20px;
 }
 
 .user-actions {
@@ -913,5 +911,13 @@ label {
     #app>div>main>div>div.col-span-1.lg\:col-span-3.border.rounded-xl.shadow-xl>div.flex.flex-col.lg\:flex-row.justify-center.my-4 {
         padding: 0 5px;
     }
+}
+
+main {
+    @apply md:!py-2
+}
+
+.p-card-body {
+    @apply !py-0
 }
 </style>

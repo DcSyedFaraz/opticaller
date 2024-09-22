@@ -125,7 +125,7 @@ export default {
                 onSuccess: () => {
                     this.newProject.title = '';
                     this.newProject.description = '';
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project created successfully', life: 3000 });
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project created successfully', life: 3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
@@ -142,7 +142,7 @@ export default {
             this.$inertia.put(`/subprojects/${this.editProjectData.id}`, this.editProjectData, {
                 onSuccess: () => {
                     this.editDialogVisible = false;
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Project updated successfully', life: 3000 });
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project updated successfully', life: 3000 });
                 },
                 onError: (errors) => {
                     Object.keys(errors).forEach(key => {
