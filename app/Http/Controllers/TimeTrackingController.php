@@ -169,7 +169,7 @@ class TimeTrackingController extends Controller
                 if ($request->notreached == true) {
                     NotReached::create(['address_id' => $address->id]);
                     $address->follow_up_date = null;
-                    $address->feedback = null;
+                    $address->feedback = 'notreached';
                 }
 
                 if ($address->follow_up_date) {

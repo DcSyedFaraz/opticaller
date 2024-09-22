@@ -25,7 +25,7 @@ class ApiController extends Controller
         try {
             $address = Address::where('contact_id', $request->contact_id)->first();
             if ($address) {
-                $address->delete();
+                $address->forceDelete();
                 DB::commit();
 
                 return response()->json(['message' => 'Address deleted successfully.'], 200);
@@ -193,6 +193,8 @@ class ApiController extends Controller
                 'addresses.*.logo' => 'nullable|string',
                 'addresses.*.notes' => 'nullable|string',
                 'addresses.*.hubspot_tag' => 'nullable|string',
+                'addresses.*.deal_id' => 'nullable|string',
+                'addresses.*.company_id' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
                 // 'addresses.*.priority' => 'nullable|integer',
                 'addresses.*.seen' => 'nullable|integer',
@@ -222,7 +224,8 @@ class ApiController extends Controller
                     'sub_project_id' => $addressData['sub_project_id'] ?? null,
                     'hubspot_tag' => $addressData['hubspot_tag'] ?? null,
                     'notes' => $addressData['notes'] ?? null,
-                    // 'priority' => $addressData['priority'] ?? 0,
+                    'company_id' => $addressData['company_id'] ?? null,
+                    'deal_id' => $addressData['deal_id'] ?? null,
                     'seen' => $addressData['seen'] ?? 0,
                 ]);
             }
