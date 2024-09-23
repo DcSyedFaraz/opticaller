@@ -42,11 +42,13 @@ class AddressResource extends JsonResource
             'activities' => $this->calLogs->map(function ($activity) {
                 $personalNotes = optional($activity->notes)->personal_notes;
                 $interestNotes = optional($activity->notes)->interest_notes;
+                $timestamp = optional($activity->created_at)->format('Y-m-d H:i:s');
 
                 // Skip activities where both notes are null
                 if (is_null($personalNotes) && is_null($interestNotes)) {
                     return [
                         'user_name' => optional($activity->users)->name,
+                        'timestamp' => $timestamp,
                     ];
                 }
 
@@ -54,6 +56,7 @@ class AddressResource extends JsonResource
                     'user_name' => optional($activity->users)->name,
                     'personal_notes' => $personalNotes,
                     'interest_notes' => $interestNotes,
+                    'timestamp' => $timestamp,
                 ];
             })->filter(),
         ];

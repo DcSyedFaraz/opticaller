@@ -94,7 +94,6 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
     // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
     Route::post('/break-end/{id}', [TimeTrackingController::class, 'break_end'])->name('break.end');
-    Route::post('/seen/{id}', [TimeTrackingController::class, 'seen'])->name('seen');
     Route::post('/stop-tracking', [TimeTrackingController::class, 'stopTracking'])->name('stop.tracking');
 
 

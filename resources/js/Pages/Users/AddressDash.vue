@@ -622,9 +622,7 @@ export default {
         }
         // this.country_names = country.names();
     },
-    // async beforeUnmount() {
-    //     await axios.post(route('seen', this.localAddress.id));
-    // },
+    
     methods: {
         getBorderClass(color) {
             const colorMap = {
