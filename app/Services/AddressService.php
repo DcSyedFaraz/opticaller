@@ -23,7 +23,7 @@ class AddressService
             ->first();
 
         if ($dueAddress) {
-            $dueAddress->increment('seen');
+            $dueAddress->seen = Carbon::now();
             $dueAddress->save();
             return $dueAddress;
         }
@@ -41,7 +41,7 @@ class AddressService
             })
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
-            // ->where('addresses.updated_at', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
+            ->where('addresses.seen', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
             ->where(function ($query) {
                 $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
                     ->orWhere(function ($subQuery) {
@@ -73,7 +73,7 @@ class AddressService
 
         // Process the retrieved address
         // For example, mark it as seen
-        $address->seen += 1;
+        $address->seen = Carbon::now();
         $address->save();
         // dd($address->project);
 
