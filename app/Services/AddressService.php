@@ -41,7 +41,10 @@ class AddressService
             })
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
-            ->where('addresses.seen', '<', Carbon::now()->subDay())  // Apply condition on Address's updated_at
+            ->where(function ($query) {
+                $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
+                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
+            }) // Apply condition on Address's updated_at
             ->where(function ($query) {
                 $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
                     ->orWhere(function ($subQuery) {
