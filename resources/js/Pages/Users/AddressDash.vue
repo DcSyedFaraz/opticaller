@@ -3,7 +3,7 @@
     <Head title="Addresses" />
     <AuthenticatedLayout>
         <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-x-4 px-4"
-            v-if="localAddress && localAddress.company_name">
+            v-if="localAddress && localAddress.id">
             <!-- Main Panel -->
             <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
                 <div class="pb-2 p-4">
@@ -724,7 +724,7 @@ export default {
                 console.log( newProjectTitle,this.previousProject);
 
                 if (this.previousProject && newProjectTitle !== this.previousProject) {
-                    this.projectChanged = true;
+                    // this.projectChanged = true;
                 }
                 this.previousProject = newProjectTitle;
                 this.locallockfields = res.data.lockfields;
