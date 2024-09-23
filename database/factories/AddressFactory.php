@@ -38,7 +38,7 @@ class AddressFactory extends Factory
             'sub_project_id' => SubProject::inRandomOrder()->first()->id,
             // 'personal_notes' => $this->faker->paragraph,
             // 'feedback' => 'Follow-up',
-            'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request', 'Follow-up', 'Delete Address']),
+            // 'feedback' => $this->faker->randomElement(['Not Interested', 'Interested', 'Request', 'Follow-up', 'Delete Address']),
             // 'follow_up_date' => '2024-08-26 15:23:08',
             'created_at' => $createdAt, // Set created_at to a random day of the current week
             'updated_at' => $createdAt,

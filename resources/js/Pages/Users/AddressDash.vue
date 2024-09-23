@@ -380,9 +380,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                    + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -449,51 +449,26 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                    Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                    + ' Seconds' }} </span>
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
             </Dialog>
 
-            <!-- <Dialog header="Callback Request" v-model:visible="showCallbackForm" modal class="rounded-lg shadow-lg"
-                :style="{ width: '90%', maxWidth: '36rem' }">
-                <div class="p-6 space-y-4">
-                    <div class="space-y-2">
-                        <div class="field">
-                            <label for="project">Project:</label>
-                            <Select id="project" v-model="callbackForm.project" :options="projectOptions"
-                                optionValue="label" optionLabel="label" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="salutation">Salutation:</label>
-                            <Select id="salutation" v-model="localAddress.salutation" :options="salutationOptions"
-                                optionLabel="label" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="first_name">First Name:</label>
-                            <InputText id="first_name" v-model="callbackForm.firstName" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="last_name">Last Name:</label>
-                            <InputText id="last_name" v-model="callbackForm.lastName" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="phoneNumber">Phone Number:</label>
-                            <InputText id="phoneNumber" v-model="callbackForm.phoneNumber" class="w-full" />
-                        </div>
-                        <div class="field">
-                            <label for="personal_notes">Notes:</label>
-                            <Textarea id="personal_notes" v-model="callbackForm.notes" rows="5" class="w-full" />
-                        </div>
-                    </div>
+            <Dialog header="Project Change Notification" v-model:visible="projectChanged" modal class="rounded-lg shadow-lg">
+                <div class="p-6">
+                    <p class="font-semibold">
+                        The project has changed. Please ensure all related information is updated accordingly.
+                    </p>
                     <div class="flex justify-end">
-                        <Button label="Submit" icon="pi pi-check" @click="submitCallbackRequest"
-                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out" />
+                        <Button label="OK" @click="projectChanged = false" class="mt-3" />
                     </div>
                 </div>
-            </Dialog> -->
+            </Dialog>
+
+
         </div>
 
         <div v-else
@@ -569,7 +544,8 @@ export default {
                 { label: 'Frau', value: 'Frau' },
                 { label: 'Divers', value: 'Divers' },
             ],
-
+            previousProject: '',
+            projectChanged: false,
         };
     },
     computed: {
@@ -619,10 +595,11 @@ export default {
         if (this.localAddress && this.localAddress.id) {
 
             this.startTracking();
+            this.previousProject = this.localAddress.subproject?.projects?.title;
         }
         // this.country_names = country.names();
     },
-    
+
     methods: {
         getBorderClass(color) {
             const colorMap = {
@@ -726,9 +703,7 @@ export default {
                 if (this.isPaused) {
                     await this.togglePause(); // Resume the tracking if it's paused
                 }
-                this.isPaused = true;
-                clearInterval(this.timer);
-                clearInterval(this.reversetimer);
+                // this.isPaused = true;
                 // console.log(this.countdown);
 
                 const res = await axios.post(route('stop.tracking'), {
@@ -740,7 +715,18 @@ export default {
                 });
                 this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 console.log(res.data);
+                clearInterval(this.timer);
+                clearInterval(this.reversetimer);
                 this.localAddress = res.data.address;
+
+                const newProjectTitle = this.localAddress.subproject?.projects?.title;
+
+                console.log( newProjectTitle,this.previousProject);
+
+                if (this.previousProject && newProjectTitle !== this.previousProject) {
+                    this.projectChanged = true;
+                }
+                this.previousProject = newProjectTitle;
                 this.locallockfields = res.data.lockfields;
                 if (this.localAddress && this.localAddress.company_name) {
 
