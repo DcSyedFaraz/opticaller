@@ -52,12 +52,6 @@ class TimeTrackingController extends Controller
         // return response()->json($timeLog);
     }
 
-    public function seen($id): void
-    {
-        $address = Address::find($id);
-        $address->seen = 0;
-        $address->save();
-    }
     public function stopTracking(Request $request)
     {
         DB::beginTransaction();
@@ -176,7 +170,6 @@ class TimeTrackingController extends Controller
                     $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
                 }
 
-                $address->seen = 0;
                 $address->save();
 
                 $seconds = $validatedData['total_duration'];
