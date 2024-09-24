@@ -596,6 +596,7 @@ export default {
         if (this.localAddress && this.localAddress.id) {
 
             this.startTracking();
+            this.localAddress.feedback = '';
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
         // this.country_names = country.names();
@@ -729,12 +730,13 @@ export default {
                 }
                 this.previousProject = newProjectTitle;
                 this.locallockfields = res.data.lockfields;
-                if (this.localAddress && this.localAddress.company_name) {
+                if (this.localAddress && this.localAddress.id) {
 
                     this.callHistory = res.data.address.cal_logs;
                     this.timer = null;
                     this.logdata.call_attempts = null;
                     this.logdata.personal_notes = '';
+                    this.localAddress.feedback = '';
                     this.logdata.interest_notes = '';
                     await this.startTracking();
                 }
