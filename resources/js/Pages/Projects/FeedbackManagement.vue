@@ -6,7 +6,6 @@
             <!-- Page Header -->
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-4xl font-extrabold text-gray-900">Manage Feedbacks</h1>
-                <!-- Optionally, add a button or link here for additional actions -->
             </div>
 
             <!-- Success Message -->
@@ -17,58 +16,57 @@
                 </div>
             </transition>
 
-            <!-- Sub-Projects Section -->
-            <div v-for="subProject in subProjects" :key="subProject.id" class="mb-12">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
-                        {{ subProject.title }}
-                        <span
-                            class="ml-3 inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                            ID: {{ subProject.id }}
-                        </span>
-                    </h2>
-                </div>
+            <!-- Feedback Form Card -->
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <FeedbackForm :submitLabel="'Add Feedback'" :loading="loading" @submit="createFeedback"
+                    :ref="'feedbackForm'" :subProjects="subProjects" />
+            </div>
 
-
-                <!-- Feedback Form Card -->
-                <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-                    <FeedbackForm :submitLabel="'Add Feedback'" :loading="loading[subProject.id]"
-                        @submit="createFeedback(subProject.id, $event)" :ref="`feedbackForm-${subProject.id}`" />
-                </div>
-
-                <!-- Feedbacks DataTable Card -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                    <DataTable :value="subProject.feedbacks" class="w-full" responsiveLayout="scroll"
-                        :emptyMessage="'No feedback found.'">
-                        <Column field="id" header="ID" class="text-center w-16" />
-                        <Column field="label" header="Label" class="text-left" />
-                        <Column field="value" header="Value" class="text-left" />
-                        <Column header="Actions" class="text-center w-32">
-                            <template #body="slotProps">
-                                <div class="flex justify-center space-x-2">
-                                    <Button icon="pi pi-pencil"
-                                        class="p-button-rounded p-button-text p-button-info hover:bg-blue-100 transition-colors"
-                                        @click="openEditDialog(slotProps.data, subProject.id)" aria-label="Edit" />
-                                    <Button icon="pi pi-trash"
-                                        class="p-button-rounded p-button-text p-button-danger hover:bg-red-100 transition-colors"
-                                        @click="confirmDelete(slotProps.data)" aria-label="Delete" />
-                                </div>
-                            </template>
-                        </Column>
-                        <template #empty>
-                            <div class="text-center py-6 text-gray-500">
-                                No feedback found.
+            <!-- Feedbacks DataTable Card -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <DataTable :value="feedbacks" class="w-full" responsiveLayout="scroll"
+                    :emptyMessage="'No feedback found.'">
+                    <Column field="id" header="ID" class="text-center w-16" />
+                    <Column field="label" header="Label" class="text-left" />
+                    <Column field="value" header="Value" class="text-left" />
+                    <Column field="no_validation" header="No Validation" class="text-center w-24">
+                        <template #body="slotProps">
+                            <Checkbox v-model="slotProps.data.no_validation"
+                                @change="toggleValidation(slotProps.data)" binary />
+                        </template>
+                    </Column>
+                    <Column header="Sub-Projects" class="text-left">
+                        <template #body="slotProps">
+                            <ul>
+                                <li v-for="subProject in slotProps.data.sub_projects" :key="subProject.id">
+                                    {{ subProject.title }}
+                                </li>
+                            </ul>
+                        </template>
+                    </Column>
+                    <Column header="Actions" class="text-center w-32">
+                        <template #body="slotProps">
+                            <div class="flex justify-center space-x-2">
+                                <Button icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-text p-button-info hover:bg-blue-100 transition-colors"
+                                    @click="openEditDialog(slotProps.data)" aria-label="Edit" />
+                                <Button icon="pi pi-trash"
+                                    class="p-button-rounded p-button-text p-button-danger hover:bg-red-100 transition-colors"
+                                    @click="confirmDelete(slotProps.data)" aria-label="Delete" />
                             </div>
                         </template>
-                    </DataTable>
-                </div>
+                    </Column>
+                    <template #empty>
+                        <div class="text-center py-6 text-gray-500">No feedback found.</div>
+                    </template>
+                </DataTable>
             </div>
 
             <!-- Edit Feedback Dialog -->
             <Dialog v-model:visible="editDialogVisible" :style="{ width: '450px' }" header="Edit Feedback" :modal="true"
                 class="p-6">
                 <FeedbackForm :initialFeedback="editFeedback" :submitLabel="'Update'" :loading="isUpdating"
-                    @submit="updateFeedback" />
+                    @submit="updateFeedback" :subProjects="subProjects" />
             </Dialog>
 
             <!-- PrimeVue Toast -->
@@ -85,8 +83,12 @@ export default {
         FeedbackForm,
     },
     props: {
+        feedbacks: {
+            type: Array, // List of all feedbacks with their associated subprojects
+            required: true,
+        },
         subProjects: {
-            type: Array, // Ensure subProjects is an array
+            type: Array, // List of all subprojects
             required: true,
         },
     },
@@ -96,36 +98,33 @@ export default {
                 id: null,
                 label: '',
                 value: '',
+                no_validation: false,
+                sub_project_ids: [],
             },
             editDialogVisible: false,
             isUpdating: false,
-            loading: {},
+            loading: false,
         };
     },
-
     methods: {
         /**
-         * Creates a new feedback for the specified sub-project.
-         * @param {Number} subProjectId - The ID of the sub-project.
+         * Creates a new feedback and assigns it to selected subprojects.
          * @param {Object} feedback - The feedback data.
          */
-        createFeedback(subProjectId, feedback) {
-            this.loading[subProjectId] = true;
+        createFeedback(feedback) {
+            this.loading = true;
 
             const form = {
                 label: feedback.label,
                 value: feedback.value,
+                no_validation: feedback.no_validation,
+                sub_project_ids: feedback.sub_project_ids,
             };
-            console.log(form);
-            this.$inertia.post(`/subprojects/${subProjectId}/feedbacks`, form, {
-                onSuccess: () => {
-                    const refName = `feedbackForm-${subProjectId}`;
-                    if (this.$refs[refName] && typeof this.$refs[refName][0].resetForm === 'function') {
-                        this.$refs[refName][0].resetForm();
-                    } else {
-                        console.log(this.$refs[refName][0].resetForm, this.$refs[refName]);
 
-                        console.warn(`Ref "${refName}" does not exist or does not have a resetForm method.`);
+            this.$inertia.post(route('feedbacks.store'), form, {
+                onSuccess: () => {
+                    if (this.$refs.feedbackForm && typeof this.$refs.feedbackForm.resetForm === 'function') {
+                        this.$refs.feedbackForm.resetForm();
                     }
 
                     this.$toast.add({
@@ -134,10 +133,9 @@ export default {
                         detail: 'Feedback added successfully.',
                         life: 3000,
                     });
-                    this.loading[subProjectId] = false;
+                    this.loading = false;
                 },
                 onError: (errors) => {
-                    // Display error messages via Toast
                     Object.values(errors).forEach((error) => {
                         this.$toast.add({
                             severity: 'error',
@@ -146,7 +144,7 @@ export default {
                             life: 5000,
                         });
                     });
-                    this.loading[subProjectId] = false;
+                    this.loading = false;
                 },
             });
         },
@@ -154,20 +152,33 @@ export default {
         /**
          * Opens the edit dialog with the selected feedback's data.
          * @param {Object} feedback - The feedback object to edit.
-         * @param {Number} subProjectId - The ID of the sub-project.
          */
-        openEditDialog(feedback, subProjectId) {
-            this.editFeedback = { ...feedback, subProjectId };
+        openEditDialog(feedback) {
+            this.editFeedback = {
+                id: feedback.id,
+                label: feedback.label,
+                value: feedback.value,
+                no_validation: feedback.no_validation,
+                sub_project_ids: feedback.sub_projects.map((sp) => sp.id),
+            };
             this.editDialogVisible = true;
         },
 
         /**
-         * Updates the selected feedback.
+         * Updates the selected feedback and its associated subprojects.
          * @param {Object} updatedFeedback - The updated feedback data.
          */
         updateFeedback(updatedFeedback) {
             this.isUpdating = true;
-            this.$inertia.put(route('feedbacks.update', updatedFeedback.id), updatedFeedback, {
+
+            const form = {
+                label: updatedFeedback.label,
+                value: updatedFeedback.value,
+                no_validation: updatedFeedback.no_validation,
+                sub_project_ids: updatedFeedback.sub_project_ids,
+            };
+
+            this.$inertia.put(route('feedbacks.update', this.editFeedback.id), form, {
                 onSuccess: () => {
                     this.editDialogVisible = false;
                     this.isUpdating = false;
@@ -177,16 +188,9 @@ export default {
                         detail: 'Feedback updated successfully.',
                         life: 3000,
                     });
-                    // Optionally, reset the editFeedback object
-                    this.editFeedback = {
-                        id: null,
-                        label: '',
-                        value: '',
-                    };
                 },
                 onError: (errors) => {
                     this.isUpdating = false;
-                    // Display error messages via Toast
                     Object.values(errors).forEach((error) => {
                         this.$toast.add({
                             severity: 'error',
@@ -213,9 +217,6 @@ export default {
                 accept: () => {
                     this.deleteFeedback(feedback);
                 },
-                reject: () => {
-                    // Optionally handle rejection
-                },
             });
         },
 
@@ -240,6 +241,35 @@ export default {
                         detail: 'Failed to delete feedback.',
                         life: 3000,
                     });
+                },
+            });
+        },
+        toggleValidation(feedback) {
+            const updatedFeedback = {
+                ...feedback,
+                no_validation: feedback.no_validation,
+            };
+
+            this.$inertia.put(route('feedbacks.validation', feedback.id), {
+                no_validation: updatedFeedback.no_validation,
+            }, {
+                onSuccess: () => {
+                    this.$toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Feedback validation status updated.',
+                        life: 3000,
+                    });
+                },
+                onError: () => {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to update validation status.',
+                        life: 3000,
+                    });
+                    // Revert the checkbox if the update fails
+                    feedback.no_validation = !feedback.no_validation;
                 },
             });
         },

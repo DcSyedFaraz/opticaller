@@ -20,7 +20,7 @@ class SubProject extends Model
     }
     public function feedbacks()
     {
-        return $this->hasMany(Feedback::class);
+        return $this->belongsToMany(Feedback::class, 'feedback_sub_project');
     }
 
 }
