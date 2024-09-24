@@ -904,7 +904,7 @@ label {
 }
 
 main {
-    @apply md: !py-2
+    @apply md:!py-2
 }
 
 .p-card-body {
