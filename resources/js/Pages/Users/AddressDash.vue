@@ -715,6 +715,8 @@ export default {
                     notreached: this.notreached,
                     saveEdits: this.saveEdits,
                 });
+                this.notreached = false;
+                this.saveEdits = false;
                 this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 console.log(res.data);
                 clearInterval(this.timer);
