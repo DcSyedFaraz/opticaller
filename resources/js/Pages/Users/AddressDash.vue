@@ -748,6 +748,7 @@ export default {
 
             } catch (error) {
                 this.notreached = false;
+                this.saveEdits = false;
                 this.isLoading = false;
                 console.log(error);
 
@@ -903,7 +904,7 @@ label {
 }
 
 main {
-    @apply md:!py-2
+    @apply md: !py-2
 }
 
 .p-card-body {
