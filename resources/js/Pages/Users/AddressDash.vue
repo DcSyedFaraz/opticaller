@@ -2,8 +2,7 @@
 
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-x-4 px-4"
-            v-if="localAddress && localAddress.id">
+        <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-x-4 px-4" v-if="localAddress && localAddress.id">
             <!-- Main Panel -->
             <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
                 <div class="pb-2 p-4">
@@ -457,7 +456,8 @@
                 </div>
             </Dialog>
 
-            <Dialog header="Project Change Notification" v-model:visible="projectChanged" modal class="rounded-lg shadow-lg">
+            <Dialog header="Project Change Notification" v-model:visible="projectChanged" modal
+                class="rounded-lg shadow-lg">
                 <div class="p-6">
                     <p class="font-semibold">
                         The project has changed. Please ensure all related information is updated accordingly.
@@ -543,6 +543,7 @@ export default {
                 { label: 'Herr', value: 'Herr' },
                 { label: 'Frau', value: 'Frau' },
                 { label: 'Divers', value: 'Divers' },
+                { label: 'Sehr geehrte Damen und Herren', value: 'Sehr geehrte Damen und Herren' },
             ],
             previousProject: '',
             projectChanged: false,
@@ -721,7 +722,7 @@ export default {
 
                 const newProjectTitle = this.localAddress.subproject?.projects?.title;
 
-                console.log( newProjectTitle,this.previousProject);
+                console.log(newProjectTitle, this.previousProject);
 
                 if (this.previousProject && newProjectTitle !== this.previousProject) {
                     this.projectChanged = true;
