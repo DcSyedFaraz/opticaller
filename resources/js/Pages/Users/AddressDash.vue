@@ -724,7 +724,7 @@ export default {
                 console.log( newProjectTitle,this.previousProject);
 
                 if (this.previousProject && newProjectTitle !== this.previousProject) {
-                    // this.projectChanged = true;
+                    this.projectChanged = true;
                 }
                 this.previousProject = newProjectTitle;
                 this.locallockfields = res.data.lockfields;
