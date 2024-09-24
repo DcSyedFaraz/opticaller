@@ -66,7 +66,7 @@ class TimeTrackingController extends Controller
                 'address.company_name' => 'required|string',
                 'address.salutation' => 'nullable|string',
                 'address.first_name' => 'nullable|string',
-                'address.last_name' => 'nullable|string',
+                'address.last_name' => 'nullable|string|min:3',
                 'address.street_address' => 'nullable|string',
                 'address.postal_code' => 'nullable|string',
                 'address.city' => 'nullable|string',
@@ -83,9 +83,9 @@ class TimeTrackingController extends Controller
                 'address.feedback' => 'required|string',
                 'address.follow_up_date' => 'nullable|date|after:today',
             ];
-
+            $data = $request->all();
             // Apply validation only if saveEdits is true
-            if ($request->saveEdits) {
+            if ($request->saveEdits && $data['address']['feedback'] != 'kein_interesse' && $data['address']['feedback'] != 'adresse_löschen') {
                 $validatedData = $request->validate($rules, [
                     'personal_notes.string' => 'Personal notes must be a string',
                     'interest_notes.string' => 'Interest notes must be a string',
