@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Address;
+use App\Models\SubProject;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 
@@ -35,23 +36,25 @@ class AddressService
         $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users', 'project')
             // ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
             // ->orderBy('sub_projects.priority', 'desc')
-            ->when($dueAddress, function ($query) {
-                $query->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
-                    ->orderBy('sub_projects.priority', 'desc');
-            })
+            // ->when($dueAddress, function ($query) {
+            //     $query->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
+            //         ->orderBy('sub_projects.priority', 'desc');
+            // })
+            ->orderBy(SubProject::select('priority')
+            ->whereColumn('sub_projects.id', 'addresses.sub_project_id'),'desc')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
             ->where(function ($query) {
                 $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
                     ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
-            }) // Apply condition on Address's updated_at
-            ->where(function ($query) {
-                $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
-                            ->whereNull('addresses.feedback');
-                    });
             })
+            // ->where(function ($query) {
+            //     $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
+            //         ->orWhere(function ($subQuery) {
+            //             $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
+            //                 ->whereNull('addresses.feedback');
+            //         });
+            // })
             ->where(function ($query) {
                 // Combine conditions for addresses with or without notreached entries
                 $query->whereHas('notreached', function ($q) {
@@ -74,8 +77,6 @@ class AddressService
             return response()->json(['message' => 'No more addresses to process'], 404);
         }
 
-        // Process the retrieved address
-        // For example, mark it as seen
         $address->seen = Carbon::now();
         $address->save();
         // dd($address->project);

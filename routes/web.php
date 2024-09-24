@@ -69,8 +69,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
     Route::resource('users', UsersController::class);
     Route::resource('statistics', StatisticsController::class);
-    Route::resource('feedbacks', FeedbackController::class)->except('store');
-    Route::post('/subprojects/{subProject}/feedbacks', [FeedbackController::class, 'store'])->name('feedbacks.store');
+    Route::resource('feedbacks', FeedbackController::class);
+    Route::put('/feedbacks/validation/{id}', [FeedbackController::class, 'validation'])->name('feedbacks.validation');
 
 
     // Settings

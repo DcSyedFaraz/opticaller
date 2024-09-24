@@ -8,10 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Feedback extends Model
 {
     use HasFactory;
-    protected $fillable = ['sub_project_id', 'label', 'value'];
+    protected $fillable = ['label', 'value','no_validation'];
+    protected $casts = [
+        'no_validation' => 'boolean',
+    ];
 
-    public function subProject()
+    public function subProjects()
     {
-        return $this->belongsTo(SubProject::class);
+        return $this->belongsToMany(SubProject::class, 'feedback_sub_project');
     }
+
 }
