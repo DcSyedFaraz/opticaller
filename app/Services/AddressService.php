@@ -41,13 +41,14 @@ class AddressService
             //         ->orderBy('sub_projects.priority', 'desc');
             // })
             ->orderBy(SubProject::select('priority')
-            ->whereColumn('sub_projects.id', 'addresses.sub_project_id'),'desc')
+                ->whereColumn('sub_projects.id', 'addresses.sub_project_id'), 'desc')
             ->whereIn('sub_project_id', $subProjectIds)
             // ->where('seen', 0)
             ->where(function ($query) {
                 $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
-                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay()->addMinutes(3));  // Checks if 'seen' is older than 24 hours
+                    ->orWhere('addresses.seen', '<', Carbon::now()->addMinutes(3));  // Checks if 'seen' is older than 24 hours
             })
+            ->whereNull('follow_up_date')
             // ->where(function ($query) {
             //     $query->where('addresses.updated_at', '<', $now->subDay())
             //         ->orWhere(function ($subQuery) {
