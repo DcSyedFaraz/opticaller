@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\GlobalLockedFields;
@@ -135,8 +136,8 @@ class TimeTrackingController extends Controller
             }
 
             // Check if the feedback is one of those options
-            if ($request->saveEdits == true && $request->notreached != true) {
-// dd('s');
+            if ($request->saveEdits == true && $request->notreached != true && App::environment('local')) {
+                // dd('s');
                 Http::get('https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf', [
                     'ID' => $validatedData['address']['contact_id']
                 ]);
