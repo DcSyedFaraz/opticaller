@@ -51,7 +51,8 @@ class AddressService
             // ->where('seen', 0)
             ->where(function ($query) {
                 $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
-                    ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
+                    // ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
+                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
             })
             ->whereNull('follow_up_date')
             // ->where(function ($query) {
