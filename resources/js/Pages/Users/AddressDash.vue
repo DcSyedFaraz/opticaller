@@ -182,7 +182,7 @@
                     </div>
                 </div>
                 <div class="flex justify-center flex-wrap my-4">
-                    <button @click="notreached = true; submitFeedback()"
+                    <button @click="notreached = true; submitFeedback()" :disabled="isLoading"
                         class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
@@ -214,7 +214,7 @@
                         <span class="mx-2 my-1">Follow-Ups</span>
                     </button>
                     <button @click="saveEdits = true; submitFeedback()"
-                        :disabled="this.localAddress.feedback == 'Follow-up'"
+                        :disabled="this.localAddress.feedback == 'Follow-up' || isLoading"
                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <i class="pi pi-save !text-2xl"></i>
                         <span class="mx-2 my-1 text-center">

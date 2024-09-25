@@ -11,6 +11,11 @@ class AddressService
     public function getDueAddress()
     {
         $now = Carbon::now();
+        // $nowInUtc = Carbon::now('Europe/Berlin');
+        // dd($now);
+        // $now = $nowInUtc->copy()->setTimezone('UTC');
+
+        // Convert $now to UTC for storing in the database and for comparison
         $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
         // Session::forget('addresses');
 
@@ -46,7 +51,7 @@ class AddressService
             // ->where('seen', 0)
             ->where(function ($query) {
                 $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
-                    ->orWhere('addresses.seen', '<', Carbon::now()->addMinutes(3));  // Checks if 'seen' is older than 24 hours
+                    ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
             })
             ->whereNull('follow_up_date')
             // ->where(function ($query) {
@@ -80,7 +85,7 @@ class AddressService
 
         $address->seen = $now;
         $address->save();
-        // dd($address->project);
+        // dd($address);
 
         return $address;
     }
