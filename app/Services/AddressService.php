@@ -24,7 +24,7 @@ class AddressService
             ->first();
 
         if ($dueAddress) {
-            $dueAddress->seen = Carbon::now();
+            $dueAddress->seen = $now;
             $dueAddress->save();
             return $dueAddress;
         }
@@ -49,9 +49,9 @@ class AddressService
                     ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
             })
             // ->where(function ($query) {
-            //     $query->where('addresses.updated_at', '<', Carbon::now()->subDay())
+            //     $query->where('addresses.updated_at', '<', $now->subDay())
             //         ->orWhere(function ($subQuery) {
-            //             $subQuery->where('addresses.updated_at', '>=', Carbon::now()->subDay())
+            //             $subQuery->where('addresses.updated_at', '>=', $now->subDay())
             //                 ->whereNull('addresses.feedback');
             //         });
             // })
@@ -77,7 +77,7 @@ class AddressService
             return response()->json(['message' => 'No more addresses to process'], 404);
         }
 
-        $address->seen = Carbon::now();
+        $address->seen = $now;
         $address->save();
         // dd($address->project);
 

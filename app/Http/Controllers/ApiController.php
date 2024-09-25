@@ -197,7 +197,6 @@ class ApiController extends Controller
                 'addresses.*.company_id' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
                 // 'addresses.*.priority' => 'nullable|integer',
-                'addresses.*.seen' => 'nullable|integer',
             ]);
             if ($validatedData->fails()) {
                 return response()->json(['error' => $validatedData->messages()], 422);
@@ -226,7 +225,6 @@ class ApiController extends Controller
                     'notes' => $addressData['notes'] ?? null,
                     'company_id' => $addressData['company_id'] ?? null,
                     'deal_id' => $addressData['deal_id'] ?? null,
-                    'seen' => $addressData['seen'] ?? 0,
                 ]);
             }
 

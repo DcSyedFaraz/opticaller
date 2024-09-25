@@ -597,6 +597,7 @@ export default {
 
             this.startTracking();
             this.localAddress.feedback = '';
+            this.localAddress.follow_up_date = null
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
         // this.country_names = country.names();
@@ -698,9 +699,6 @@ export default {
             this.showFollowModal = false;
             try {
 
-                if (this.localAddress.feedback != 'Follow-up') {
-                    this.localAddress.follow_up_date = null
-                }
 
                 if (this.isPaused) {
                     await this.togglePause(); // Resume the tracking if it's paused
@@ -745,11 +743,13 @@ export default {
                 this.ReverseCountdown = 180;
                 this.notreached = false;
                 this.isLoading = false;
+                this.localAddress.follow_up_date = null
 
             } catch (error) {
                 this.notreached = false;
                 this.saveEdits = false;
                 this.isLoading = false;
+                this.localAddress.follow_up_date = null
                 console.log(error);
 
                 if (error.response?.status === 422) {

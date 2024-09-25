@@ -15,7 +15,7 @@ return new class extends Migration {
             // Change column type from string to timestamp
             $table->text('seen')->nullable()->change();
         });
-        \DB::statement("UPDATE `addresses` SET `seen` = '1970-01-01 00:00:00'");
+        // \DB::statement("UPDATE `addresses` SET `seen` = '1970-01-01 00:00:00'");
     }
 
     /**
