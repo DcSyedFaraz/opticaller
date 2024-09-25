@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App;
 use App\Models\Activity;
 use App\Models\Address;
+use App\Models\Feedback;
 use App\Models\GlobalLockedFields;
 use App\Models\NotReached;
 use App\Services\AddressService;
@@ -66,8 +67,6 @@ class TimeTrackingController extends Controller
                 'address.id' => 'required|integer|exists:addresses,id',
                 'address.company_name' => 'required|string',
                 'address.salutation' => 'nullable|string',
-                'address.first_name' => 'nullable|string',
-                'address.last_name' => 'nullable|string|min:3',
                 'address.street_address' => 'nullable|string',
                 'address.postal_code' => 'nullable|string',
                 'address.city' => 'nullable|string',
@@ -84,9 +83,18 @@ class TimeTrackingController extends Controller
                 'address.feedback' => 'required|string',
                 'address.follow_up_date' => 'nullable|date|after:today',
             ];
-            $data = $request->all();
+            if ($request->address['salutation'] !== 'Sehr geehrte Damen und Herren') {
+                $rules['address.first_name'] = 'required|string|min:3';
+                $rules['address.last_name'] = 'required|string|min:3';
+            } else {
+                // If the salutation is "Sehr geehrte Damen und Herren", make first and last name optional
+                $rules['address.first_name'] = 'nullable|string';
+                $rules['address.last_name'] = 'nullable|string';
+            }
+            // $data = $request->all();
+            $feedback = Feedback::where('value', $request->address['feedback'])->first();
             // Apply validation only if saveEdits is true
-            if ($request->saveEdits && $data['address']['feedback'] != 'kein_interesse' && $data['address']['feedback'] != 'adresse_löschen') {
+            if ($request->saveEdits && $feedback && !$feedback->no_validation) {
                 $validatedData = $request->validate($rules, [
                     'personal_notes.string' => 'Personal notes must be a string',
                     'interest_notes.string' => 'Interest notes must be a string',

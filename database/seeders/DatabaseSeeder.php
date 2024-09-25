@@ -36,13 +36,13 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678'),
         ]);
         $user->assignRole('user');
-        User::factory()->count(5)->admin()->create();
-        User::factory()->count(5)->user()->create();
+        // User::factory()->count(5)->admin()->create();
+        // User::factory()->count(5)->user()->create();
 
         Project::factory(5)->create();
         SubProject::factory(5)->create();
-        Address::factory(2)->create();
+        Address::factory(30)->create();
         // Activity::factory(50)->create();
-        LoginTime::factory(50)->create();
+        // LoginTime::factory(50)->create();
     }
 }
