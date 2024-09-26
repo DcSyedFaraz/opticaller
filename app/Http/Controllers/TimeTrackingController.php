@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class TimeTrackingController extends Controller
 {
@@ -59,11 +60,12 @@ class TimeTrackingController extends Controller
         DB::beginTransaction();
 
         try {
+            // Define validation rules
             $rules = [
                 'personal_notes' => 'nullable|string',
                 'interest_notes' => 'nullable|string',
                 'address' => 'required|array',
-                'total_duration' => 'required|integer', // assuming total_duration should be an integer
+                'total_duration' => 'required|integer',
                 'address.id' => 'required|integer|exists:addresses,id',
                 'address.company_name' => 'required|string',
                 'address.salutation' => 'nullable|string',
@@ -82,19 +84,24 @@ class TimeTrackingController extends Controller
                 'address.email_address_new' => 'nullable|email',
                 'address.feedback' => 'required|string',
                 'address.follow_up_date' => 'nullable|date|after:today',
+                'notreached' => 'sometimes|boolean', // Ensure 'notreached' is boolean
             ];
+
+            // Conditional validation for first_name and last_name based on salutation
             if ($request->address['salutation'] !== 'Sehr geehrte Damen und Herren') {
-                $rules['address.first_name'] = 'required|string|min:3';
-                $rules['address.last_name'] = 'required|string|min:3';
+                $rules['address.first_name'] = 'nullable|string|min:3';
+                $rules['address.last_name'] = 'nullable|string|min:3';
             } else {
-                // If the salutation is "Sehr geehrte Damen und Herren", make first and last name optional
                 $rules['address.first_name'] = 'nullable|string';
                 $rules['address.last_name'] = 'nullable|string';
             }
-            // $data = $request->all();
+
+            // Fetch feedback
             $feedback = Feedback::where('value', $request->address['feedback'])->first();
-            // Apply validation only if saveEdits is true
+
+            // Apply validation only if saveEdits is true and feedback requires validation
             if ($request->saveEdits && $feedback && !$feedback->no_validation) {
+
                 $validatedData = $request->validate($rules, [
                     'personal_notes.string' => 'Personal notes must be a string',
                     'interest_notes.string' => 'Interest notes must be a string',
@@ -130,12 +137,18 @@ class TimeTrackingController extends Controller
                     'address.follow_up_date.after' => 'Follow up date must be after today',
                 ]);
             } else {
-                // Handle non-validation case if necessary
-                $validatedData = $request->all();
+                // If not validating, ensure 'address' and 'feedback' exist to prevent issues
+                $validatedData = $request->only(['address', 'personal_notes', 'interest_notes', 'total_duration']);
+                $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? '';
+            }
+
+            // Ensure 'feedback' is present and not empty when saveEdits is true
+            if ($request->saveEdits && empty($validatedData['address']['feedback'])) {
+                DB::rollBack();
+                return response()->json(['error' => 'Feedback is required when saving edits.'], 422);
             }
 
             $addressID = $validatedData['address']['id'];
-            // dd($validatedData['address']);
             $address = Address::find($addressID);
 
             if (!$address) {
@@ -143,40 +156,64 @@ class TimeTrackingController extends Controller
                 return response()->json(['error' => 'Address not found'], 404);
             }
 
-            // Check if the feedback is one of those options
-            if ($request->saveEdits == true && $request->notreached != true) {
-                // dd('s');
-                Http::get('https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf', [
-                    'ID' => $validatedData['address']['contact_id']
-                ]);
-                // dd($response->successful() contact_id);
+            // Determine if 'notreached' is true
+            $notreached = filter_var($request->notreached, FILTER_VALIDATE_BOOLEAN);
+
+            // testing hook
+            // $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
+
+            // live hook
+            $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
+
+            // Enhanced condition to trigger webhook
+            if ($request->saveEdits && !$notreached && !empty($validatedData['address']['feedback'])) {
+                // Check if the application is not running in the 'local' environment
+                if (App::environment('local')) {
+                    // Optional: Log webhook trigger
+                    Log::info('Triggering webhook for contact ID: ' . $validatedData['address']['contact_id']);
+
+                    // Option 1: Directly trigger (synchronous)
+                    // Uncomment if you prefer synchronous execution
+
+                    $response = Http::post($webhookUrl, [
+                        'ID' => $validatedData['address']['contact_id']
+                    ]);
+
+                    if ($response->successful()) {
+                        Log::info('Webhook successfully triggered for contact ID: ' . $validatedData['address']['contact_id']);
+                    } else {
+                        Log::error('Webhook failed for contact ID: ' . $validatedData['address']['contact_id'] . '. Response: ' . $response->body());
+                    }
+
+
+                    // Option 2: Dispatch a job for asynchronous processing (recommended)
+                    // TriggerWebhook::dispatch($validatedData['address']['contact_id'], $webhookUrl);
+                } else {
+                    // Optional: Log why webhook is not triggered
+                    Log::info('Webhook not triggered. Application is running in the local environment.');
+                }
+            } else {
+                // Optional: Log why webhook is not triggered
+                Log::info('Webhook not triggered. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                    ', notreached: ' . ($notreached ? 'true' : 'false') .
+                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? 'present' : 'empty'));
             }
+
             if ($validatedData['address']['feedback'] == 'Delete Address') {
                 $address->delete();
-                // DB::commit();
-                // return response()->json(['message' => 'Address deleted successfully']);
             } else {
-                if (isset($validatedData['address']['cal_logs'])) {
-                    unset($validatedData['address']['cal_logs']);
-
+                // Clean up unwanted fields
+                $fieldsToUnset = ['cal_logs', 'subproject', 'feedbacks', 'project'];
+                foreach ($fieldsToUnset as $field) {
+                    if (isset($validatedData['address'][$field])) {
+                        unset($validatedData['address'][$field]);
+                    }
                 }
-                if (isset($validatedData['address']['subproject'])) {
-                    unset($validatedData['address']['subproject']);
 
-                }
-                if (isset($validatedData['address']['feedbacks'])) {
-                    unset($validatedData['address']['feedbacks']);
-
-                }
-                if (isset($validatedData['address']['project'])) {
-                    unset($validatedData['address']['project']);
-
-                }
-                // dd($validatedData['address']);
-                // dd('d');
+                // Update address
                 $address->update($validatedData['address']);
 
-                if ($request->notreached == true) {
+                if ($notreached) {
                     NotReached::create(['address_id' => $address->id]);
                     $address->follow_up_date = null;
                     $address->feedback = 'notreached';
@@ -188,6 +225,7 @@ class TimeTrackingController extends Controller
 
                 $address->save();
 
+                // Log activity
                 $seconds = $validatedData['total_duration'];
                 $timeLog = new Activity();
                 $timeLog->activity_type = 'call';
@@ -202,10 +240,9 @@ class TimeTrackingController extends Controller
                         'interest_notes' => $validatedData['interest_notes'] ?? null,
                     ]);
                 }
-
             }
-            DB::commit();
 
+            DB::commit();
 
             $addressService = new AddressService();
             $address = $addressService->getDueAddress();
@@ -215,9 +252,11 @@ class TimeTrackingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // throw $e;
+            // Log the exception for debugging
+            Log::error('Error in stopTracking: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }
+
 
 }

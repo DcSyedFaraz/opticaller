@@ -379,9 +379,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                            + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -448,9 +448,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                    + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -758,6 +758,10 @@ export default {
                 this.localAddress.follow_up_date = null
                 console.log(error);
 
+                if (error.response.data.error) {
+
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 4000 });
+                }
                 if (error.response?.status === 422) {
                     const errors = error.response.data.errors;
                     console.log(errors);
