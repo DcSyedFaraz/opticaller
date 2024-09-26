@@ -34,6 +34,7 @@ class AddressFactory extends Factory
             'phone_number' => $this->faker->phoneNumber,
             'email_address_system' => fake()->unique()->safeEmail(),
             'email_address_new' => $this->faker->safeEmail,
+            'contact_id' => $this->faker->numberBetween(1111, 9999),
             // 'priority' => $this->faker->numberBetween(0, 4),
             'sub_project_id' => SubProject::inRandomOrder()->first()->id,
             // 'personal_notes' => $this->faker->paragraph,
