@@ -7,12 +7,12 @@
             <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
                 <div class="pb-2 p-4">
                     <div
-                        class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-3xl font-medium text-white ring-1 ring-inset ring-black mb-1">
+                        class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-xl font-medium text-white ring-1 ring-inset ring-black mb-1">
                         Sub Project Title: {{ localAddress.subproject?.title }}
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
                         <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
-                            class="inline-flex items-center rounded-md  px-2 py-1 text-lg md:text-xl font-medium text-white ring-1 ring-inset  mb-1">
+                            class="inline-flex items-center rounded-md  px-2 py-1 text-lg md:text-md font-medium text-white ring-1 ring-inset  mb-1">
                             Project Title: {{ localAddress.subproject?.projects?.title }}
                         </div>
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
@@ -143,7 +143,7 @@
                         <Card class="shadow-md">
                             <template #content>
                                 <div class="grid">
-                                    <div class="grid grid-cols-1">
+                                    <!-- <div class="grid grid-cols-1">
                                         <div class="field col-span-1 md:col-span-1 lg:col-span-1">
                                             <label for="notes" class="font-extrabold text-lg">
                                                 Notes:
@@ -151,7 +151,7 @@
                                             <InputText id="notes" v-model="localAddress.notes"
                                                 class="w-full !border-secondary" disabled />
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
                                         <div class="field">
                                             <label class="font-extrabold text-lg" for="feedback">
@@ -165,7 +165,7 @@
                                             <label class="font-extrabold text-lg" for="interest_notes">
                                                 Interest Notes:
                                             </label>
-                                            <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="5"
+                                            <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="3"
                                                 class="w-full !border-secondary" />
                                         </div>
                                     </div>
@@ -196,7 +196,7 @@
                         </svg>
                         <span class="mx-2 my-1">Not Reached</span>
                     </button>
-                    <button @click="showFollowModal = true" :disabled="this.localAddress.feedback != 'Follow-up'"
+                    <button @click="showFollowModal = true" :disabled="isButtonDisabled"
                         class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <!-- SVG and Text for Button remain unchanged -->
                         <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -213,8 +213,7 @@
                         </svg>
                         <span class="mx-2 my-1">Follow-Ups</span>
                     </button>
-                    <button @click="saveEdits = true; submitFeedback()"
-                        :disabled="this.localAddress.feedback == 'Follow-up' || isButtonDisabled"
+                    <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
                         <i class="pi pi-save !text-2xl"></i>
                         <span class="mx-2 my-1 text-center">
@@ -327,7 +326,15 @@
                         <span class="pi pi-clock !text-[3rem] text-secondary ml-2" data-pc-section="icon"></span>
                     </div>
                 </div>
-
+                <div class="grid grid-cols-1">
+                    <div class="field col-span-1 md:col-span-1 lg:col-span-1">
+                        <label for="notes" class="font-extrabold text-lg">
+                            Notes:
+                        </label>
+                        <InputText id="notes" v-model="localAddress.notes"
+                            class="w-full !border-secondary" disabled />
+                    </div>
+                </div>
                 <!-- Responsive adjustments for call history and modal dialogs -->
                 <div class="bg-white border border-gray-300 rounded-lg shadow-xl">
                     <div class="flex justify-between items-center pb-2 border-b-2 p-4">
@@ -379,9 +386,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -448,8 +455,8 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
                                     + ' Seconds' }} </span>
                             </span>
                     </div>

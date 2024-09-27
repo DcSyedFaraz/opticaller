@@ -60,6 +60,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(LoginTime::class, 'user_id');
     }
+    public function latestLoginTime()
+    {
+        return $this->hasOne(LoginTime::class, 'user_id')->latestOfMany();
+    }
+    public function latestLogoutTime()
+    {
+        return $this->hasOne(LoginTime::class, 'user_id')->whereNotNull('logout_time')->latestOfMany();
+    }
+
     public function activities()
     {
         return $this->hasMany(Activity::class, 'user_id');
