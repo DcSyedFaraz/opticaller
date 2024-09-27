@@ -165,7 +165,7 @@ class TimeTrackingController extends Controller
             $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
 
             // Enhanced condition to trigger webhook
-            if ($request->saveEdits && !$notreached && !empty($validatedData['address']['feedback'])) {
+            if (!$notreached && !empty($validatedData['address']['feedback'])) {
                 // Check if the application is not running in the 'local' environment
                 Log::info('Triggering webhook for contact ID: ' . $address->contact_id);
 
@@ -193,10 +193,11 @@ class TimeTrackingController extends Controller
                 // }
             } else {
                 // Optional: Log why webhook is not triggered
-                Log::info('Webhook not triggered. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                Log::info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
                     ', feedback: ' . (!empty($validatedData['address']['feedback']) ? 'present' : 'empty'));
             }
+
 
             if ($validatedData['address']['feedback'] == 'Delete Address') {
                 $address->delete();
