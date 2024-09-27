@@ -21,7 +21,8 @@ class UsersController extends Controller
      */
     public function toggleStatusget()
     {
-        $users = User::all();
+        $users = User::with('latestLoginTime','latestLogoutTime')->get();
+        // dd($users);
         return Inertia::render('Settings/UserStatusToggle', [
             'users' => $users
         ]);
