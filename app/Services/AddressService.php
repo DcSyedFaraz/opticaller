@@ -5,6 +5,7 @@ use App\Models\Address;
 use App\Models\SubProject;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
+use Log;
 
 class AddressService
 {
@@ -31,6 +32,13 @@ class AddressService
         if ($dueAddress) {
             $dueAddress->seen = $now;
             $dueAddress->save();
+
+            Log::channel('address')->info('Due Address Processed', [
+                'timestamp' => $now->toDateTimeString(),
+                'user_id' => auth()->id(),
+                'address' => $dueAddress->toArray(),
+            ]);
+
             return $dueAddress;
         }
 
@@ -81,12 +89,24 @@ class AddressService
 
         // Check if there are no more addresses to process
         if ($addresses->isEmpty()) {
+
+            Log::channel('address')->warning('No Addresses to Process', [
+                'timestamp' => $now->toDateTimeString(),
+                'user_id' => auth()->id(),
+            ]);
+
             return response()->json(['message' => 'No more addresses to process'], 404);
         }
 
         $address->seen = $now;
         $address->save();
         // dd($address);
+
+        Log::channel('address')->info('Address Processed', [
+            'timestamp' => $now->toDateTimeString(),
+            'user_id' => auth()->id(),
+            'address' => $address->toArray(),
+        ]);
 
         return $address;
     }
