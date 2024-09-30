@@ -15,7 +15,16 @@
                     <Column field="title" header="Sub Project Title" class="font-semibold text-lg"></Column>
                     <Column header="Assigned Users" class="text-lg">
                         <template #body="slotProps">
-                            {{ slotProps.data.users ? slotProps.data.users.length : 0 }}
+                            <div>
+                                <span v-if="slotProps.data.users && slotProps.data.users.length > 0">
+                                
+                                    <ul>
+                                        <li v-for="user in slotProps.data.users" :key="user.id">{{ user.name }}</li>
+                                    </ul>
+                                </span>
+                                <span v-else>No users assigned.</span>
+                            </div>
+
                         </template>
                     </Column>
                     <Column header="Action" class="text-lg">

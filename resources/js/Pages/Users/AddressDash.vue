@@ -39,7 +39,7 @@
                                             :disabled="isFieldLocked('company_name')" />
                                     </div>
 
-                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-4">
+                                    <div class="grid grid-cols-1 lg:grid-cols-6 gap-x-4">
                                         <div class="field col-span-1 md:col-span-1 lg:col-span-1">
                                             <label for="salutation" class="font-extrabold text-lg">
                                                 Salutation: <span class="text-red-600">*</span>
@@ -48,6 +48,14 @@
                                                 placeholder="select salutation" :options="salutationOptions"
                                                 optionLabel="label" optionValue="value" class="w-full !border-secondary"
                                                 :disabled="isFieldLocked('salutation')" />
+                                        </div>
+                                        <div class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                            <label for="salutation" class="font-extrabold text-lg">
+                                                Titel: <span class="text-red-600">*</span>
+                                            </label>
+                                            <Select id="titel" v-model="localAddress.titel" placeholder="select titel"
+                                                :options="titelOptions" optionLabel="label" optionValue="value"
+                                                class="w-full !border-secondary" :disabled="isFieldLocked('titel')" />
                                         </div>
 
                                         <div class="field col-span-1 md:col-span-1 lg:col-span-2">
@@ -361,13 +369,13 @@
                         <div class="border-b border-gray-300 pt-2 p-4">
                             <div class="mb-4">
                                 <div class="flex items-center mb-1">
-                                    <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
-                                    <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
+                                    <span class="text-md font-[1000] ">Personal Notes:</span>
                                 </div>
                                 <p
                                     class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                                    {{ item.notes?.personal_notes?.slice(0, 50) }}
-                                    {{ item.notes?.personal_notes?.length > 50 ? '...' : '' }}
+                                    <!-- {{ item.notes?.personal_notes?.slice(0, 50) }}
+                                    {{ item.notes?.personal_notes?.length > 50 ? '...' : '' }} -->
+                                    {{ item.notes?.personal_notes }}
                                 </p>
                             </div>
                             <div>
@@ -574,6 +582,12 @@ export default {
                 { label: 'Divers', value: 'Divers' },
                 { label: 'Sehr geehrte Damen und Herren', value: 'Sehr geehrte Damen und Herren' },
             ],
+            titelOptions: [
+                { label: 'Dr.', value: 'Dr.' },
+                { label: 'Prof.', value: 'Prof.' },
+                { label: 'Prof. Dr.', value: 'Prof. Dr.' },
+
+            ],
             previousProject: '',
             projectChanged: false,
             isButtonDisabled: false,
@@ -582,16 +596,16 @@ export default {
             selectedHour: null,
             selectedMinute: null,
             hourOptions: [
-            { label: '09', value: 9 },
-            { label: '10', value: 10 },
-            { label: '11', value: 11 },
-            { label: '12', value: 12 },
-            { label: '13', value: 13 },
-            { label: '14', value: 14 },
-            { label: '15', value: 15 },
-            { label: '16', value: 16 },
-            { label: '17', value: 17 },
-        ],
+                { label: '09', value: 9 },
+                { label: '10', value: 10 },
+                { label: '11', value: 11 },
+                { label: '12', value: 12 },
+                { label: '13', value: 13 },
+                { label: '14', value: 14 },
+                { label: '15', value: 15 },
+                { label: '16', value: 16 },
+                { label: '17', value: 17 },
+            ],
 
             minuteOptions: [
                 { label: '00', value: '00' },

@@ -40,6 +40,10 @@ class Address extends Model
     {
         return $this->hasMany(Activity::class)->where('activity_type', 'call');
     }
+    public function lastuser()
+    {
+        return $this->hasOne(Activity::class)->where('activity_type', 'call')->latestOfMany();
+    }
     public function notreached()
     {
         return $this->hasMany(NotReached::class, 'address_id');
