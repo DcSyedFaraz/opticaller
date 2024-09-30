@@ -1,11 +1,12 @@
 <template>
 
-    <Head title="Feedback Customization" />
+    <Head title="Address Customization" />
     <AuthenticatedLayout>
 
         <div class="flex justify-between">
-            <h1 class="text-2xl font-bold">Feedback Customization</h1>
-            <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button" type="button">Create
+            <h1 class="text-2xl font-bold">Address Customization</h1>
+            <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button"
+                type="button">Create
             New</Link>
         </div>
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -13,9 +14,16 @@
             <DataTable :value="addresses.data" responsiveLayout="scroll" :sortField="filters.sortField"
                 :sortOrder="sortOrderMap[filters.sortOrder]" @sort="onSort">
                 <Column field="company_name" header="Company Name" sortable></Column>
-                <Column field="city" header="City" sortable></Column>
-                <Column field="phone_number" header="Phone Number" sortable></Column>
+                <Column header="Sub-Project" sortable>
+
+                    <template #body="slotProps">
+                        {{ slotProps.data. }}
+                    </template>
+                </Column>
                 <Column field="email_address_system" header="Email Address System" sortable></Column>
+                <Column field="feedback" header="Last Feedback" sortable></Column>
+                <Column field="deal_id" header="Deal ID" sortable></Column>
+                <Column field="phone_number" header="Closure User" sortable></Column>
                 <Column header="Actions">
                     <template #body="slotProps">
                         <Link :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">

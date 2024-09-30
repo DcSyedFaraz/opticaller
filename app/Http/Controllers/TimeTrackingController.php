@@ -57,6 +57,7 @@ class TimeTrackingController extends Controller
 
     public function stopTracking(Request $request)
     {
+        // dd($request->all());
         DB::beginTransaction();
 
         try {
@@ -159,10 +160,10 @@ class TimeTrackingController extends Controller
             $notreached = filter_var($request->notreached, FILTER_VALIDATE_BOOLEAN);
 
             // testing hook
-            // $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
+            $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
 
             // live hook
-            $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
+            // $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
 
             // Enhanced condition to trigger webhook
             if (!$notreached && !empty($validatedData['address']['feedback'])) {
@@ -221,6 +222,7 @@ class TimeTrackingController extends Controller
 
                 if ($address->follow_up_date) {
                     $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+                    dd($request->address['follow_up_date'],$address->follow_up_date);
                 }
 
                 $address->save();

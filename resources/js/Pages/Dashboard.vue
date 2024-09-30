@@ -227,7 +227,7 @@
                 </svg>
             </span> Start Call</Link>
 
-            <Link :href="route('dash')" class="bg-[#383838] text-white flex px-[4rem] py-3 text-xl mx-2 rounded mb-2">
+            <!-- <Link :href="route('dash')" class="bg-[#383838] text-white flex px-[4rem] py-3 text-xl mx-2 rounded mb-2">
             <span class="mr-1">
                 <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
@@ -240,7 +240,7 @@
                         stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M10.0027 10.9567H21.9383" stroke="white" stroke-width="2" stroke-linecap="round" />
                 </svg>
-            </span> Follow-Ups</Link>
+            </span> Follow-Ups</Link> -->
 
             <Link :href="route('statistics.index')"
                 class="bg-secondary text-white flex px-[5rem] py-3 text-xl mx-2 rounded mb-2">

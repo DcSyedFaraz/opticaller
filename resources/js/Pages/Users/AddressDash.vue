@@ -331,8 +331,7 @@
                         <label for="notes" class="font-extrabold text-lg">
                             Notes:
                         </label>
-                        <InputText id="notes" v-model="localAddress.notes"
-                            class="w-full !border-secondary" disabled />
+                        <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary" disabled />
                     </div>
                 </div>
                 <!-- Responsive adjustments for call history and modal dialogs -->
@@ -388,7 +387,7 @@
                                     {{
                                         item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                             Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -405,15 +404,37 @@
                 :style="{ width: '90%', maxWidth: '36rem' }">
                 <div class="p-6 space-y-4">
                     <div class="space-y-2">
+                        <!-- Date Selection -->
                         <div class="field">
                             <label for="follow_up_date">Follow-up Date:</label>
-                            <DatePicker id="follow_up_date" showTime hourFormat="24" fluid
-                                placeholder="Follow up datetime" v-model="localAddress.follow_up_date"
+                            <DatePicker id="follow_up_date" v-model="selectedDate" dateFormat="dd/mm/yy"
+                                placeholder="Select follow-up date" class="w-full !border-secondary" :showTime="false"
+                                :manualInput="false" />
+                            <small class="text-red-600" v-if="errors.follow_up_date">{{ errors.follow_up_date }}</small>
+                        </div>
+
+                        <!-- Hour Selection -->
+                        <div class="field">
+                            <label for="follow_up_hour">Hour:</label>
+                            <Select id="follow_up_hour" v-model="selectedHour" :options="hourOptions"
+                                optionLabel="label" optionValue="value" placeholder="Select hour"
                                 class="w-full !border-secondary" />
+                            <small class="text-red-600" v-if="errors.follow_up_hour">{{ errors.follow_up_hour }}</small>
+                        </div>
+
+                        <!-- Minute Selection -->
+                        <div class="field">
+                            <label for="follow_up_minute">Minute:</label>
+                            <Select id="follow_up_minute" v-model="selectedMinute" :options="minuteOptions"
+                                optionLabel="label" optionValue="value" placeholder="Select minute"
+                                class="w-full !border-secondary" />
+                            <small class="text-red-600" v-if="errors.follow_up_minute">{{ errors.follow_up_minute
+                                }}</small>
                         </div>
                     </div>
+
                     <div class="flex justify-end">
-                        <Button class="font-bold py-2 px-4" @click="submitFeedback">Schedule Follow-up</Button>
+                        <Button class="font-bold py-2 px-4" @click="scheduleFollowUp">Schedule Follow-up</Button>
                     </div>
                 </div>
             </Dialog>
@@ -457,7 +478,7 @@
                                 {{
                                     item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                         Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                    + ' Seconds' }} </span>
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -499,6 +520,7 @@
 
 <script>
 import moment from "moment";
+import timezone from 'moment-timezone';
 // import country from 'country-list-js';
 
 
@@ -555,6 +577,29 @@ export default {
             previousProject: '',
             projectChanged: false,
             isButtonDisabled: false,
+            // New data properties for follow-up scheduling
+            selectedDate: null,
+            selectedHour: null,
+            selectedMinute: null,
+            hourOptions: [
+            { label: '09', value: 9 },
+            { label: '10', value: 10 },
+            { label: '11', value: 11 },
+            { label: '12', value: 12 },
+            { label: '13', value: 13 },
+            { label: '14', value: 14 },
+            { label: '15', value: 15 },
+            { label: '16', value: 16 },
+            { label: '17', value: 17 },
+        ],
+
+            minuteOptions: [
+                { label: '00', value: '00' },
+                { label: '15', value: '15' },
+                { label: '30', value: '30' },
+                { label: '45', value: '45' },
+            ],
+
 
         };
     },
@@ -610,6 +655,8 @@ export default {
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
         // this.country_names = country.names();
+
+
     },
 
     methods: {
@@ -631,6 +678,37 @@ export default {
 
             // Return mapped class or a default if color not found
             return colorMap[color] || 'bg-primary ring-primary';
+        },
+
+        async scheduleFollowUp() {
+            // Reset previous errors
+            if (!this.selectedDate || this.selectedHour === null || this.selectedMinute === null) {
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Please select date, hour, and minute.', life: 4000 });
+                return;
+            }
+
+            // Clone the selectedDate to avoid mutating the original object
+            let followUpMoment = timezone.tz(this.selectedDate, 'Europe/Berlin');
+
+            // Set the hour and minute
+            followUpMoment.hour(this.selectedHour);
+            followUpMoment.minute(this.selectedMinute);
+            followUpMoment.second(0);
+
+            // Convert to JavaScript Date object
+            const followUpDateTime = followUpMoment.toDate();
+
+            // Optional: Log for debugging
+            console.log('Selected Date:', this.selectedDate);
+            console.log('Selected Hour:', this.selectedHour);
+            console.log('Selected Minute:', this.selectedMinute);
+            console.log('Combined Follow-Up DateTime:', followUpDateTime);
+
+            // Assign to localAddress.follow_up_date
+            this.localAddress.follow_up_date = followUpDateTime;
+
+            // Submit the form
+            await this.submitFeedback();
         },
         formatnewDate(date) {
             return moment(date).format("MMM D dddd");
@@ -696,6 +774,7 @@ export default {
                 console.error('Error toggling pause:', error);
             }
         },
+
         async submitFeedback() {
 
             // if (!this.logdata.call_attempts || this.logdata.call_attempts <= 0) {
@@ -921,7 +1000,7 @@ label {
 }
 
 main {
-    @apply md:!py-2
+    @apply !py-2
 }
 
 .p-card-body {
