@@ -22,9 +22,9 @@ class AddressController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('company_name', 'like', "%{$search}%")
-                ->orWhere('city', 'like', "%{$search}%")
-                ->orWhere('phone_number', 'like', "%{$search}%")
-                ->orWhere('email_address_system', 'like', "%{$search}%");
+                ->orWhere('feedback', 'like', "%{$search}%")
+                ->orWhere('email_address_system', 'like', "%{$search}%")
+                ->orWhere('deal_id', 'like', "%{$search}%");
         }
 
         // Sorting functionality with validation
@@ -34,7 +34,7 @@ class AddressController extends Controller
         $query->orderBy($sortField, $sortOrder);
 
         // Pagination
-        $addresses = $query->with('subproject')->paginate(10);
+        $addresses = $query->with('subproject','lastuser.users')->paginate(10);
 
         return inertia('Addresses/Index', [
             'addresses' => $addresses,

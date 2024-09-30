@@ -182,6 +182,7 @@ class ApiController extends Controller
                 'addresses.*.street_address' => 'nullable|string',
                 'addresses.*.postal_code' => 'nullable|string',
                 'addresses.*.city' => 'nullable|string',
+                'addresses.*.titel' => 'nullable|string',
                 'addresses.*.country' => 'nullable|string',
                 'addresses.*.website' => 'nullable|string',
                 'addresses.*.phone_number' => 'nullable|string',
@@ -225,6 +226,7 @@ class ApiController extends Controller
                     'notes' => $addressData['notes'] ?? null,
                     'company_id' => $addressData['company_id'] ?? null,
                     'deal_id' => $addressData['deal_id'] ?? null,
+                    'titel' => $addressData['titel'] ?? null,
                 ]);
             }
 

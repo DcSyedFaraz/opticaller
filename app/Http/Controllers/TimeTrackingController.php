@@ -75,6 +75,7 @@ class TimeTrackingController extends Controller
                 'address.city' => 'nullable|string',
                 'address.country' => 'nullable|string',
                 'address.website' => 'nullable|string',
+                'address.titel' => 'nullable|string',
                 'address.phone_number' => 'nullable|string',
                 'address.email_address_system' => [
                     'required',
@@ -222,7 +223,7 @@ class TimeTrackingController extends Controller
 
                 if ($address->follow_up_date) {
                     $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
-                    dd($request->address['follow_up_date'],$address->follow_up_date);
+                    dd($request->address['follow_up_date'], $address->follow_up_date);
                 }
 
                 $address->save();

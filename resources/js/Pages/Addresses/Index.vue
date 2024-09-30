@@ -14,16 +14,20 @@
             <DataTable :value="addresses.data" responsiveLayout="scroll" :sortField="filters.sortField"
                 :sortOrder="sortOrderMap[filters.sortOrder]" @sort="onSort">
                 <Column field="company_name" header="Company Name" sortable></Column>
-                <Column header="Sub-Project" sortable>
+                <Column header="Sub-Project">
 
                     <template #body="slotProps">
-                        {{ slotProps.data. }}
+                        {{ slotProps.data.subproject?.title }}
                     </template>
                 </Column>
                 <Column field="email_address_system" header="Email Address System" sortable></Column>
                 <Column field="feedback" header="Last Feedback" sortable></Column>
                 <Column field="deal_id" header="Deal ID" sortable></Column>
-                <Column field="phone_number" header="Closure User" sortable></Column>
+                <Column header="Closure User">
+                    <template #body="slotProps">
+                        {{ slotProps.data.lastuser?.users?.name }}
+                    </template>
+                </Column>
                 <Column header="Actions">
                     <template #body="slotProps">
                         <Link :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">

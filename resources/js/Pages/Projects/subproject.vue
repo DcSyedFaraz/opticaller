@@ -44,6 +44,14 @@
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column field="description" header="Description"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
+                <Column header="Priority"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <template #body="slotProps">
+                        <span>
+                            {{ getPriorityLabel(slotProps.data.priority) }}
+                        </span>
+                    </template>
+                </Column>
                 <Column header="Actions"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
@@ -120,6 +128,10 @@ export default {
         }
     },
     methods: {
+        getPriorityLabel(priorityValue) {
+            const priority = this.priorityOptions.find(option => option.value === priorityValue);
+            return priority ? priority.label : 'N/A';
+        },
         createProject() {
             this.$inertia.post('/subprojects', this.newProject, {
                 onSuccess: () => {
