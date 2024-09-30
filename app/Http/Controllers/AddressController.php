@@ -34,7 +34,7 @@ class AddressController extends Controller
         $query->orderBy($sortField, $sortOrder);
 
         // Pagination
-        $addresses = $query->paginate(10);
+        $addresses = $query->with('subproject')->paginate(10);
 
         return inertia('Addresses/Index', [
             'addresses' => $addresses,
