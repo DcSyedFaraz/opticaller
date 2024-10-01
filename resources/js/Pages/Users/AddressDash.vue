@@ -7,12 +7,12 @@
             <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
                 <div class="pb-2 p-4">
                     <div
-                        class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-xl font-medium text-white ring-1 ring-inset ring-black mb-1">
+                        class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-xl font-medium text-white ring-1 ring-inset ring-black ">
                         Sub Project Title: {{ localAddress.subproject?.title }}
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
                         <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
-                            class="inline-flex items-center rounded-md  px-2 py-1 text-lg md:text-md font-medium text-white ring-1 ring-inset  mb-1">
+                            class="inline-flex items-center rounded-md  px-2 py-1 text-sm md:text-md font-medium text-white ring-1 ring-inset  mb-1">
                             Project Title: {{ localAddress.subproject?.projects?.title }}
                         </div>
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
@@ -21,168 +21,147 @@
                         </div>
                     </div>
                 </div>
-                <div class="border my-0 m-4 lg:mx-7 rounded-lg shadow shadow-secondary">
+                <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-secondary my-3">
                     <!-- <div class="border-b-2 p-3">
-                        <span class="mx-4 font-extrabold text-lg">Details</span>
+                        <span class="mx-4 font-extrabold text-sm">Details</span>
                     </div> -->
 
-                    <div class="grid">
+                    <div class="grid m-3">
                         <Card class="shadow-md">
                             <template #content>
-                                <div class="grid grid-cols-1 mx-3">
-                                    <div class="field">
-                                        <label for="company_name" class="font-extrabold text-lg">
+                                <div class="grid lg:grid-cols-8 grid-cols-1 gap-x-4 mb-2">
+                                    <div v-if="!isFieldLocked('company_name')" class="field col-span-1 md:col-span-2 lg:col-span-2">
+                                        <label for="company_name" class="font-extrabold text-sm">
                                             Company Name: <span class="text-red-600">*</span>
                                         </label>
                                         <InputText id="company_name" v-model="localAddress.company_name"
-                                            class="w-full !border-secondary"
-                                            :disabled="isFieldLocked('company_name')" />
+                                            class="w-full !border-secondary" />
                                     </div>
+                                    <div v-if="!isFieldLocked('salutation')" class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                        <label for="salutation" class="font-extrabold text-sm">
+                                            Salutation:
+                                        </label>
+                                        <Select id="salutation" v-model="localAddress.salutation" placeholder="select salutation"
+                                            :options="salutationOptions" optionLabel="label" optionValue="value"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('titel')" class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                        <label for="titel" class="font-extrabold text-sm">
+                                            Titel:
+                                        </label>
+                                        <Select id="titel" v-model="localAddress.titel" placeholder="select titel"
+                                            :options="titelOptions" optionLabel="label" optionValue="value"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('first_name')" class="field col-span-1 md:col-span-1 lg:col-span-2">
+                                        <label for="first_name" class="font-extrabold text-sm">
+                                            First Name:
+                                        </label>
+                                        <InputText id="first_name" v-model="localAddress.first_name"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('last_name')" class="field md:col-span-2">
+                                        <label for="last_name" class="font-extrabold text-sm">
+                                            Last Name:
+                                        </label>
+                                        <InputText id="last_name" v-model="localAddress.last_name"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                </div>
 
-                                    <div class="grid grid-cols-1 lg:grid-cols-6 gap-x-4">
-                                        <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                                            <label for="salutation" class="font-extrabold text-lg">
-                                                Salutation: <span class="text-red-600">*</span>
-                                            </label>
-                                            <Select id="salutation" v-model="localAddress.salutation"
-                                                placeholder="select salutation" :options="salutationOptions"
-                                                optionLabel="label" optionValue="value" class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('salutation')" />
-                                        </div>
-                                        <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                                            <label for="salutation" class="font-extrabold text-lg">
-                                                Titel: <span class="text-red-600">*</span>
-                                            </label>
-                                            <Select id="titel" v-model="localAddress.titel" placeholder="select titel"
-                                                :options="titelOptions" optionLabel="label" optionValue="value"
-                                                class="w-full !border-secondary" :disabled="isFieldLocked('titel')" />
-                                        </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-4 mb-2">
+                                    <div v-if="!isFieldLocked('street_address')" class="field">
+                                        <label class="font-extrabold text-sm" for="street_address">
+                                            Street and House Number:
+                                        </label>
+                                        <InputText id="street_address" v-model="localAddress.street_address"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('postal_code')" class="field">
+                                        <label class="font-extrabold text-sm" for="postal_code">
+                                            Postal Code:
+                                        </label>
+                                        <InputText id="postal_code" v-model="localAddress.postal_code"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('city')" class="field col-span-1 md:col-span-1">
+                                        <label class="font-extrabold text-sm" for="city">
+                                            City:
+                                        </label>
+                                        <InputText id="city" v-model="localAddress.city"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                    <div v-if="!isFieldLocked('country')" class="field">
+                                        <label class="font-extrabold text-sm" for="country">
+                                            Country:
+                                        </label>
+                                        <Select id="country" v-model="localAddress.country" filter
+                                            :options="country_names" placeholder="Select a country"
+                                            class="w-full !border-secondary" />
+                                    </div>
+                                </div>
 
-                                        <div class="field col-span-1 md:col-span-1 lg:col-span-2">
-                                            <label for="first_name" class="font-extrabold text-lg">
-                                                First Name: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="first_name" v-model="localAddress.first_name"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('first_name')" />
-                                        </div>
-                                        <div class="field md:col-span-2">
-                                            <label for="last_name" class="font-extrabold text-lg">
-                                                Last Name: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="last_name" v-model="localAddress.last_name"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('last_name')" />
-                                        </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4">
+                                    <div v-if="!isFieldLocked('website')" class="field">
+                                        <label class="font-extrabold text-sm" for="website">
+                                            Website:
+                                        </label>
+                                        <InputText id="website" v-model="localAddress.website"
+                                            class="w-full !border-secondary" />
                                     </div>
-                                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-4">
-                                        <div class="field md:col-span-2">
-                                            <label class="font-extrabold text-lg" for="street_address">
-                                                Street and House Number:
-                                                <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="street_address" v-model="localAddress.street_address"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('street_address')" />
-                                        </div>
-                                        <div class="field">
-                                            <label class="font-extrabold text-lg" for="postal_code">
-                                                Postal Code: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="postal_code" v-model="localAddress.postal_code"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('postal_code')" />
-                                        </div>
-                                        <div class="field col-span-1 md:col-span-1 lg:col-span-2">
-                                            <label class="font-extrabold text-lg" for="city">
-                                                City: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="city" v-model="localAddress.city"
-                                                class="w-full !border-secondary" :disabled="isFieldLocked('city')" />
-                                        </div>
+                                    <div v-if="!isFieldLocked('phone_number')" class="field">
+                                        <label class="font-extrabold text-sm" for="phone_number">
+                                            Phone Number:
+                                        </label>
+                                        <InputText id="phone_number" v-model="localAddress.phone_number"
+                                            class="w-full !border-secondary" />
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                                        <div class="field">
-                                            <label class="font-extrabold text-lg" for="country">
-                                                Country:
-                                            </label>
-                                            <Select id="country" v-model="localAddress.country" filter
-                                                :options="country_names" placeholder="Select a country"
-                                                class="w-full !border-secondary" :disabled="isFieldLocked('country')" />
-                                        </div>
-                                        <div class="field">
-                                            <label class="font-extrabold text-lg" for="website">
-                                                Website:
-                                            </label>
-                                            <InputText id="website" v-model="localAddress.website"
-                                                class="w-full !border-secondary" :disabled="isFieldLocked('website')" />
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                                        <div class="field">
-                                            <label class="font-extrabold text-lg" for="phone_number">
-                                                Phone Number: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="phone_number" v-model="localAddress.phone_number"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('phone_number')" />
-                                        </div>
-                                        <div class="field">
-                                            <label for="email_address_system" class="font-extrabold text-lg">
-                                                Email Address: <span class="text-red-600">*</span>
-                                            </label>
-                                            <InputText id="email_address_system"
-                                                v-model="localAddress.email_address_system"
-                                                class="w-full !border-secondary"
-                                                :disabled="isFieldLocked('email_address_system')" />
-                                        </div>
+                                    <div v-if="!isFieldLocked('email_address_system')" class="field">
+                                        <label for="email_address_system" class="font-extrabold text-sm">
+                                            Email Address: <span class="text-red-600">*</span>
+                                        </label>
+                                        <InputText id="email_address_system" v-model="localAddress.email_address_system"
+                                            class="w-full !border-secondary" />
                                     </div>
                                 </div>
                             </template>
                         </Card>
+
                     </div>
                 </div>
                 <!-- Notes and Buttons remain unchanged as they have flexible widths -->
                 <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-blue-200">
                     <!-- <div class="border-b-2 p-3">
-                        <span class="mx-4 font-extrabold text-lg">Notes</span>
+                        <span class="mx-4 font-extrabold text-sm">Notes</span>
                     </div> -->
                     <div class="grid">
                         <Card class="shadow-md">
                             <template #content>
                                 <div class="grid">
-                                    <!-- <div class="grid grid-cols-1">
-                                        <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                                            <label for="notes" class="font-extrabold text-lg">
-                                                Notes:
-                                            </label>
-                                            <InputText id="notes" v-model="localAddress.notes"
-                                                class="w-full !border-secondary" disabled />
-                                        </div>
-                                    </div> -->
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                                        <div class="field">
-                                            <label class="font-extrabold text-lg" for="feedback">
-                                                Feedback: <span class="text-red-600">*</span>
+                                        <div class="field md:col-span-2">
+                                            <label class="font-extrabold text-sm" for="feedback">
+                                                Feedback:
                                             </label>
                                             <Select id="feedback" v-model="localAddress.feedback"
                                                 class="w-full !border-secondary" :options="feedbackOptions"
                                                 optionValue="value" optionLabel="label" />
                                         </div>
                                         <div class="field">
-                                            <label class="font-extrabold text-lg" for="interest_notes">
+                                            <label class="font-extrabold text-sm" for="interest_notes">
                                                 Interest Notes:
                                             </label>
-                                            <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="3"
+                                            <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="2"
                                                 class="w-full !border-secondary" />
                                         </div>
-                                    </div>
-                                    <div class="field">
-                                        <label class="font-extrabold text-lg" for="personal_notes">
-                                            Personal Notes:
-                                        </label>
-                                        <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="2"
-                                            class="w-full !border-secondary" />
+                                        <div class="field">
+                                            <label class="font-extrabold text-sm" for="personal_notes">
+                                                Personal Notes:
+                                            </label>
+                                            <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="2"
+                                                class="w-full !border-secondary" />
+                                        </div>
                                     </div>
                                 </div>
                             </template>
@@ -233,7 +212,7 @@
                 <div class="call-history lg:col-span-1 hidden">
                     <Card class="shadow-md">
                         <template #title>
-                            <h2 class="text-lg font-bold">Call History</h2>
+                            <h2 class="text-sm font-bold">Call History</h2>
                         </template>
                         <template #content>
                             <DataTable :value="callHistory" class="w-full !border-secondary" scrollable
@@ -334,21 +313,25 @@
                         <span class="pi pi-clock !text-[3rem] text-secondary ml-2" data-pc-section="icon"></span>
                     </div>
                 </div>
-                <div class="grid grid-cols-1">
-                    <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                        <label for="notes" class="font-extrabold text-lg">
-                            Notes:
-                        </label>
-                        <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary" disabled />
-                    </div>
-                </div>
                 <!-- Responsive adjustments for call history and modal dialogs -->
                 <div class="bg-white border border-gray-300 rounded-lg shadow-xl">
-                    <div class="flex justify-between items-center pb-2 border-b-2 p-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Call History</h3>
-                        <button class="text-gray-500 hover:text-gray-700 focus:outline-none" @click="showNotes()">
-                            <i class="pi pi-expand !text-xl text-secondary"></i>
-                        </button>
+                    <div class="  pb-2 border-b-2 p-4">
+                        <div class="grid grid-cols-1">
+                            <div class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                <label for="notes" class="font-semibold text-sm">
+                                    Notes:
+                                </label>
+                                <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary"
+                                    disabled />
+                            </div>
+                        </div>
+                        <div class="field col-span-1 md:col-span-1 lg:col-span-1 flex justify-between items-center">
+
+                            <h3 class="text-sm font-semibold text-gray-800">Call History</h3>
+                            <button class="text-gray-500 hover:text-gray-700 focus:outline-none" @click="showNotes()">
+                                <i class="pi pi-expand !text-xl text-secondary"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="my-3" v-for="(item, index) in callHistory.slice(0, 3)" :key="index"
                         v-if="callHistory.length > 0">
@@ -367,18 +350,26 @@
                             </span>
                         </div>
                         <div class="border-b border-gray-300 pt-2 p-4">
-                            <div class="mb-4">
+                            <div v-if="item.notes?.feedback" class="mb-4">
                                 <div class="flex items-center mb-1">
-                                    <span class="text-md font-[1000] ">Personal Notes:</span>
+                                    <span class="text-md font-[1000]">Feedback:</span>
                                 </div>
                                 <p
                                     class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                                    <!-- {{ item.notes?.personal_notes?.slice(0, 50) }}
-                                    {{ item.notes?.personal_notes?.length > 50 ? '...' : '' }} -->
+                                    {{ item.notes?.feedback }}
+                                </p>
+                            </div>
+                            <div v-if="item.notes?.personal_notes" class="mb-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-md font-[1000]">Personal Notes:</span>
+                                </div>
+                                <p
+                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
                                     {{ item.notes?.personal_notes }}
                                 </p>
                             </div>
-                            <div>
+
+                            <div v-if="item.notes?.interest_notes" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000] text-red-500">Interest Notes:</span>
                                 </div>
@@ -388,6 +379,7 @@
                                     {{ item.notes?.interest_notes?.length > 50 ? '...' : '' }}
                                 </p>
                             </div>
+
                             <span
                                 class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
                                 Call Duration:
@@ -401,7 +393,7 @@
                     </div>
                     <div v-else>
                         <div class="flex justify-center items-center h-[12rem]">
-                            <div class="text-lg text-gray-500">No history</div>
+                            <div class="text-sm text-gray-500">No history</div>
                         </div>
                     </div>
                 </div>
@@ -725,7 +717,7 @@ export default {
             await this.submitFeedback();
         },
         formatnewDate(date) {
-            return moment(date).format("MMM D dddd");
+            return moment(date).locale('de').format('DD.MM.YYYY, HH:mm');
         },
         showNotes(notes) {
             // this.selectedNotes = notes
@@ -991,7 +983,7 @@ label {
 @media only screen and (max-width: 768px) {
     #app>div>main>div>div.col-span-1.lg\:col-span-3.border.rounded-xl.shadow-xl>div.pb-2.p-4>div.inline-flex.items-center.rounded-md.bg-black.px-2.py-1.text-2xl.xl\:text-3xl.font-medium.text-white.ring-1.ring-inset.ring-black.mb-1,
 
-    #app>div>main>div>div.col-span-1.lg\:col-span-3.border.rounded-xl.shadow-xl>div.pb-2.p-4>div.flex.flex-wrap.justify-between.items-center>div.inline-flex.items-center.rounded-md.bg-primary.px-2.py-1.text-lg.md\:text-xl.font-medium.text-white.ring-1.ring-inset.ring-primary.mb-1,
+    #app>div>main>div>div.col-span-1.lg\:col-span-3.border.rounded-xl.shadow-xl>div.pb-2.p-4>div.flex.flex-wrap.justify-between.items-center>div.inline-flex.items-center.rounded-md.bg-primary.px-2.py-1.text-sm.md\:text-xl.font-medium.text-white.ring-1.ring-inset.ring-primary.mb-1,
 
     #app>div>main>div>div.col-span-1.lg\:col-span-3.border.rounded-xl.shadow-xl>div.pb-2.p-4>div.flex.flex-wrap.justify-between.items-center>div.inline-flex.items-center.rounded-md.mr-2.mb-1.w-full.md\:w-auto {
         margin-bottom: 15px;
