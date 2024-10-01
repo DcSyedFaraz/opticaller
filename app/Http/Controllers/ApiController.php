@@ -20,10 +20,14 @@ class ApiController extends Controller
         if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        if (!$request->contact_id || !$request->sub_project_id) {
+            return response()->json(['error' => 'Both contact ID and sub-project ID are required.'], 422);
+        }
+
         DB::beginTransaction();
 
         try {
-            $address = Address::where('contact_id', $request->contact_id)->first();
+            $address = Address::where('contact_id', $request->contact_id)->where('sub_project_id', $request->sub_project_id)->first();
             if ($address) {
                 $address->forceDelete();
                 DB::commit();
