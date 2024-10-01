@@ -57,7 +57,7 @@ class TimeTrackingController extends Controller
 
     public function stopTracking(Request $request)
     {
-        // dd($request->all());
+        // dd();
         DB::beginTransaction();
 
         try {
@@ -224,7 +224,7 @@ class TimeTrackingController extends Controller
 
                 if ($address->follow_up_date) {
                     $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
-                    dd($request->address['follow_up_date'], $address->follow_up_date);
+                    // dd($request->address['follow_up_date'], $address->follow_up_date);
                 }
 
                 $address->save();
@@ -236,6 +236,9 @@ class TimeTrackingController extends Controller
                 $timeLog->user_id = auth()->id();
                 $timeLog->address_id = $addressID;
                 $timeLog->total_duration = $seconds;
+                $timeLog->feedback = $validatedData['address']['feedback'];
+                $timeLog->contact_id = $address->contact_id;
+                $timeLog->sub_project_id = $request->address['subproject']['title'];
                 $timeLog->save();
 
                 if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
