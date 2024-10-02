@@ -27,7 +27,7 @@ class ProjectController extends Controller
     public function create()
     {
         $projects = Project::select('title', 'id')->get();
-        $subprojects = SubProject::all();
+        $subprojects = SubProject::with('projects')->get();
 
         return inertia('Projects/subproject', ['projects' => $projects, 'subprojects' => $subprojects]);
     }

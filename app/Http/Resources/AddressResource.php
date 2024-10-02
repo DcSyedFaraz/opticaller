@@ -50,11 +50,13 @@ class AddressResource extends JsonResource
                     return [
                         'user_name' => optional($activity->users)->name,
                         'timestamp' => $timestamp,
+                        'sub_project' => $activity->sub_project_id,
                     ];
                 }
 
                 return [
                     'user_name' => optional($activity->users)->name,
+                    'sub_project' => $activity->sub_project_id,
                     'personal_notes' => $personalNotes,
                     'interest_notes' => $interestNotes,
                     'timestamp' => $timestamp,

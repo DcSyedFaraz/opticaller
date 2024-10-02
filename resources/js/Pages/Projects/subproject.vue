@@ -44,6 +44,14 @@
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
                 <Column field="description" header="Description"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></Column>
+                <Column header="Project"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <template #body="slotProps">
+                        <span>
+                            {{ slotProps.data.projects?.title }}
+                        </span>
+                    </template>
+                </Column>
                 <Column header="Priority"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <template #body="slotProps">
