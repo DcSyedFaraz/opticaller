@@ -22,5 +22,9 @@ class SubProject extends Model
     {
         return $this->belongsToMany(Feedback::class, 'feedback_sub_project');
     }
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
 
 }

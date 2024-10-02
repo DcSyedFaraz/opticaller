@@ -20,15 +20,16 @@ class ActivityFactory extends Factory
     public function definition(): array
     {
         $createdAt = Carbon::now()->startOfWeek()->addDays(rand(0, 6));
+        $address = Address::inRandomOrder()->first();
         return [
-            'user_id' => User::inRandomOrder()->first()->id, // Generate a new User if not provided
-            'address_id' => Address::inRandomOrder()->first()->id, // Generate a new Address if not provided
-            // 'project_id' => Project::inRandomOrder()->first()->id->nullable(), // Uncomment and use if a Project model exists
-            'activity_type' => $this->faker->randomElement(['call', 'break']), // Example of different activity types
-            // 'starting_time' => $this->faker->time('H:i:s'), // Random start time
-            // 'ending_time' => $this->faker->time('H:i:s'), // Random end time
-            'total_duration' => $this->faker->numberBetween(1, 3600), // Random duration in seconds
-            'created_at' => $createdAt, // Set created_at to a random day of the current week
+            'user_id' => User::inRandomOrder()->first()->id,
+            'address_id' => $address->id,
+            'contact_id' => $address->contact_id,
+            'feedback' => $address->feedback,
+            'activity_type' => $this->faker->randomElement(['call', 'break']),
+
+            'total_duration' => $this->faker->numberBetween(1, 3600),
+            'created_at' => $createdAt,
             'updated_at' => $createdAt,
         ];
     }

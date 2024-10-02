@@ -9,4 +9,8 @@ class Project extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    public function addresses()
+    {
+        return $this->hasManyThrough(Address::class, SubProject::class);
+    }
 }

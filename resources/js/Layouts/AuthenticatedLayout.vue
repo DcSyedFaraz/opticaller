@@ -17,7 +17,7 @@ export default {
     <Toast />
     <ConfirmDialog></ConfirmDialog>
 
-    <header class="flex justify-between items-center bg-[#EBF1EF] p-4 md:p-6">
+    <header class="flex justify-between items-center bg-[#EBF1EF] p-4 md:px-6 md:py-2">
         <div class="flex items-center">
             <!-- Optionally, you can uncomment and use the following lines -->
             <svg class="w-full max-w-xs xl:max-w-md lg:max-w-lg" width="200" height="53" viewBox="0 0 320 93"

@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Address;
 use App\Models\LoginTime;
 use App\Models\NotReached;
+use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -102,6 +103,15 @@ class StatisticsController extends Controller
 
         $employeeLeaderboard = $userData->sortByDesc('addresses_processed')->first()['user_name'] ?? null;
 
+        $totalAddressesWithNullFeedback = Address::whereNull('feedback')->count();
+
+        // Counts per project
+        $projectsWithAddressCounts = Project::withCount([
+            'addresses' => function ($query) {
+                $query->whereNull('feedback');
+            }
+        ])->get();
+
         $data = [
             'dailyCallOutVolume' => $dailyCallOutVolume,
             'successRateData' => $successfulPercentage,
@@ -112,6 +122,8 @@ class StatisticsController extends Controller
             'total_logged_in_time' => $totalLoggedInTimeFormatted,
             'avgCall' => $avgCall,
             'totalBreak' => $totalBreak,
+            'totalAddressesWithNullFeedback' => $totalAddressesWithNullFeedback,
+            'projectsWithAddressCounts' => $projectsWithAddressCounts,
         ];
 
         // dd($data, $userData);

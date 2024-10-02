@@ -145,6 +145,35 @@
                 </div>
 
             </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg mt-4  mx-auto">
+                <!-- Header -->
+                <div class="border-b-2 border-gray-200 pb-2">
+                    <span class="mx-4 text-xl font-extrabold text-gray-700">
+                        Open Addresses
+                    </span>
+                </div>
+
+                <!-- Total Open Addresses -->
+                <div class="my-6">
+                    <h3 class="text-xl font-semibold text-gray-800">
+                        Total Open Addresses:
+                        <span class="text-indigo-600">{{ data.totalAddressesWithNullFeedback }}</span>
+                    </h3>
+                </div>
+
+                <!-- Open Addresses per Project -->
+                <div class="my-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Open Addresses by Project:</h3>
+                    <ul class="list-disc list-inside text-gray-600 mt-3 space-y-2">
+                        <li v-for="project in data.projectsWithAddressCounts" :key="project.id">
+                            <span class="font-semibold text-gray-700">{{ project.title }}:</span>
+                            <span class="text-indigo-500">{{ project.addresses_count }}</span> open addresses
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+
             <!-- User Productivity and Call Statistics Table -->
             <div class="bg-white p-4 rounded-lg shadow mt-2">
                 <div class="border-b-2 p-1">
@@ -226,7 +255,7 @@
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
                             <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
-                                    data.totalBreak) }}</p>
+                                data.totalBreak) }}</p>
                         </div>
 
 
