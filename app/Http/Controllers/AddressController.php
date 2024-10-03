@@ -14,6 +14,27 @@ use Mail;
 
 class AddressController extends Controller
 {
+    public function getAddressByContactId($contact_id)
+    {
+        // Fetch the address using the Contact ID
+        $address = Address::with(['calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users'])->where('contact_id', $contact_id)->first();
+
+        if ($address) {
+            $address->seen = now();
+            $address->save();
+            // Assuming you have lockfields logic
+            $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
+
+            return response()->json([
+                'address' => $address,
+                'lockfields' => $globalLockedFields,
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Address not found for the provided Contact ID.',
+            ], 404);
+        }
+    }
     public function index(Request $request)
     {
         $query = Address::query();
@@ -34,7 +55,7 @@ class AddressController extends Controller
         $query->orderBy($sortField, $sortOrder);
 
         // Pagination
-        $addresses = $query->with('subproject','lastuser.users')->paginate(10);
+        $addresses = $query->with('subproject', 'lastuser.users')->paginate(10);
 
         return inertia('Addresses/Index', [
             'addresses' => $addresses,

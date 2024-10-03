@@ -2,24 +2,45 @@
 
     <Head title="Addresses" />
     <AuthenticatedLayout>
-        <div class="user-page grid grid-cols-1 lg:grid-cols-4 gap-x-4 px-4" v-if="localAddress && localAddress.id">
+
+
+        <div class="user-page grid grid-cols-1 lg:grid-cols-5 gap-x-4 px-4" v-if="localAddress && localAddress.id">
             <!-- Main Panel -->
-            <div class="col-span-1 lg:col-span-3 border rounded-xl shadow-xl">
+            <div class="col-span-1 lg:col-span-4 border rounded-xl shadow-xl">
                 <div class="pb-2 p-4">
-                    <div
-                        class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-sm font-medium text-white ring-1 ring-inset ring-black ">
-                        Sub Project Title: {{ localAddress.subproject?.title }}
+                    <div class="flex flex-wrap justify-between items-center">
+                        <div
+                            class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-sm font-medium text-white ring-1 ring-inset ring-black ">
+                            Sub Project Title: {{ localAddress.subproject?.title }}
+                        </div>
+
+                        <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
+                            <div v-if="localAddress.subproject?.pdf_url" class="mt-2">
+                                <a :href="localAddress.subproject.pdf_url" target="_blank" rel="noopener noreferrer"
+                                    class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                    <i class="pi pi-file-pdf "></i>
+                                </a>
+                            </div>
+                        </div>
+
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
                         <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
                             class="inline-flex items-center rounded-md  px-2 py-1 text-sm md:text-xs font-medium text-white ring-1 ring-inset  mb-1">
                             Project Title: {{ localAddress.subproject?.projects?.title }}
                         </div>
+                        <!-- Existing Contact ID Field -->
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
                             <InputText id="contact_id" v-model="localAddress.contact_id" placeholder="Contact ID"
                                 class="w-full !border-black" disabled />
+                            <!-- New Button to Open Dialog -->
+                            <Button icon="pi pi-search" class="ml-2" v-if="$page.props.auth.roles[0] == 'admin'"
+                                @click="openContactIdDialog" v-tooltip.top="'Search Contact ID'" />
                         </div>
+
                     </div>
+
+
                 </div>
                 <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-secondary my-3">
                     <!-- <div class="border-b-2 p-3">
@@ -30,22 +51,25 @@
                         <Card class="shadow-md">
                             <template #content>
                                 <div class="grid lg:grid-cols-8 grid-cols-1 gap-x-4 mb-2">
-                                    <div v-if="!isFieldLocked('company_name')" class="field col-span-1 md:col-span-2 lg:col-span-2">
+                                    <div v-if="!isFieldLocked('company_name')"
+                                        class="field col-span-1 md:col-span-2 lg:col-span-2">
                                         <label for="company_name" class="font-extrabold text-sm">
                                             Company Name: <span class="text-red-600">*</span>
                                         </label>
                                         <InputText id="company_name" v-model="localAddress.company_name"
                                             class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('salutation')" class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                    <div v-if="!isFieldLocked('salutation')"
+                                        class="field col-span-1 md:col-span-1 lg:col-span-1">
                                         <label for="salutation" class="font-extrabold text-sm">
                                             Salutation:
                                         </label>
-                                        <Select id="salutation" v-model="localAddress.salutation" placeholder="select salutation"
-                                            :options="salutationOptions" optionLabel="label" optionValue="value"
-                                            class="w-full !border-secondary" />
+                                        <Select id="salutation" v-model="localAddress.salutation"
+                                            placeholder="select salutation" :options="salutationOptions"
+                                            optionLabel="label" optionValue="value" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('titel')" class="field col-span-1 md:col-span-1 lg:col-span-1">
+                                    <div v-if="!isFieldLocked('titel')"
+                                        class="field col-span-1 md:col-span-1 lg:col-span-1">
                                         <label for="titel" class="font-extrabold text-sm">
                                             Titel:
                                         </label>
@@ -53,7 +77,8 @@
                                             :options="titelOptions" optionLabel="label" optionValue="value"
                                             class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('first_name')" class="field col-span-1 md:col-span-1 lg:col-span-2">
+                                    <div v-if="!isFieldLocked('first_name')"
+                                        class="field col-span-1 md:col-span-1 lg:col-span-2">
                                         <label for="first_name" class="font-extrabold text-sm">
                                             First Name:
                                         </label>
@@ -244,13 +269,7 @@
             </div>
             <!-- Side Panel -->
             <div class="col-span-1 lg:w-2/3">
-                <!-- <Button
-            label="Callback"
-            icon="pi pi-phone"
-            class="w-full my-2"
-            size="large"
-            @click="showCallbackForm = true"
-          /> -->
+
                 <Link :href="route('callback')" class="p-button p-component p-button-lg w-full my-2 !rounded">
                 <i class="pi pi-phone !text-xl"></i> Callback
                 </Link>
@@ -318,11 +337,15 @@
                     <div class="  pb-2 border-b-2 p-4">
                         <div class="grid grid-cols-1">
                             <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                                <label for="notes" class="font-semibold text-sm">
+                                <label for="notes" class="!font-extrabold text-sm">
                                     Notes:
                                 </label>
-                                <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary"
-                                    disabled />
+                                <!-- <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary"
+                                    disabled /> -->
+                                <p
+                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                    {{ localAddress.notes }}
+                                </p>
                             </div>
                         </div>
                         <div class="field col-span-1 md:col-span-1 lg:col-span-1 flex justify-between items-center">
@@ -350,13 +373,22 @@
                             </span>
                         </div>
                         <div class="border-b border-gray-300 pt-2 p-4">
-                            <div v-if="item.notes?.feedback" class="mb-4">
+                            <div v-if="item.feedback" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Feedback:</span>
                                 </div>
                                 <p
                                     class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                                    {{ item.notes?.feedback }}
+                                    {{ item.feedback }}
+                                </p>
+                            </div>
+                            <div v-if="item.sub_project_id" class="mb-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-md font-[1000]">Sub Project:</span>
+                                </div>
+                                <p
+                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                    {{ item.sub_project_id }}
                                 </p>
                             </div>
                             <div v-if="item.notes?.personal_notes" class="mb-4">
@@ -399,6 +431,27 @@
                 </div>
             </div>
 
+            <!-- New Dialog for Changing Contact ID -->
+            <Dialog header="Change Contact ID" v-model:visible="showContactIdDialog" modal class="rounded-lg shadow-lg"
+                :style="{ width: '90%', maxWidth: '36rem' }">
+                <div class="p-6 space-y-4">
+                    <div class="space-y-2">
+                        <!-- Input Field for New Contact ID -->
+                        <div class="field">
+                            <label for="new_contact_id">New Contact ID:</label>
+                            <InputText id="new_contact_id" v-model="newContactId" placeholder="Enter new Contact ID"
+                                class="w-full !border-secondary" />
+                            <!-- Error Message Display -->
+                            <small class="text-red-600" v-if="contactIdError">{{ contactIdError }}</small>
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end">
+                        <Button label="Cancel" class="mr-2" @click="closeContactIdDialog" />
+                        <Button label="Submit" @click="submitNewContactId" :loading="contactIdLoading" />
+                    </div>
+                </div>
+            </Dialog>
             <!-- Dialog components remain unchanged for responsiveness -->
             <Dialog header="Follow Up" v-model:visible="showFollowModal" modal class="rounded-lg shadow-lg"
                 :style="{ width: '90%', maxWidth: '36rem' }">
@@ -587,6 +640,10 @@ export default {
             selectedDate: null,
             selectedHour: null,
             selectedMinute: null,
+            showContactIdDialog: false,
+            newContactId: '',
+            contactIdLoading: false,
+            contactIdError: '',
             hourOptions: [
                 { label: '09', value: 9 },
                 { label: '10', value: 10 },
@@ -666,6 +723,74 @@ export default {
     },
 
     methods: {
+        openContactIdDialog() {
+            this.newContactId = '';
+            this.contactIdError = '';
+            this.showContactIdDialog = true;
+        },
+
+        // Method to close the Contact ID dialog
+        closeContactIdDialog() {
+            this.showContactIdDialog = false;
+        },
+
+        // Method to handle the submission of the new Contact ID
+        async submitNewContactId() {
+            // Validate input
+            if (!this.newContactId) {
+                this.contactIdError = 'Contact ID is required.';
+                return;
+            }
+
+            this.contactIdLoading = true;
+            this.contactIdError = '';
+
+            try {
+                // Replace 'address.getByContactId' with your actual route name
+                const response = await axios.get(route('address.getByContactId', { contact_id: this.newContactId }));
+
+                if (response.data && response.data.address) {
+                    console.log(response.data);
+
+                    // Update localAddress with the new address data
+                    this.localAddress = response.data.address;
+                    this.locallockfields = response.data.lockfields || [];
+                    this.callHistory = response.data.address.cal_logs || [];
+                    this.previousProject = this.localAddress.subproject?.projects?.title || '';
+
+                    // Reset existing timers
+                    clearInterval(this.timer);
+                    clearInterval(this.reversetimer);
+                    this.countdown = 0;
+                    this.ReverseCountdown = 180;
+
+                    // Restart tracking for the new address
+                    await this.startTracking();
+
+                    // Notify the user of success
+                    this.$toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Address loaded successfully.',
+                        life: 3000
+                    });
+
+                    // Close the dialog
+                    this.showContactIdDialog = false;
+                } else {
+                    this.contactIdError = 'No address found for the provided Contact ID.';
+                }
+            } catch (error) {
+                console.error('Error fetching address:', error);
+                if (error.response && error.response.data && error.response.data.error) {
+                    this.contactIdError = error.response.data.error;
+                } else {
+                    this.contactIdError = 'An error occurred while fetching the address.';
+                }
+            } finally {
+                this.contactIdLoading = false;
+            }
+        },
         getBorderClass(color) {
             const colorMap = {
                 '#509EE9': 'ring-[#509EE9] bg-[#509EE9]',

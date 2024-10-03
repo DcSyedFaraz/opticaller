@@ -71,6 +71,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('statistics', StatisticsController::class);
     Route::resource('feedbacks', FeedbackController::class);
     Route::put('/feedbacks/validation/{id}', [FeedbackController::class, 'validation'])->name('feedbacks.validation');
+    Route::get('/address/search/{contact_id}', [AddressController::class, 'getAddressByContactId'])->name('address.getByContactId');
+
 
 
     // Settings

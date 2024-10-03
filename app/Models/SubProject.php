@@ -4,11 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Storage;
 
 class SubProject extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    protected $appends = ['pdf_url'];
+
+    public function getPdfUrlAttribute()
+    {
+        return $this->pdf_path ? Storage::url($this->pdf_path) : null;
+    }
 
     public function users()
     {

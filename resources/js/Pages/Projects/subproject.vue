@@ -28,7 +28,15 @@
                         <Select v-model="newProject.priority" :options="priorityOptions" optionValue="value"
                             optionLabel="label" placeholder="Select Priority" class="w-full" />
                     </div>
+                    <div class="sm:col-span-12">
+                        <label for="pdf" class="block text-sm font-medium text-gray-700">Upload PDF</label>
+                        <input type="file" @change="handleFileUpload($event, 'newProject')" accept="application/pdf"
+                            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                                   file:rounded-md file:border-0 file:text-sm file:font-semibold
+                                   file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                    </div>
                 </div>
+
                 <div class="mt-8">
                     <Button type="submit" label="Add Sub Project"
                         class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
@@ -60,6 +68,19 @@
                         </span>
                     </template>
                 </Column>
+                <Column header="PDF"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <template #body="slotProps">
+                        <span v-if="slotProps.data.pdf_url">
+                            <a :href="slotProps.data.pdf_url" target="_blank"
+                                class="text-indigo-600 hover:underline">View PDF</a>
+                        </span>
+                        <span v-else>
+                            N/A
+                        </span>
+                    </template>
+                </Column>
+
                 <Column header="Actions"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider flex">
                     <template #body="slotProps">
@@ -94,6 +115,14 @@
                             optionLabel="label" placeholder="Select Priority" class="w-full" />
                     </div>
                     <div class="field">
+                        <label for="pdf" class="block text-sm font-medium text-gray-700">Upload PDF</label>
+                        <input type="file" @change="handleFileUpload($event, 'editProjectData')"
+                            accept="application/pdf" class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                                   file:rounded-md file:border-0 file:text-sm file:font-semibold
+                                   file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                    </div>
+
+                    <div class="field">
                         <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
                             optionLabel="title" placeholder="Select Project" class="w-full" />
@@ -118,6 +147,9 @@ export default {
             newProject: {
                 title: '',
                 description: '',
+                project_id: null,
+                priority: null,
+                pdf: null,
             },
             priorityOptions: [
                 { label: 'Low', value: 1 },
@@ -125,7 +157,9 @@ export default {
                 { label: 'High', value: 3 },
                 { label: 'Critical', value: 4 },
             ],
-            editProjectData: {},
+            editProjectData: {
+                pdf: null,
+            },
             editDialogVisible: false,
         };
     },
@@ -136,15 +170,36 @@ export default {
         }
     },
     methods: {
+        handleFileUpload(event, target) {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/pdf') {
+                this[target].pdf = file;
+            } else {
+                this.$toast.add({ severity: 'error', summary: 'Invalid File', detail: 'Please upload a valid PDF file.', life: 3000 });
+                event.target.value = null; // Reset the input
+            }
+        },
         getPriorityLabel(priorityValue) {
             const priority = this.priorityOptions.find(option => option.value === priorityValue);
             return priority ? priority.label : 'N/A';
         },
         createProject() {
-            this.$inertia.post('/subprojects', this.newProject, {
+            const formData = new FormData();
+            formData.append('title', this.newProject.title);
+            formData.append('description', this.newProject.description);
+            formData.append('project_id', this.newProject.project_id);
+            formData.append('priority', this.newProject.priority);
+            if (this.newProject.pdf) {
+                formData.append('pdf', this.newProject.pdf);
+            }
+
+            this.$inertia.post('/subprojects', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
                 onSuccess: () => {
-                    this.newProject.title = '';
-                    this.newProject.description = '';
+                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null };
+
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project created successfully', life: 3000 });
                 },
                 onError: (errors) => {
@@ -159,7 +214,19 @@ export default {
             this.editDialogVisible = true;
         },
         updateProject() {
-            this.$inertia.put(`/subprojects/${this.editProjectData.id}`, this.editProjectData, {
+            const formData = new FormData();
+            formData.append('title', this.editProjectData.title);
+            formData.append('description', this.editProjectData.description);
+            formData.append('project_id', this.editProjectData.project_id);
+            formData.append('priority', this.editProjectData.priority);
+            if (this.editProjectData.pdf) {
+                formData.append('pdf', this.editProjectData.pdf);
+            }
+
+            this.$inertia.put(`/subprojects/${this.editProjectData.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
                 onSuccess: () => {
                     this.editDialogVisible = false;
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project updated successfully', life: 3000 });
