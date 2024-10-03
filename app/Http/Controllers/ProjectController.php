@@ -8,7 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Toast;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;// Import the toast.js file
+use Illuminate\Validation\Validator;
+use Storage;// Import the toast.js file
 
 class ProjectController extends Controller
 {
@@ -51,11 +52,46 @@ class ProjectController extends Controller
             'priority' => 'nullable',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
+            'pdf' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        SubProject::create($validatedData);
+        $data = $request->only(['title', 'description', 'project_id', 'priority']);
+
+        if ($request->hasFile('pdf')) {
+            $path = $request->file('pdf')->store('pdfs', 'public');
+            $data['pdf_path'] = $path;
+        }
+
+        $subProject = SubProject::create($data);
 
         return redirect()->route('projects.create')->with('success', 'Project created successfully');
+    }
+    public function subprojectsUpdate(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'priority' => 'nullable',
+            'description' => 'required|string',
+            'project_id' => 'required|exists:projects,id',
+            'pdf' => 'nullable|file|mimes:pdf|max:2048',
+
+        ]);
+        $subproject = SubProject::findOrFail($id);
+        // dd($request->all(), $project);
+        $data = $request->only(['title', 'description', 'project_id', 'priority']);
+
+        if ($request->hasFile('pdf')) {
+            // Delete old PDF if exists
+            if ($subproject->pdf_path) {
+                Storage::disk('public')->delete($subproject->pdf_path);
+            }
+
+            $path = $request->file('pdf')->store('pdfs', 'public');
+            $data['pdf_path'] = $path;
+        }
+
+        $subproject->update($data);
+        return redirect()->route('projects.create');
     }
     public function assignUsers(Request $request, SubProject $subProject)
     {
@@ -100,20 +136,7 @@ class ProjectController extends Controller
         $project->update($validatedData);
         return redirect()->route('projects.index');
     }
-    public function subprojectsUpdate(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'priority' => 'nullable',
-            'description' => 'required|string',
-            'project_id' => 'required|exists:projects,id',
 
-        ]);
-        $project = SubProject::findOrFail($id);
-        // dd($request->all(), $project);
-        $project->update($validatedData);
-        return redirect()->route('projects.create');
-    }
     public function destroy(Project $project)
     {
         $project->delete();
@@ -121,9 +144,11 @@ class ProjectController extends Controller
     }
     public function subprojectsDelete($id)
     {
-        $project = SubProject::findOrFail($id);
-        // dd($project);
-        $project->delete();
+        $subproject = SubProject::findOrFail($id);
+        if ($subproject->pdf_path) {
+            Storage::disk('public')->delete($subproject->pdf_path);
+        }
+        $subproject->delete();
         return redirect()->route('projects.create')->with('success', 'Project deleted successfully');
     }
 }
