@@ -223,7 +223,7 @@ export default {
                 formData.append('pdf', this.editProjectData.pdf);
             }
 
-            this.$inertia.put(`/subprojects/${this.editProjectData.id}`, formData, {
+            this.$inertia.post(`/subprojects/${this.editProjectData.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
