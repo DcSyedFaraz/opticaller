@@ -216,6 +216,11 @@
                             {{ formatSeconds(slotProps.data.total_effective_working_time) }}
                         </template>
                     </Column>
+                    <Column field="feedback_counts" header="Feedback Counts">
+                        <template #body="slotProps">
+                            {{ formatFeedbackCounts(slotProps.data.feedback_counts) }}
+                        </template>
+                    </Column>
                 </DataTable>
             </div>
 
@@ -307,6 +312,16 @@ export default {
 
     },
     methods: {
+        formatFeedbackCounts(feedbackCounts) {
+            if (!feedbackCounts || Object.keys(feedbackCounts).length === 0) {
+                return 'No Feedback';
+            }
+            // Convert the feedbackCounts object into an array of "Key: Value" strings
+            const formatted = Object.entries(feedbackCounts)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(', ');
+            return formatted;
+        },
         onDateChange() {
             console.log('sad');
 

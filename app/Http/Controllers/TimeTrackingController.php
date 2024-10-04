@@ -223,7 +223,7 @@ class TimeTrackingController extends Controller
                 }
 
                 if ($address->follow_up_date) {
-                    $address->follow_up_date = Carbon::parse($address->follow_up_date)->setTimezone('Europe/Berlin');
+                    $address->follow_up_date = Carbon::parse($address->follow_up_date);
                     // dd($request->address['follow_up_date'], $address->follow_up_date);
                 }
 

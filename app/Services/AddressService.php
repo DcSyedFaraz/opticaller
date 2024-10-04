@@ -32,6 +32,7 @@ class AddressService
         if ($dueAddress) {
             $dueAddress->seen = $now;
             $dueAddress->save();
+            // dd($now,  $dueAddress->follow_up_date);
 
             Log::channel('address')->info('Due Address Processed', [
                 'timestamp' => $now->toDateTimeString(),

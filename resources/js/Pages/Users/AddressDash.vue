@@ -819,7 +819,7 @@ export default {
             }
 
             // Clone the selectedDate to avoid mutating the original object
-            let followUpMoment = timezone.tz(this.selectedDate, 'Europe/Berlin');
+            let followUpMoment = timezone(this.selectedDate);
 
             // Set the hour and minute
             followUpMoment.hour(this.selectedHour);

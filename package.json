@@ -30,6 +30,6 @@
         "primevue": "^4.0.4",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vuex": "^4.0.2",
-        "webex": "^3.3.1"
+        "webex": "^3.4.0"
     }
 }

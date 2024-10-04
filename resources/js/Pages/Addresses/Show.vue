@@ -1,4 +1,5 @@
 <template>
+
     <Head title="Addresses" />
     <AuthenticatedLayout>
         <div class="max-w-4xl mx-auto  sm:px-6 lg:px-8">
@@ -7,11 +8,13 @@
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="company_name">Company Name</InputLabel>
                     <InputText v-model="address.company_name" type="text" required class="w-full" />
-                    <Message v-if="errors.company_name" severity="error" class="mt-2">{{ errors.company_name }}</Message>
+                    <Message v-if="errors.company_name" severity="error" class="mt-2">{{ errors.company_name }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="salutation">Salutation</InputLabel>
-                    <InputText v-model="address.salutation" type="text" class="w-full" />
+                    <Select id="salutation" v-model="address.salutation" placeholder="select salutation"
+                        :options="salutationOptions" optionLabel="label" optionValue="value" class="w-full" />
                     <Message v-if="errors.salutation" severity="error" class="mt-2">{{ errors.salutation }}</Message>
                 </div>
                 <div class="mb-4">
@@ -27,7 +30,8 @@
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="street_address">Street Address</InputLabel>
                     <InputText v-model="address.street_address" type="text" class="w-full" />
-                    <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}</Message>
+                    <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="postal_code">Postal Code</InputLabel>
@@ -40,58 +44,85 @@
                     <Message v-if="errors.city" severity="error" class="mt-2">{{ errors.city }}</Message>
                 </div>
                 <div class="mb-4">
+                    <InputLabel for="country">Country</InputLabel>
+                    <Select id="country" v-model="address.country" filter :options="country_names"
+                        placeholder="Select a country" class="w-full " />
+                    <Message v-if="errors.country" severity="error" class="mt-2">{{ errors.country }}</Message>
+                </div>
+                <div class="mb-4">
                     <InputLabel for="website">Website</InputLabel>
-                    <InputText v-model="address.website" type="url" class="w-full" />
+                    <InputText v-model="address.website" type="text" class="w-full" />
                     <Message v-if="errors.website" severity="error" class="mt-2">{{ errors.website }}</Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="phone_number">Phone Number</InputLabel>
                     <InputText v-model="address.phone_number" type="text" class="w-full" />
-                    <Message v-if="errors.phone_number" severity="error" class="mt-2">{{ errors.phone_number }}</Message>
+                    <Message v-if="errors.phone_number" severity="error" class="mt-2">{{ errors.phone_number }}
+                    </Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="email_address_system">System Email Address</InputLabel>
                     <InputText v-model="address.email_address_system" type="email" class="w-full" />
-                    <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{ errors.email_address_system }}</Message>
+                    <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{
+                        errors.email_address_system }}</Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="email_address_new">New Email Address</InputLabel>
                     <InputText v-model="address.email_address_new" type="email" class="w-full" />
-                    <Message v-if="errors.email_address_new" severity="error" class="mt-2">{{ errors.email_address_new }}</Message>
+                    <Message v-if="errors.email_address_new" severity="error" class="mt-2">{{ errors.email_address_new
+                        }}</Message>
                 </div>
 
                 <div class="mb-4">
-                    <InputLabel for="priority">Project Priority</InputLabel>
-                    <Select v-model="address.priority" :options="priorityOptions" optionValue="value" optionLabel="label"
-                        placeholder="Select Priority" class="w-full" />
-                    <Message v-if="errors.priority" severity="error" class="mt-2">{{ errors.priority }}</Message>
-                </div>
-                <!-- <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
-                    <InputLabel for="personal_notes">Personal Notes</InputLabel>
-                    <Textarea v-model="address.personal_notes" class="w-full" />
-                    <Message v-if="errors.personal_notes" severity="error" class="mt-2">{{ errors.personal_notes }}</Message>
-                </div> -->
-                <!-- <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
-                    <InputLabel for="interest_notes">Interest Notes</InputLabel>
-                    <Textarea v-model="address.interest_notes" class="w-full" />
-                    <Message v-if="errors.interest_notes" severity="error" class="mt-2">{{ errors.interest_notes }}</Message>
-                </div> -->
-                <div class="mb-4 col-span-1 sm:col-span-2 lg:col-span-3">
-                    <InputLabel for="feedback">Feedback</InputLabel>
-                    <Select v-model="address.feedback" :options="feedbackOptions" optionValue="label"
-                        optionLabel="label" placeholder="Select Feedback" class="w-full" />
-                    <Message v-if="errors.feedback" severity="error" class="mt-2">{{ errors.feedback }}</Message>
+                    <InputLabel for="linkedin">LinkedIn</InputLabel>
+                    <InputText v-model="address.linkedin" type="text" class="w-full" />
+                    <Message v-if="errors.linkedin" severity="error" class="mt-2">{{ errors.linkedin }}</Message>
                 </div>
                 <div class="mb-4">
-                    <InputLabel for="follow_up_date">Follow Up Date</InputLabel>
-                    <DatePicker v-model="address.follow_up_date" dateFormat="dd/mm/yy" class="w-full" />
-                    <Message v-if="errors.follow_up_date" severity="error" class="mt-2">{{ errors.follow_up_date }}</Message>
+                    <InputLabel for="logo">Logo</InputLabel>
+                    <InputText v-model="address.logo" type="text" class="w-full" />
+                    <Message v-if="errors.logo" severity="error" class="mt-2">{{ errors.logo }}</Message>
+                </div>
+                <div class="mb-4">
+                    <InputLabel for="notes">Notes</InputLabel>
+                    <Textarea v-model="address.notes" class="w-full" />
+                    <Message v-if="errors.notes" severity="error" class="mt-2">{{ errors.notes }}</Message>
                 </div>
                 <div class="mb-4">
                     <InputLabel for="sub_project_id">Sub Project</InputLabel>
                     <Select v-model="address.sub_project_id" :options="subprojects" optionLabel="title" optionValue="id"
                         placeholder="Select a Project" class="w-full" filter />
-                    <Message v-if="errors.sub_project_id" severity="error" class="mt-2">{{ errors.sub_project_id }}</Message>
+                    <Message v-if="errors.sub_project_id" severity="error" class="mt-2">{{ errors.sub_project_id }}
+                    </Message>
+                </div>
+                <div class="mb-4">
+                    <InputLabel for="contact_id">Contact ID</InputLabel>
+                    <InputText v-model="address.contact_id" type="number" class="w-full" />
+                    <Message v-if="errors.contact_id" severity="error" class="mt-2">{{ errors.contact_id }}</Message>
+                </div>
+                <div class="mb-4">
+                    <InputLabel for="hubspot_tag">HubSpot Tag</InputLabel>
+                    <InputText v-model="address.hubspot_tag" type="text" class="w-full" />
+                    <Message v-if="errors.hubspot_tag" severity="error" class="mt-2">{{ errors.hubspot_tag }}</Message>
+                </div>
+
+                <div class="mb-4">
+                    <InputLabel for="deal_id">Deal ID</InputLabel>
+                    <InputText v-model="address.deal_id" type="text" class="w-full" />
+                    <Message v-if="errors.deal_id" severity="error" class="mt-2">{{ errors.deal_id }}</Message>
+                </div>
+
+                <div class="mb-4">
+                    <InputLabel for="company_id">Company ID</InputLabel>
+                    <InputText v-model="address.company_id" type="text" class="w-full" />
+                    <Message v-if="errors.company_id" severity="error" class="mt-2">{{ errors.company_id }}</Message>
+                </div>
+
+                <div class="mb-4">
+                    <InputLabel for="titel">Title</InputLabel>
+                    <Select id="titel" v-model="address.titel" placeholder="select titel" :options="titelOptions"
+                    optionLabel="label" optionValue="value" class="w-full " />
+                    <Message v-if="errors.titel" severity="error" class="mt-2">{{ errors.titel }}</Message>
                 </div>
 
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">
@@ -100,13 +131,12 @@
             </form>
         </div>
     </AuthenticatedLayout>
+
 </template>
 
 <script>
-import { Link } from '@inertiajs/vue3'
 
 export default {
-    components: { Link },
     props: {
         address: Object,
         subprojects: Array,
@@ -115,18 +145,18 @@ export default {
     data() {
         return {
             errors: {},
-            feedbackOptions: [
-                { label: 'Not Interested', value: 'Not Interested' },
-                { label: 'Interested', value: 'Interested' },
-                { label: 'Request', value: 'Request' },
-                { label: 'Follow-up', value: 'Follow-up' },
-                { label: 'Delete Address', value: 'Delete Address' },
+            country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy'],
+            salutationOptions: [
+                { label: 'Herr', value: 'Herr' },
+                { label: 'Frau', value: 'Frau' },
+                { label: 'Divers', value: 'Divers' },
+                { label: 'Sehr geehrte Damen und Herren', value: 'Sehr geehrte Damen und Herren' },
             ],
-            priorityOptions: [
-                { label: 'Low', value: 1 },
-                { label: 'Medium', value: 2 },
-                { label: 'High', value: 3 },
-                { label: 'Critical', value: 4 },
+            titelOptions: [
+                { label: 'Dr.', value: 'Dr.' },
+                { label: 'Prof.', value: 'Prof.' },
+                { label: 'Prof. Dr.', value: 'Prof. Dr.' },
+
             ],
         }
     },
