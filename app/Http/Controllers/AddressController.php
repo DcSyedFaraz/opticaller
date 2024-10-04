@@ -9,7 +9,9 @@ use App\Models\Project;
 use App\Models\SubProject;
 use App\Models\User;
 use DB;
+use Http;
 use Illuminate\Http\Request;
+use Log;
 use Mail;
 
 class AddressController extends Controller
@@ -50,7 +52,7 @@ class AddressController extends Controller
 
         // Sorting functionality with validation
         $sortField = $request->input('sortField', 'id');
-        $sortOrder = $request->input('sortOrder', 'asc');
+        $sortOrder = $request->input('sortOrder', 'desc');
         // dd($sortField, $sortOrder);
         $query->orderBy($sortField, $sortOrder);
 
@@ -101,13 +103,19 @@ class AddressController extends Controller
             'street_address' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
-            'website' => 'nullable|url|max:255',
+            'website' => 'nullable|max:255',
             'phone_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'required|email|max:255',
-            'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
-            'follow_up_date' => 'nullable|date',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
+            'hubspot_tag' => 'nullable|string|max:255',
+            'deal_id' => 'nullable|string|max:255',
+            'company_id' => 'nullable|string|max:255',
+            'titel' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
+            'logo' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:255',
+            'contact_id' => 'nullable|string|unique:addresses,contact_id,' . $id,
         ]);
 
         DB::beginTransaction();
@@ -123,7 +131,7 @@ class AddressController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Address update failed', ['error' => $e->getMessage()]);
+            Log::error('Address update failed', ['error' => $e->getMessage()]);
 
             return redirect()->back()->withErrors(['error' => 'Address update failed: ' . $e->getMessage()]);
         }
@@ -138,13 +146,19 @@ class AddressController extends Controller
             'street_address' => 'nullable|string|max:255',
             'postal_code' => 'nullable|string|max:20',
             'city' => 'nullable|string|max:255',
-            'website' => 'nullable|url|max:255',
+            'website' => 'nullable|max:255',
             'phone_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'required|email|max:255',
-            'feedback' => 'nullable|string|in:Not Interested,Interested,Request,Follow-up,Delete Address',
-            'follow_up_date' => 'nullable|date',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
+            'hubspot_tag' => 'nullable|string|max:255',
+            'deal_id' => 'nullable|string|max:255',
+            'company_id' => 'nullable|string|max:255',
+            'titel' => 'nullable|string|max:255',
+            'linkedin' => 'nullable|string|max:255',
+            'logo' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:255',
+            'contact_id' => 'nullable|string|unique:addresses,contact_id',
         ]);
 
         DB::beginTransaction();
@@ -160,7 +174,7 @@ class AddressController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Address creation failed', ['error' => $e->getMessage()]);
+            Log::error('Address creation failed', ['error' => $e->getMessage()]);
 
             return redirect()->back()->withErrors(['error' => 'Address creation failed: ' . $e->getMessage()]);
         }
@@ -201,6 +215,14 @@ class AddressController extends Controller
             'phoneNumber' => $validatedData['phoneNumber'],
             'notes' => $validatedData['notes'],
         ];
+        $response = Http::post('https://hook.eu1.make.com/nnhsxiekkqv73s25g1em9p09s3itywou', $details);
+        if ($response->successful()) {
+            Log::info('Webhook called: ' . $response->body());
+        } else {
+            // Handle failure (log the error, retry, etc.)
+            Log::error('Webhook call failed: ' . $response->body());
+        }
+
 
         Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
 
@@ -208,5 +230,10 @@ class AddressController extends Controller
         return redirect()->route('dash')->with('message', 'Call back sent successfully!');
 
     }
+    public function destroy(Address $address)
+    {
+        $address->delete();
 
+        return redirect()->route('addresses.index')->with('message', 'Address deleted successfully.');
+    }
 }

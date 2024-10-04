@@ -12,6 +12,7 @@ class Address extends Model
     protected $guarded = [];
     protected $casts = [
         'seen' => 'datetime',
+        'follow_up_date' => 'datetime',
     ];
     // protected $casts = [
     //     'locked_fields' => 'array',

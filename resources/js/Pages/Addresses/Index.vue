@@ -6,8 +6,7 @@
         <div class="flex justify-between">
             <h1 class="text-2xl font-bold">Address Customization</h1>
             <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button"
-                type="button">Create
-            New</Link>
+                type="button">Create New</Link>
         </div>
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             <InputText v-model="filters.search" placeholder="Search..." class="mb-4" @input="fetchData" />
@@ -15,7 +14,6 @@
                 :sortOrder="sortOrderMap[filters.sortOrder]" @sort="onSort">
                 <Column field="company_name" header="Company Name" sortable></Column>
                 <Column header="Sub-Project">
-
                     <template #body="slotProps">
                         {{ slotProps.data.subproject?.title }}
                     </template>
@@ -30,10 +28,19 @@
                 </Column>
                 <Column header="Actions">
                     <template #body="slotProps">
-                        <Link :href="`/addresses/${slotProps.data.id}`" class="!text-blue-600 hover:!text-blue-900">
-                        View</Link>
+                        <div class="flex space-x-2">
+                            <!-- View Button -->
+                            <Button icon="pi pi-eye" class="p-button-text p-button-info"
+                                @click="viewAddress(slotProps.data.id)" :tooltip="'View Address'"
+                                tooltipOptions="{ position: 'top' }" />
+                            <!-- Delete Button -->
+                            <Button icon="pi pi-trash" class="p-button-text p-button-danger"
+                                @click="confirmDelete(slotProps.data)" :tooltip="'Delete Address'"
+                                tooltipOptions="{ position: 'top' }" />
+                        </div>
                     </template>
                 </Column>
+
                 <template #empty>
                     <div class="text-center py-4 text-gray-500">
                         No address found. Please try adjusting your search criteria or add a new address.
@@ -42,8 +49,11 @@
             </DataTable>
             <Paginator :rows="addresses.per_page" :totalRecords="addresses.total" @page="onPageChange($event)" />
         </div>
+
+
     </AuthenticatedLayout>
 </template>
+
 
 <script>
 import { Link } from '@inertiajs/vue3';
@@ -71,6 +81,17 @@ export default {
         };
     },
     methods: {
+        deleteAddress(address) {
+            this.$inertia.delete(route('addresses.destroy', address.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // this.$toast.add({ severity: 'success', summary: 'Deleted', detail: 'Address deleted successfully', life: 3000 });
+                },
+                onError: () => {
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete address', life: 3000 });
+                }
+            });
+        },
         fetchData() {
             // Ensure default sortField and sortOrder are included
             if (!this.filters.sortField) this.filters.sortField = 'id';
@@ -86,7 +107,23 @@ export default {
         onPageChange(event) {
             this.filters.page = event.page + 1;
             this.fetchData();
-        }
+        },
+        confirmDelete(address) {
+            this.$confirm.require({
+                message: 'Are you sure you want to delete this address?',
+                header: 'Confirmation',
+                icon: 'pi pi-exclamation-triangle',
+                acceptLabel: 'Yes',
+                rejectLabel: 'No',
+                accept: () => {
+                    this.deleteAddress(address);
+                },
+            });
+        },
+        viewAddress(id) {
+            // Navigate to the address detail page
+            this.$inertia.visit(route('addresses.show', id));
+        },
     },
     mounted() {
         console.log(this.$page.props);

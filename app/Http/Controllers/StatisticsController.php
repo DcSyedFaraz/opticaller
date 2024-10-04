@@ -9,6 +9,7 @@ use App\Models\NotReached;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -105,6 +106,25 @@ class StatisticsController extends Controller
 
         $totalAddressesWithNullFeedback = Address::whereNull('feedback')->count();
 
+        $feedbackCounts = Activity::whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('feedback')
+            ->select('user_id', 'feedback', DB::raw('count(*) as total'))
+            ->groupBy('user_id', 'feedback')
+            ->where('feedback', '!=', '')
+            ->with('users')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function ($feedbacks) {
+                return $feedbacks->mapWithKeys(function ($item) {
+                    return [$item->feedback => $item->total];
+                });
+            });
+        $userData = $userData->map(function ($user) use ($feedbackCounts) {
+            $userFeedbacks = $feedbackCounts->get($user['user_id'], []);
+            return array_merge($user, ['feedback_counts' => $userFeedbacks]);
+        });
+
+        // dd($userData);
         // Counts per project
         $projectsWithAddressCounts = Project::withCount([
             'addresses' => function ($query) {
