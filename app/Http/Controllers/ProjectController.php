@@ -68,6 +68,7 @@ class ProjectController extends Controller
     }
     public function subprojectsUpdate(Request $request, $id)
     {
+        dd($request->all());
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'priority' => 'nullable',

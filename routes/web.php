@@ -63,7 +63,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::resource('projects', ProjectController::class);
     Route::post('/subprojects', [ProjectController::class, 'subprojects']);
-    Route::put('/subprojects/{id}', [ProjectController::class, 'subprojectsUpdate']);
+    Route::post('/subprojects/{id}', [ProjectController::class, 'subprojectsUpdate']);
     Route::delete('/subprojects/{id}', [ProjectController::class, 'subprojectsDelete']);
     Route::get('/subprojects/assign', [ProjectController::class, 'assign'])->name('projects.assign');
     Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
