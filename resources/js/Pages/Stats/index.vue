@@ -218,7 +218,9 @@
                     </Column>
                     <Column field="feedback_counts" header="Feedback Counts">
                         <template #body="slotProps">
-                            {{ formatFeedbackCounts(slotProps.data.feedback_counts) }}
+                            <!-- {{ formatFeedbackCounts(slotProps.data.feedback_counts) }} -->
+                            <div v-html="formatFeedbackCounts(slotProps.data.feedback_counts)"></div>
+
                         </template>
                     </Column>
                 </DataTable>
@@ -260,7 +262,7 @@
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
                             <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
-                                data.totalBreak) }}</p>
+                                    data.totalBreak) }}</p>
                         </div>
 
 
@@ -316,9 +318,9 @@ export default {
             if (!feedbackCounts || Object.keys(feedbackCounts).length === 0) {
                 return 'No Feedback';
             }
-            // Convert the feedbackCounts object into an array of "Key: Value" strings
+            // Convert the feedbackCounts object into an array of "Key: Value" strings with bold keys
             const formatted = Object.entries(feedbackCounts)
-                .map(([key, value]) => `${key}: ${value}`)
+                .map(([key, value]) => `<strong>${key}</strong>: ${value}`)
                 .join(', ');
             return formatted;
         },

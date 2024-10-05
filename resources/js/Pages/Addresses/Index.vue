@@ -1,10 +1,10 @@
 <template>
 
-    <Head title="Address Customization" />
+    <Head title="Address List" />
     <AuthenticatedLayout>
 
         <div class="flex justify-between">
-            <h1 class="text-2xl font-bold">Address Customization</h1>
+            <h1 class="text-2xl font-bold">Address List</h1>
             <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button"
                 type="button">Create New</Link>
         </div>
