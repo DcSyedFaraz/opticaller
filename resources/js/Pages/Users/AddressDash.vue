@@ -7,7 +7,7 @@
         <div class="user-page grid grid-cols-1 lg:grid-cols-5 gap-x-4 px-4" v-if="localAddress && localAddress.id">
             <!-- Main Panel -->
             <div class="col-span-1 lg:col-span-4 border rounded-xl shadow-xl">
-                <div class="pb-2 p-4">
+                <div class="pb-0 p-4">
                     <div class="flex flex-wrap justify-between items-center">
                         <div
                             class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-sm font-medium text-white ring-1 ring-inset ring-black ">
@@ -42,7 +42,7 @@
 
 
                 </div>
-                <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-secondary my-3">
+                <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-secondary my-1">
                     <!-- <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-sm">Details</span>
                     </div> -->
@@ -155,7 +155,7 @@
                     </div>
                 </div>
                 <!-- Notes and Buttons remain unchanged as they have flexible widths -->
-                <div class="border m-4 lg:mx-7 rounded-lg shadow shadow-blue-200">
+                <div class="border m-4 my-1 lg:mx-7 rounded-lg shadow shadow-blue-200">
                     <!-- <div class="border-b-2 p-3">
                         <span class="mx-4 font-extrabold text-sm">Notes</span>
                     </div> -->
@@ -193,7 +193,7 @@
                         </Card>
                     </div>
                 </div>
-                <div class="flex justify-center flex-wrap my-4">
+                <div class="flex justify-center flex-wrap my-1">
                     <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
                         class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
                         <!-- SVG and Text for Button remain unchanged -->
@@ -333,20 +333,19 @@
                     </div>
                 </div>
                 <!-- Responsive adjustments for call history and modal dialogs -->
+                <div class="field col-span-1 md:col-span-1 lg:col-span-1">
+                    <label for="notes" class="!font-extrabold text-sm">
+                        Notes:
+                    </label>
+                    <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary" disabled />
+                    <!-- <p
+                        class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                        {{ localAddress.notes }}
+                    </p> -->
+                </div>
                 <div class="bg-white border border-gray-300 rounded-lg shadow-xl">
                     <div class="  pb-2 border-b-2 p-4">
                         <div class="grid grid-cols-1">
-                            <div class="field col-span-1 md:col-span-1 lg:col-span-1">
-                                <label for="notes" class="!font-extrabold text-sm">
-                                    Notes:
-                                </label>
-                                <!-- <InputText id="notes" v-model="localAddress.notes" class="w-full !border-secondary"
-                                    disabled /> -->
-                                <p
-                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                                    {{ localAddress.notes }}
-                                </p>
-                            </div>
                         </div>
                         <div class="field col-span-1 md:col-span-1 lg:col-span-1 flex justify-between items-center">
 
@@ -363,10 +362,10 @@
                                 class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-secondary mb-1">
                                 Last call on: {{ formatnewDate(item.created_at) }}
                             </span>
-                            <span
+                            <!-- <span
                                 class="inline-flex mx-2 items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-primary">
                                 Country: {{ localAddress.country }}
-                            </span>
+                            </span> -->
                             <span
                                 class="inline-flex items-center rounded-md bg-[#3E3E3E] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#3E3E3E]">
                                 Agent: {{ item.users?.name }}
@@ -417,9 +416,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                            + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -501,20 +500,38 @@
                             class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">
                             Last call on: {{ formatnewDate(item.created_at) }}
                         </span>
-                        <span
+                        <!-- <span
                             class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">
                             Country: {{ localAddress.country }}
-                        </span>
+                        </span> -->
                         <span
                             class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">
                             Agent: {{ item.users?.name }}
                         </span>
                     </div>
                     <div class="border-b border-gray-300 pt-2 p-4">
+                        <div v-if="item.feedback" class="mb-4">
+                            <div class="flex items-center mb-1">
+                                <span class="text-md font-[1000]">Feedback:</span>
+                            </div>
+                            <p
+                                class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                {{ item.feedback }}
+                            </p>
+                        </div>
+                        <div v-if="item.sub_project_id" class="mb-4">
+                            <div class="flex items-center mb-1">
+                                <span class="text-md font-[1000]">Sub Project:</span>
+                            </div>
+                            <p
+                                class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                {{ item.sub_project_id }}
+                            </p>
+                        </div>
                         <div class="mb-4">
                             <div class="flex items-center mb-1">
-                                <span class="h-2 w-2 bg-primary rounded-full mr-2"></span>
-                                <span class="text-md font-[1000] text-green-600">Personal Notes:</span>
+                                <!-- <span class="h-2 w-2 bg-primary rounded-full mr-2"></span> -->
+                                <span class="text-md font-[1000] ">Personal Notes:</span>
                             </div>
                             <p class="text-sm text-gray-700 font-bold">{{ item.notes?.personal_notes }}</p>
                         </div>
@@ -529,9 +546,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
