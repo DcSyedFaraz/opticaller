@@ -12,7 +12,7 @@
                         <label for="project" class=" text-gray-700 mb-1 font-extrabold text-lg">Select Project <span
                                 class="text-red-600 font-bold">*</span></label>
                         <Select id="project" v-model="formData.project" :options="projects" optionLabel="name"
-                            optionValue="email" placeholder="--Select--" required />
+                            optionValue="name" placeholder="--Select--" required />
                     </div>
 
                     <!-- Salutation Input -->
@@ -89,10 +89,11 @@ export default {
 
             // Options for the Select Project
             projects: [
-                { name: 'vimtronix', email: 'info@vimtronix.com' },
-                { name: 'XSimpress', email: 'info@xsimpress.com' },
-                { name: 'box4pflege.de', email: 'info@box4pflege.de' },
-                { name: 'Management', email: 'dcsyedfaraz@gmail.com' },
+                { name: 'Vimtronix' },
+                { name: 'XSimpress' },
+                { name: 'Box4Pflege' },
+                { name: 'Management' },
+                { name: 'MEDIQANO' },
             ],
         };
     },
@@ -102,7 +103,7 @@ export default {
 
             if (!this.formData.project) missingFields.push('Project');
             if (!this.formData.salutation) missingFields.push('Salutation');
-            if (!this.formData.firstName) missingFields.push('First Name');
+            // if (!this.formData.firstName) missingFields.push('First Name');
             if (!this.formData.lastName) missingFields.push('Last Name');
             if (!this.formData.phoneNumber) missingFields.push('Phone Number');
             // if (!this.formData.email) missingFields.push('Email');
@@ -137,16 +138,16 @@ export default {
                             //     },
                             // });
 
-                        //     this.$toast.add({
-                        //         severity: 'success',
-                        //         summary: 'Success',
-                        //         detail: 'Form submitted successfully!',
-                        //         life: 3000,
-                        //     });
-                        // setTimeout(() => {
-                        //     this.$inertia.visit(route('dash'));
-                        // }, 1000000);
-                        console.log('submitted');
+                            //     this.$toast.add({
+                            //         severity: 'success',
+                            //         summary: 'Success',
+                            //         detail: 'Form submitted successfully!',
+                            //         life: 3000,
+                            //     });
+                            // setTimeout(() => {
+                            //     this.$inertia.visit(route('dash'));
+                            // }, 1000000);
+                            console.log('submitted');
                     },
                     onError: (errors) => {
                         this.isLoading = false,

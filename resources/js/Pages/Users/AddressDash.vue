@@ -149,19 +149,7 @@
                                             class="w-full !border-secondary" />
                                     </div>
                                 </div>
-                            </template>
-                        </Card>
-
-                    </div>
-                </div>
-                <!-- Notes and Buttons remain unchanged as they have flexible widths -->
-                <div class="border m-4 my-1 lg:mx-7 rounded-lg shadow shadow-blue-200">
-                    <!-- <div class="border-b-2 p-3">
-                        <span class="mx-4 font-extrabold text-sm">Notes</span>
-                    </div> -->
-                    <div class="grid">
-                        <Card class="shadow-md">
-                            <template #content>
+                                <hr class="mb-2 border-1 border-black">
                                 <div class="grid">
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
@@ -189,50 +177,64 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="flex justify-center flex-wrap my-1">
+                                    <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
+                                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
+                                        <!-- SVG and Text for Button remain unchanged -->
+                                        <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M22.4383 24.261C19.9103 24.261 17.3183 23.628 14.6623 22.362C12.0063 21.096 9.53434 19.3185 7.24634 17.0295C4.97634 14.7415 3.20833 12.274 1.94233 9.62705C0.676335 6.98005 0.043335 4.39305 0.043335 1.86605C0.043335 1.41605 0.193335 1.03605 0.493335 0.726047C0.793335 0.416047 1.16834 0.261047 1.61834 0.261047H5.32783C5.73583 0.261047 6.09183 0.389547 6.39583 0.646547C6.69983 0.903547 6.90533 1.23305 7.01233 1.63505L7.75634 5.21105C7.82634 5.63105 7.81383 5.99755 7.71883 6.31055C7.62383 6.62355 7.45734 6.88005 7.21934 7.08005L3.92834 10.149C4.54434 11.266 5.22484 12.304 5.96984 13.263C6.71484 14.222 7.50984 15.1305 8.35484 15.9885C9.22484 16.8585 10.1618 17.6685 11.1658 18.4185C12.1698 19.1675 13.2718 19.8745 14.4718 20.5395L17.6803 17.274C17.9243 17.011 18.1988 16.8375 18.5038 16.7535C18.8078 16.6705 19.1448 16.654 19.5148 16.704L22.6693 17.349C23.0773 17.449 23.4083 17.6545 23.6623 17.9655C23.9163 18.2765 24.0433 18.6325 24.0433 19.0335V22.686C24.0433 23.136 23.8883 23.511 23.5783 23.811C23.2683 24.111 22.8883 24.261 22.4383 24.261Z"
+                                                fill="white" />
+                                            <path d="M15.0433 2.26105L20.3483 7.56605M20.3483 2.26105L15.0433 7.56605"
+                                                stroke="white" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+
+                                        </svg>
+                                        <span class="mx-2 my-1">Not Reached</span>
+                                    </button>
+                                    <button @click="showFollowModal = true" :disabled="isButtonDisabled"
+                                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
+                                        <!-- SVG and Text for Button remain unchanged -->
+                                        <svg width="33" height="33" viewBox="0 0 33 33" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M17.5222 22.8817L13.5434 26.8604L9.5647 22.8817" stroke="white"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M13.5435 18.2398V26.8604" stroke="white" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M16.1885 5.62616L19.5116 8.95604L16.1885 12.3315" stroke="white"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M7.57593 8.95673H19.5116" stroke="white" stroke-width="2"
+                                                stroke-linecap="round" />
+
+                                        </svg>
+                                        <span class="mx-2 my-1">Follow-Ups</span>
+                                    </button>
+                                    <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
+                                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
+                                        <i class="pi pi-save !text-2xl"></i>
+                                        <span class="mx-2 my-1 text-center">
+                                            Save & Next
+                                        </span>
+                                    </button>
+                                </div>
+                            </template>
+                        </Card>
+
+                    </div>
+                </div>
+                <!-- Notes and Buttons remain unchanged as they have flexible widths -->
+                <!-- <div class="border m-4 my-1 lg:mx-7 rounded-lg shadow shadow-blue-200">
+
+                    <div class="grid">
+                        <Card class="shadow-md">
+                            <template #content>
                             </template>
                         </Card>
                     </div>
-                </div>
-                <div class="flex justify-center flex-wrap my-1">
-                    <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
-                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
-                        <!-- SVG and Text for Button remain unchanged -->
-                        <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M22.4383 24.261C19.9103 24.261 17.3183 23.628 14.6623 22.362C12.0063 21.096 9.53434 19.3185 7.24634 17.0295C4.97634 14.7415 3.20833 12.274 1.94233 9.62705C0.676335 6.98005 0.043335 4.39305 0.043335 1.86605C0.043335 1.41605 0.193335 1.03605 0.493335 0.726047C0.793335 0.416047 1.16834 0.261047 1.61834 0.261047H5.32783C5.73583 0.261047 6.09183 0.389547 6.39583 0.646547C6.69983 0.903547 6.90533 1.23305 7.01233 1.63505L7.75634 5.21105C7.82634 5.63105 7.81383 5.99755 7.71883 6.31055C7.62383 6.62355 7.45734 6.88005 7.21934 7.08005L3.92834 10.149C4.54434 11.266 5.22484 12.304 5.96984 13.263C6.71484 14.222 7.50984 15.1305 8.35484 15.9885C9.22484 16.8585 10.1618 17.6685 11.1658 18.4185C12.1698 19.1675 13.2718 19.8745 14.4718 20.5395L17.6803 17.274C17.9243 17.011 18.1988 16.8375 18.5038 16.7535C18.8078 16.6705 19.1448 16.654 19.5148 16.704L22.6693 17.349C23.0773 17.449 23.4083 17.6545 23.6623 17.9655C23.9163 18.2765 24.0433 18.6325 24.0433 19.0335V22.686C24.0433 23.136 23.8883 23.511 23.5783 23.811C23.2683 24.111 22.8883 24.261 22.4383 24.261Z"
-                                fill="white" />
-                            <path d="M15.0433 2.26105L20.3483 7.56605M20.3483 2.26105L15.0433 7.56605" stroke="white"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-
-                        </svg>
-                        <span class="mx-2 my-1">Not Reached</span>
-                    </button>
-                    <button @click="showFollowModal = true" :disabled="isButtonDisabled"
-                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
-                        <!-- SVG and Text for Button remain unchanged -->
-                        <svg width="33" height="33" viewBox="0 0 33 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M17.5222 22.8817L13.5434 26.8604L9.5647 22.8817" stroke="white" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M13.5435 18.2398V26.8604" stroke="white" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M16.1885 5.62616L19.5116 8.95604L16.1885 12.3315" stroke="white" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M7.57593 8.95673H19.5116" stroke="white" stroke-width="2" stroke-linecap="round" />
-
-                        </svg>
-                        <span class="mx-2 my-1">Follow-Ups</span>
-                    </button>
-                    <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
-                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
-                        <i class="pi pi-save !text-2xl"></i>
-                        <span class="mx-2 my-1 text-center">
-                            Save & Next
-                        </span>
-                    </button>
-                </div>
+                </div> -->
                 <!-- Call History remains unchanged with the addition of responsive adjustments -->
                 <div class="call-history lg:col-span-1 hidden">
                     <Card class="shadow-md">
