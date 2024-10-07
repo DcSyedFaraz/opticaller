@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\GlobalLockedFields;
+use App\Models\SubProject;
 use App\Models\User;
 use App\Services\AddressService;
 use Carbon\Carbon;
@@ -21,7 +22,7 @@ class UsersController extends Controller
      */
     public function toggleStatusget()
     {
-        $users = User::with('latestLoginTime','latestLogoutTime')->get();
+        $users = User::with('latestLoginTime', 'latestLogoutTime')->get();
         // dd($users);
         return Inertia::render('Settings/UserStatusToggle', [
             'users' => $users
@@ -42,11 +43,11 @@ class UsersController extends Controller
     {
         $addressService = new AddressService();
         $address = $addressService->getDueAddress();
-
         $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
+        $subproject = SubProject::select('id', 'title')->get();
 
         // Return the address with Inertia
-        return Inertia::render('Users/AddressDash', ['address' => $address, 'lockfields' => $globalLockedFields]);
+        return Inertia::render('Users/AddressDash', ['address' => $address, 'subproject' => $subproject, 'lockfields' => $globalLockedFields]);
     }
 
     public function index(Request $request)

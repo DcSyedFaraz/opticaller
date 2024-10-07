@@ -236,7 +236,7 @@ class TimeTrackingController extends Controller
                 $timeLog->user_id = auth()->id();
                 $timeLog->address_id = $addressID;
                 $timeLog->total_duration = $seconds;
-                $timeLog->feedback = $validatedData['address']['feedback'];
+                $timeLog->feedback = $address->feedback;
                 $timeLog->contact_id = $address->contact_id;
                 $timeLog->sub_project_id = $request->address['subproject']['title'];
                 $timeLog->save();

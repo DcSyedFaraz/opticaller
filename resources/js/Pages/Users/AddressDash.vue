@@ -416,9 +416,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -442,6 +442,14 @@
                                 class="w-full !border-secondary" />
                             <!-- Error Message Display -->
                             <small class="text-red-600" v-if="contactIdError">{{ contactIdError }}</small>
+                        </div>
+                        <div class="field">
+                            <label for="new_contact_id">New Sub-Project:</label>
+                            <Select id="subproject" v-model="newsubproject" placeholder="select subproject"
+                                :options="subproject" optionLabel="title" optionValue="id"
+                                class="w-full !border-secondary" />
+                            <!-- Error Message Display -->
+                            <small class="text-red-600" v-if="subprojectError">{{ subprojectError }}</small>
                         </div>
                     </div>
                     <!-- Action Buttons -->
@@ -546,9 +554,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -598,6 +606,7 @@ import timezone from 'moment-timezone';
 export default {
     props: {
         address: Object,
+        subproject: Object,
         lockfields: Array,
     },
     data() {
@@ -659,8 +668,10 @@ export default {
             selectedMinute: null,
             showContactIdDialog: false,
             newContactId: '',
+            newsubproject: '',
             contactIdLoading: false,
             contactIdError: '',
+            subprojectError: '',
             hourOptions: [
                 { label: '09', value: 9 },
                 { label: '10', value: 10 },
@@ -742,7 +753,9 @@ export default {
     methods: {
         openContactIdDialog() {
             this.newContactId = '';
+            this.newsubproject = '';
             this.contactIdError = '';
+            this.subprojectError = '';
             this.showContactIdDialog = true;
         },
 
@@ -758,13 +771,18 @@ export default {
                 this.contactIdError = 'Contact ID is required.';
                 return;
             }
+            if (!this.newsubproject) {
+                this.subprojectError = 'Sub Project ID is required.';
+                return;
+            }
 
             this.contactIdLoading = true;
             this.contactIdError = '';
+            this.subprojectError = '';
 
             try {
                 // Replace 'address.getByContactId' with your actual route name
-                const response = await axios.get(route('address.getByContactId', { contact_id: this.newContactId }));
+                const response = await axios.get(route('address.getByContactId', { contact_id: this.newContactId, sub_project_id: this.newsubproject }));
 
                 if (response.data && response.data.address) {
                     console.log(response.data);

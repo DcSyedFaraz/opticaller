@@ -16,10 +16,10 @@ use Mail;
 
 class AddressController extends Controller
 {
-    public function getAddressByContactId($contact_id)
+    public function getAddressByContactId($contact_id, $sub_project_id)
     {
         // Fetch the address using the Contact ID
-        $address = Address::with(['calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users'])->where('contact_id', $contact_id)->first();
+        $address = Address::with(['calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users'])->where('contact_id', $contact_id)->where('sub_project_id', $sub_project_id)->first();
 
         if ($address) {
             $address->seen = now();
