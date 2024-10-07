@@ -143,6 +143,7 @@ class ApiController extends Controller
         }
         // Fetch search parameters
         $contactId = $request->input('contact_id');
+        $subProjectID = $request->input('sub_project_id');
         $emailAddress = $request->input('email_address_system');
         $companyName = $request->input('company_name');
         $limit = $request->input('limit', 500);
@@ -153,6 +154,9 @@ class ApiController extends Controller
         // Apply filters based on search parameters
         if ($contactId) {
             $query->where('contact_id', $contactId);
+        }
+        if ($subProjectID) {
+            $query->where('sub_project_id', $subProjectID);
         }
 
         if ($emailAddress) {
