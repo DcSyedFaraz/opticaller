@@ -185,9 +185,10 @@ class AddressController extends Controller
     }
     public function callbackMail(Request $request)
     {
+        // dd('d');
         // Validate the incoming request
         $validatedData = $request->validate([
-            'project' => 'required|email',
+            'project' => 'required',
             'salutation' => 'required|string|max:255',
             'firstName' => 'required|string|max:255',
             'lastName' => 'required|string|max:255',
@@ -206,17 +207,50 @@ class AddressController extends Controller
         $address->save();
 
         $user = auth()->user();
+
+
+        // Determine the email recipient based on the project field
+        $emailRecipient = '';
+        switch ($validatedData['project']) {
+            case 'Vimtronix':
+                $emailRecipient = 'info@vimtronix.com';
+                break;
+            case 'XSimpress':
+                $emailRecipient = 'info@xsimpress.com';
+                break;
+            case 'Box4Pflege':
+                $emailRecipient = 'info@box4pflege.de';
+                break;
+            case 'Management':
+                $emailRecipient = 'geschaeftsleitung@vim-solution.com';
+                break;
+            case 'MEDIQANO':
+                $emailRecipient = 'info@mediqano.com';
+                break;
+            default:
+                // You can handle other cases or throw an exception if necessary
+                Log::error('Unknown project: ' . $validatedData['project']);
+                break;
+        }
         $details = [
             'senderName' => $user->name,
             'senderId' => $user->id,
             'salutation' => $validatedData['salutation'],
+            'emailRecipient' => $emailRecipient,
             'project' => $validatedData['project'],
             'firstName' => $validatedData['firstName'],
             'lastName' => $validatedData['lastName'],
             'phoneNumber' => $validatedData['phoneNumber'],
             'notes' => $validatedData['notes'],
         ];
-        $response = Http::post('https://hook.eu1.make.com/nnhsxiekkqv73s25g1em9p09s3itywou', $details);
+        // dd($details);
+        // testing hook
+        // $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
+
+        // live hook
+        $webhookUrl = 'https://hook.eu1.make.com/nnhsxiekkqv73s25g1em9p09s3itywou';
+        // Call webhook
+        $response = Http::post($webhookUrl, $details);
         if ($response->successful()) {
             Log::info('Webhook called: ' . $response->body());
         } else {
@@ -224,8 +258,13 @@ class AddressController extends Controller
             Log::error('Webhook call failed: ' . $response->body());
         }
 
+        // Send the email if a recipient was set
+        if ($emailRecipient) {
+            Mail::to($emailRecipient)->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
+        } else {
+            Log::error('No email recipient was set for the project.');
+        }
 
-        Mail::to($validatedData['project'])->bcc('arsalan195@gmail.com')->send(new CallbackMail($details));
 
         // Return inertia response
         return redirect()->route('dash')->with('message', 'Call back sent successfully!');

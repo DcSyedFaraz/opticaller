@@ -216,13 +216,21 @@
                             {{ formatSeconds(slotProps.data.total_effective_working_time) }}
                         </template>
                     </Column>
-                    <Column field="feedback_counts" header="Feedback Counts">
+                    <!-- <Column field="feedback_counts" header="Feedback Counts">
                         <template #body="slotProps">
-                            <!-- {{ formatFeedbackCounts(slotProps.data.feedback_counts) }} -->
                             <div v-html="formatFeedbackCounts(slotProps.data.feedback_counts)"></div>
 
                         </template>
-                    </Column>
+
+                    </Column> -->
+                    <!-- Dynamic Feedback Count Columns -->
+                    <template v-for="(value, key) in userData[0].feedback_counts" :key="key">
+                        <Column :field="`feedback_counts.${key}`" :header="formatHeader(key)">
+                            <template #body="slotProps">
+                                {{ slotProps.data.feedback_counts[key] ?? 0 }}
+                            </template>
+                        </Column>
+                    </template>
                 </DataTable>
             </div>
 
@@ -262,7 +270,7 @@
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
                             <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
-                                    data.totalBreak) }}</p>
+                                data.totalBreak) }}</p>
                         </div>
 
 
@@ -314,6 +322,10 @@ export default {
 
     },
     methods: {
+        formatHeader(key) {
+            // Converts keys like "saved_and_next" to "Saved & Next"
+            return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+        },
         formatFeedbackCounts(feedbackCounts) {
             if (!feedbackCounts || Object.keys(feedbackCounts).length === 0) {
                 return 'No Feedback';
