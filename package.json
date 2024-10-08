@@ -25,9 +25,11 @@
         "chart.js": "^4.4.4",
         "country-list-js": "^3.1.8",
         "global": "^4.4.0",
+        "laravel-echo": "^1.16.1",
         "moment-timezone": "^0.5.45",
         "primeicons": "^7.0.0",
         "primevue": "^4.0.4",
+        "pusher-js": "^8.4.0-rc2",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vuex": "^4.0.2",
         "webex": "^3.4.0"

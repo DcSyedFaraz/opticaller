@@ -22,6 +22,13 @@
                     <span class="ml-2 text-sm text-gray-700">No Validation</span>
                 </label>
             </div>
+            <div class="sm:col-span-6">
+                <label for="no_statistics" class="flex items-center">
+                    <Checkbox v-model="feedback.no_statistics" binary inputId="no_statistics" :disabled="loading" />
+                    <span class="ml-2 text-sm text-gray-700">No Statistics</span>
+                </label>
+            </div>
+
 
             <!-- Sub-Projects MultiSelect Field -->
             <div class="sm:col-span-6">
@@ -43,7 +50,7 @@ export default {
     props: {
         initialFeedback: {
             type: Object,
-            default: () => ({ label: '', value: '', no_validation: false, sub_project_ids: [] }),
+            default: () => ({ label: '', value: '', no_validation: false, no_statistics: false, sub_project_ids: [] }),
         },
         submitLabel: {
             type: String,
@@ -69,7 +76,7 @@ export default {
             this.$emit('submit', { ...this.feedback });
         },
         resetForm() {
-            this.feedback = { label: '', value: '', no_validation: false, sub_project_ids: [] };
+            this.feedback = { label: '', value: '', no_validation: false, no_statistics: false, sub_project_ids: [] };
         },
     },
     watch: {

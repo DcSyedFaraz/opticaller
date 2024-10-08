@@ -87,14 +87,18 @@ class StatisticsController extends Controller
 
         // Count addresses and feedbacks within the date range
         $updatedAddressesToday = Address::whereBetween('updated_at', [$startDate, $endDate])->count();
-        $notInterestedCountToday = Address::where('feedback', 'Not Interested')
+        $notInterestedCountToday = Address::whereHas('feedbacks', function ($query) {
+            $query->where('no_statistics', true);
+        })
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
-        $followCountToday = Address::where('feedback', 'Follow-up')
+        $followCountToday = Address::whereNotNull('follow_up_date')
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
-        $successfulOutcomes = Address::where('feedback', 'Interested')
-            ->whereBetween('updated_at', [$startDate, $endDate])
+        $successfulOutcomes = Address::whereBetween('updated_at', [$startDate, $endDate])
+            ->whereHas('feedbacks', function ($query) {
+                $query->where('no_statistics', false);
+            })
             ->count();
         $notReachedCountToday = NotReached::whereBetween('updated_at', [$startDate, $endDate])->count();
 
@@ -234,11 +238,15 @@ class StatisticsController extends Controller
         // Today's Success Rate
         $subProjectIds = $user->subProjects()->pluck('sub_project_id');
         $successfulCalls = Address::whereIn('sub_project_id', $subProjectIds)
-            ->where('feedback', 'Interested')
+            ->whereHas('feedbacks', function ($query) {
+                $query->where('no_statistics', false);
+            })
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
         $notReachedCalls = Address::whereIn('sub_project_id', $subProjectIds)
-            ->where('feedback', 'Not Interested')
+            ->whereHas('feedbacks', function ($query) {
+                $query->where('no_statistics', true);
+            })
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
 

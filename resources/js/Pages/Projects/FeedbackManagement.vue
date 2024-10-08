@@ -8,13 +8,6 @@
                 <h1 class="text-4xl font-extrabold text-gray-900">Manage Feedbacks</h1>
             </div>
 
-            <!-- Success Message -->
-            <transition name="fade">
-                <div v-if="$page.props.flash.success"
-                    class="mb-6 p-4 bg-green-100 border border-green-200 text-green-800 rounded-lg shadow-sm">
-                    {{ $page.props.flash.success }}
-                </div>
-            </transition>
 
             <!-- Feedback Form Card -->
             <div class="bg-white shadow-md rounded-lg p-6 mb-6">
@@ -118,6 +111,7 @@ export default {
                 label: feedback.label,
                 value: feedback.value,
                 no_validation: feedback.no_validation,
+                no_statistics: feedback.no_statistics,
                 sub_project_ids: feedback.sub_project_ids,
             };
 
@@ -158,6 +152,7 @@ export default {
                 id: feedback.id,
                 label: feedback.label,
                 value: feedback.value,
+                no_statistics: feedback.no_statistics,
                 no_validation: feedback.no_validation,
                 sub_project_ids: feedback.sub_projects.map((sp) => sp.id),
             };
@@ -175,6 +170,7 @@ export default {
                 label: updatedFeedback.label,
                 value: updatedFeedback.value,
                 no_validation: updatedFeedback.no_validation,
+                no_statistics: updatedFeedback.no_statistics,
                 sub_project_ids: updatedFeedback.sub_project_ids,
             };
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\UserStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
@@ -66,6 +67,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($lastLogin) {
             $lastLogin->update(['logout_time' => now()]);
+            broadcast(new UserStatusChanged(Auth::id(), 'offline'));
         }
         Auth::guard('web')->logout();
 
