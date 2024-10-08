@@ -53,15 +53,14 @@ class AddressService
 
         // Fetch addresses dynamically
         $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users', 'project')
-            // ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
-            // ->orderBy('sub_projects.priority', 'desc')
-            // ->when($dueAddress, function ($query) {
-            //     $query->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
-            //         ->orderBy('sub_projects.priority', 'desc');
-            // })
-            ->orderBy(SubProject::select('priority')
-                ->whereColumn('sub_projects.id', 'addresses.sub_project_id'), 'desc')
+            ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id') // Join sub_projects
+            ->orderBy('sub_projects.priority', 'desc')
             ->whereIn('sub_project_id', $subProjectIds)
+            ->where(function ($query) {
+                $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
+                    // ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
+                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
+            })
             // ->where('seen', 0)
             ->whereNull('follow_up_date')
             // ->where(function ($query) {
