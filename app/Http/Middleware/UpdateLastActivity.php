@@ -17,8 +17,10 @@ class UpdateLastActivity
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::check()) {
-            $loginTime = Auth::user()->loginTimes()->whereNull('logout_time')->orderBy('id','desc')->first();
+        $user = Auth::user();
+
+        if ($user) {
+            $loginTime = Auth::user()->loginTimes()?->whereNull('logout_time')->orderBy('id', 'desc')->first();
             if ($loginTime) {
                 $loginTime->update(['last_activity' => now()]);
                 broadcast(new UserStatusChanged(Auth::id(), 'online'));
