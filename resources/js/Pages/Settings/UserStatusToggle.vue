@@ -1,12 +1,12 @@
 <template>
 
     <Head title="Account lockout" />
-
     <AuthenticatedLayout>
         <div class="max-w-7xl mx-auto p-6 lg:p-8">
             <h2 class="text-2xl font-semibold mb-4 text-primary">Account lockout</h2>
             <DataTable :value="users" class="!p-datatable-striped" v-model:filters="filters"
                 :globalFilterFields="['name', 'email']" :paginator="true" :rows="10" responsiveLayout="scroll">
+
                 <template #header>
                     <div class="flex justify-end">
                         <IconField>
@@ -27,21 +27,13 @@
                 <Column field="name" header="Name" />
                 <Column field="email" header="Email" />
 
-                <!-- New Activity Details Column -->
+                <!-- Activity Details Column -->
                 <Column header="Activity Details">
                     <template #body="slotProps">
                         <div class="flex flex-col">
-                            <!-- Active Status -->
-                            <!-- <span :class="slotProps.data.is_active ? 'text-success' : 'text-secondary'">
-                                <Badge v-if="slotProps.data.is_active" value="Active" size="large" severity="success">
-                                </Badge>
-                                <Badge v-else value="Inactive" size="large" severity="danger"></Badge>
-                            </span> -->
-                            <!-- Last Login -->
                             <span class="text-sm text-gray-600">
                                 Last Login: {{ slotProps.data.latest_login_time?.login_time ?? 'N/A' }}
                             </span>
-                            <!-- Last Logout -->
                             <span class="text-sm text-gray-600">
                                 Last Logout: {{ slotProps.data.latest_logout_time?.logout_time ?? 'N/A' }}
                             </span>
@@ -49,38 +41,35 @@
                     </template>
                 </Column>
 
+                <!-- Status Column: Online/Offline -->
                 <Column header="Status">
                     <template #body="slotProps">
                         <span :class="slotProps.data.is_active ? 'text-success' : 'text-secondary'">
-                            <Badge v-if="slotProps.data.is_active" value="Active" size="large" severity="success">
+                            <Badge v-if="slotProps.data.is_active" value="Online" size="large" severity="success">
                             </Badge>
-                            <Badge v-else value="Inactive" size="large" severity="danger"></Badge>
+                            <Badge v-else value="Offline" size="large" severity="danger"></Badge>
                         </span>
                     </template>
                 </Column>
+
+                <!-- Action Column for Activate/Deactivate -->
                 <Column header="Action">
                     <template #body="slotProps">
-                        <Button :label="slotProps.data.is_active ? 'Deactivate' : 'Activate'" :class="`
-                                ${slotProps.data.is_active
-                                ? '!bg-red-500 hover:!bg-red-700 !border-red-500 hover:!border-red-700 text-white'
-                                : '!bg-green-500 hover:!bg-green-700 !border-green-500 hover:!border-green-700 text-white'
-                            }
-                            `" @click="openConfirmationDialog(slotProps.data)" />
+                        <Button :label="slotProps.data.is_active ? 'Deactivate' : 'Activate'"
+                            :class="slotProps.data.is_active ? 'bg-red-500 hover:bg-red-700' : 'bg-green-500 hover:bg-green-700'"
+                            @click="openConfirmationDialog(slotProps.data)" />
                     </template>
                 </Column>
             </DataTable>
 
-            <!-- Confirmation Dialog for Toggling User Status -->
+            <!-- Confirmation Dialog for User Status -->
             <Dialog v-model:visible="confirmDialogVisible" header="Confirmation" :closable="false"
                 :style="{ width: '350px' }">
                 <p class="text-secondary">Are you sure you want to change the status of this user?</p>
                 <template #footer>
-                    <Button label="Cancel" icon="pi pi-times"
-                        class="!bg-[#383838] !border-[#383838] !rounded !px-[4rem] text-secondary"
+                    <Button label="Cancel" icon="pi pi-times" class="!bg-gray-500"
                         @click="confirmDialogVisible = false" />
-                    <Button label="Yes" icon="pi pi-check"
-                        class="!bg-primary !border-primary !rounded !px-[4rem] text-primary"
-                        @click="toggleUserStatus" />
+                    <Button label="Yes" icon="pi pi-check" class="!bg-primary" @click="toggleUserStatus" />
                 </template>
             </Dialog>
         </div>
@@ -89,6 +78,8 @@
 
 <script>
 import { FilterMatchMode } from '@primevue/core/api';
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
 export default {
     props: {
@@ -99,14 +90,30 @@ export default {
             filters: {
                 global: { value: null, matchMode: FilterMatchMode.CONTAINS },
             },
-            selectedUser: null,
             confirmDialogVisible: false,
+            selectedUser: null,
         };
     },
     mounted() {
-        console.log(this.users);
+        this.initializeWebSocket();
     },
     methods: {
+        initializeWebSocket() {
+            console.log(window.Echo);
+            // Listen for real-time changes in user status (online/offline)
+            window.Echo.channel('online-users')
+                .listen('UserStatusChanged', (event) => {
+                    this.updateUserStatus(event.user_id, event.status);
+                });
+        },
+        updateUserStatus(userId, status) {
+            const user = this.users.find(u => u.id === userId);
+            if (user) {
+                user.status = (status === 'online');
+                console.log(user);
+
+            }
+        },
         openConfirmationDialog(user) {
             this.selectedUser = user;
             this.confirmDialogVisible = true;
@@ -116,18 +123,6 @@ export default {
                 this.$inertia.post(route('toggleStatus'), { id: this.selectedUser.id });
                 this.confirmDialogVisible = false;
             }
-        },
-        formatDate(date) {
-            if (!date) return 'N/A';
-            const options = {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-            };
-            return new Date(date).toLocaleString(undefined, options);
         },
     },
 };
