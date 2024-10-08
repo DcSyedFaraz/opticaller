@@ -22,6 +22,7 @@ class FeedbackController extends Controller
             'label' => 'required|string|max:255',
             'value' => 'required|string|max:255',
             'no_validation' => 'required|boolean',
+            'no_statistics' => 'required|boolean',
             'sub_project_ids' => 'required|array',
             'sub_project_ids.*' => 'exists:sub_projects,id',
         ]);
@@ -30,6 +31,7 @@ class FeedbackController extends Controller
             'label' => $request->label,
             'value' => $request->value,
             'no_validation' => $request->no_validation,
+            'no_statistics' => $request->no_statistics,
         ]);
 
         $feedback->subProjects()->attach($request->input('sub_project_ids'));
@@ -40,19 +42,21 @@ class FeedbackController extends Controller
 
     public function update(Request $request, $id)
     {
+        $feedback = Feedback::findOrFail($id);
         $request->validate([
             'label' => 'required|string|max:255',
             'value' => 'required|string|max:255',
             'no_validation' => 'required|boolean',
+            'no_statistics' => 'required|boolean', // Add this line
             'sub_project_ids' => 'required|array',
             'sub_project_ids.*' => 'exists:sub_projects,id',
         ]);
 
-        $feedback = Feedback::findOrFail($id);
         $feedback->update([
             'label' => $request->label,
             'value' => $request->value,
             'no_validation' => $request->no_validation,
+            'no_statistics' => $request->no_statistics, // Add this line
         ]);
 
         $feedback->subProjects()->sync($request->input('sub_project_ids'));

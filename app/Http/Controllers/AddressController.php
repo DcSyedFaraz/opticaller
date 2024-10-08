@@ -44,17 +44,32 @@ class AddressController extends Controller
         // Search functionality
         if ($request->has('search')) {
             $search = $request->input('search');
-            $query->where('company_name', 'like', "%{$search}%")
-                ->orWhere('feedback', 'like', "%{$search}%")
-                ->orWhere('email_address_system', 'like', "%{$search}%")
-                ->orWhere('deal_id', 'like', "%{$search}%");
+            $query->where('addresses.company_name', 'like', "%{$search}%")
+                ->orWhere('addresses.contact_id', 'like', "%{$search}%")
+                ->orWhere('addresses.feedback', 'like', "%{$search}%")
+                ->orWhere('addresses.email_address_system', 'like', "%{$search}%")
+                ->orWhere('addresses.deal_id', 'like', "%{$search}%");
         }
 
         // Sorting functionality with validation
         $sortField = $request->input('sortField', 'id');
         $sortOrder = $request->input('sortOrder', 'desc');
-        // dd($sortField, $sortOrder);
-        $query->orderBy($sortField, $sortOrder);
+        // $query->orderBy($sortField, $sortOrder);
+        if ($sortField === 'closure_user_name') {
+            // dd($sortField, $sortOrder);
+            // Join the users table to sort by users.name
+            $query->leftJoin('activities', function ($join) {
+                $join->on('addresses.id', '=', 'activities.address_id')
+                    ->where('activities.activity_type', 'call');
+            })
+                ->leftJoin('users', 'activities.user_id', '=', 'users.id')
+                ->select('addresses.*', 'users.name as closure_user_name')
+                ->orderBy('users.name', $sortOrder);
+
+        } else {
+            // Default sorting
+            $query->orderBy($sortField, $sortOrder);
+        }
 
         // Pagination
         $addresses = $query->with('subproject', 'lastuser.users')->paginate(10);

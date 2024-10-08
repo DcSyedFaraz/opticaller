@@ -8,7 +8,7 @@
             <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast " as="button"
                 type="button">Create New</Link>
         </div>
-        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 text-nowrap">
             <InputText v-model="filters.search" placeholder="Search..." class="mb-4" @input="fetchData" />
             <DataTable :value="addresses.data" responsiveLayout="scroll" :sortField="filters.sortField"
                 :sortOrder="sortOrderMap[filters.sortOrder]" @sort="onSort">
@@ -18,10 +18,12 @@
                         {{ slotProps.data.subproject?.title }}
                     </template>
                 </Column>
-                <Column field="email_address_system" header="Email Address System" sortable></Column>
+                <Column field="email_address_system" header="Email System" sortable></Column>
                 <Column field="feedback" header="Last Feedback" sortable></Column>
+                <Column field="follow_up_date" header="Follow Date" sortable></Column>
                 <Column field="deal_id" header="Deal ID" sortable></Column>
-                <Column header="Closure User">
+                <Column field="contact_id" header="Contact ID" sortable></Column>
+                <Column header="Closure User" sortable sortField="closure_user_name">
                     <template #body="slotProps">
                         {{ slotProps.data.lastuser?.users?.name }}
                     </template>

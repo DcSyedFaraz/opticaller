@@ -39,7 +39,7 @@ class Address extends Model
     // }
     public function calLogs()
     {
-        return $this->hasMany(Activity::class,'contact_id','contact_id')->where('activity_type', 'call')->orderBy('id','desc');
+        return $this->hasMany(Activity::class, 'contact_id', 'contact_id')->where('activity_type', 'call')->orderBy('id', 'desc');
     }
     public function lastuser()
     {
@@ -52,6 +52,10 @@ class Address extends Model
     public function subproject()
     {
         return $this->belongsTo(SubProject::class, 'sub_project_id');
+    }
+    public function feedbacks()
+    {
+        return $this->belongsTo(Feedback::class, 'feedback', 'value');
     }
 
     public function project()
