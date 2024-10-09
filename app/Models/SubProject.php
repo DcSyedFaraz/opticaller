@@ -33,5 +33,8 @@ class SubProject extends Model
     {
         return $this->hasMany(Address::class);
     }
-
+    public function fieldVisibilities()
+    {
+        return $this->hasMany(SubProjectFieldVisibility::class);
+    }
 }
