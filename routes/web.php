@@ -6,6 +6,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\SubProjectFieldVisibilityController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WebexController;
@@ -72,6 +73,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('feedbacks', FeedbackController::class);
     Route::put('/feedbacks/validation/{id}', [FeedbackController::class, 'validation'])->name('feedbacks.validation');
     Route::get('/address/search/{contact_id}/{sub_project_id}', [AddressController::class, 'getAddressByContactId'])->name('address.getByContactId');
+
+    Route::resource('field-visibility', SubProjectFieldVisibilityController::class)->only([
+        'index', 'store', 'update', 'destroy'
+    ]);
+    Route::post('/field-visibility/bulk-update', [SubProjectFieldVisibilityController::class, 'bulkUpdate'])->name('field-visibility.bulkUpdate');
 
 
 
