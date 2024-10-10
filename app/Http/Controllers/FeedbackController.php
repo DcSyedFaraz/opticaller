@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feedback;
 use App\Models\SubProject;
+use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,7 +12,7 @@ class FeedbackController extends Controller
 {
     public function index()
     {
-        $feedbacks = Feedback::with('subProjects')->get();
+        $feedbacks = Feedback::with('subProjects')->orderBy('order')->get();
         $subProjects = SubProject::all();
         return Inertia::render('Projects/FeedbackManagement', compact('feedbacks', 'subProjects'));
     }
@@ -39,7 +40,24 @@ class FeedbackController extends Controller
         return redirect()->back()->with('success', 'Feedback added successfully.');
     }
 
+    public function reorder(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'orderedIds' => 'required|array',
+            'orderedIds.*' => 'integer|exists:feedback,id',
+        ]);
 
+        $orderedIds = $request->orderedIds;
+
+        DB::transaction(function () use ($orderedIds) {
+            foreach ($orderedIds as $index => $id) {
+                Feedback::where('id', $id)->update(['order' => $index + 1]);
+            }
+        });
+
+        return back()->with('message', 'Feedbacks reordered successfully.');
+    }
     public function update(Request $request, $id)
     {
         $feedback = Feedback::findOrFail($id);

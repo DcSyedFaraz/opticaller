@@ -223,6 +223,7 @@ class TimeTrackingController extends Controller
                 }
 
                 if ($address->follow_up_date) {
+                    $address->feedback = 'Follow-up';
                     $address->follow_up_date = Carbon::parse($address->follow_up_date);
                     // dd($request->address['follow_up_date'], $address->follow_up_date);
                 }

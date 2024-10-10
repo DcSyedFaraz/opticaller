@@ -51,136 +51,165 @@
                         <Card class="shadow-md">
                             <template #content>
                                 <div class="grid lg:grid-cols-8 grid-cols-1 gap-x-4 mb-2">
-                                    <div v-if="!isFieldLocked('company_name')"
+                                    <!-- Company Name Field -->
+                                    <div v-if="!isHidden('company_name')"
                                         class="field col-span-1 md:col-span-2 lg:col-span-2">
                                         <label for="company_name" class="font-extrabold text-sm">
                                             Company Name: <span class="text-red-600">*</span>
                                         </label>
                                         <InputText id="company_name" v-model="localAddress.company_name"
+                                            :disabled="isFieldLocked('company_name')"
                                             class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('salutation')"
+
+                                    <!-- Salutation Field -->
+                                    <div v-if="!isHidden('salutation')"
                                         class="field col-span-1 md:col-span-1 lg:col-span-1">
                                         <label for="salutation" class="font-extrabold text-sm">
                                             Salutation:
                                         </label>
                                         <Select id="salutation" v-model="localAddress.salutation"
                                             placeholder="select salutation" :options="salutationOptions"
-                                            optionLabel="label" optionValue="value" class="w-full !border-secondary" />
+                                            optionLabel="label" optionValue="value"
+                                            :disabled="isFieldLocked('salutation')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('titel')"
-                                        class="field col-span-1 md:col-span-1 lg:col-span-1">
+
+                                    <!-- Title Field -->
+                                    <div v-if="!isHidden('titel')" class="field col-span-1 md:col-span-1 lg:col-span-1">
                                         <label for="titel" class="font-extrabold text-sm">
-                                            Titel:
+                                            Title:
                                         </label>
-                                        <Select id="titel" v-model="localAddress.titel" placeholder="select titel"
+                                        <Select id="titel" v-model="localAddress.titel" placeholder="select title"
                                             :options="titelOptions" optionLabel="label" optionValue="value"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('titel')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('first_name')"
+
+                                    <!-- First Name Field -->
+                                    <div v-if="!isHidden('first_name')"
                                         class="field col-span-1 md:col-span-1 lg:col-span-2">
                                         <label for="first_name" class="font-extrabold text-sm">
                                             First Name:
                                         </label>
                                         <InputText id="first_name" v-model="localAddress.first_name"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('first_name')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('last_name')" class="field md:col-span-2">
+
+                                    <!-- Last Name Field -->
+                                    <div v-if="!isHidden('last_name')" class="field md:col-span-2">
                                         <label for="last_name" class="font-extrabold text-sm">
                                             Last Name:
                                         </label>
                                         <InputText id="last_name" v-model="localAddress.last_name"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('last_name')" class="w-full !border-secondary" />
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-x-4 mb-2">
-                                    <div v-if="!isFieldLocked('street_address')" class="field">
+                                    <!-- Street Address Field -->
+                                    <div v-if="!isHidden('street_address')" class="field">
                                         <label class="font-extrabold text-sm" for="street_address">
                                             Street and House Number:
                                         </label>
                                         <InputText id="street_address" v-model="localAddress.street_address"
+                                            :disabled="isFieldLocked('street_address')"
                                             class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('postal_code')" class="field">
+
+                                    <!-- Postal Code Field -->
+                                    <div v-if="!isHidden('postal_code')" class="field">
                                         <label class="font-extrabold text-sm" for="postal_code">
                                             Postal Code:
                                         </label>
                                         <InputText id="postal_code" v-model="localAddress.postal_code"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('postal_code')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('city')" class="field col-span-1 md:col-span-1">
+
+                                    <!-- City Field -->
+                                    <div v-if="!isHidden('city')" class="field col-span-1 md:col-span-1">
                                         <label class="font-extrabold text-sm" for="city">
                                             City:
                                         </label>
                                         <InputText id="city" v-model="localAddress.city"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('city')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('country')" class="field">
+
+                                    <!-- Country Field -->
+                                    <div v-if="!isHidden('country')" class="field">
                                         <label class="font-extrabold text-sm" for="country">
                                             Country:
                                         </label>
                                         <Select id="country" v-model="localAddress.country" filter
                                             :options="country_names" placeholder="Select a country"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('country')" class="w-full !border-secondary" />
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4">
-                                    <div v-if="!isFieldLocked('website')" class="field">
+                                    <!-- Website Field -->
+                                    <div v-if="!isHidden('website')" class="field">
                                         <label class="font-extrabold text-sm" for="website">
                                             Website:
                                         </label>
                                         <InputText id="website" v-model="localAddress.website"
-                                            class="w-full !border-secondary" />
+                                            :disabled="isFieldLocked('website')" class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('phone_number')" class="field">
+
+                                    <!-- Phone Number Field -->
+                                    <div v-if="!isHidden('phone_number')" class="field">
                                         <label class="font-extrabold text-sm" for="phone_number">
                                             Phone Number:
                                         </label>
                                         <InputText id="phone_number" v-model="localAddress.phone_number"
+                                            :disabled="isFieldLocked('phone_number')"
                                             class="w-full !border-secondary" />
                                     </div>
-                                    <div v-if="!isFieldLocked('email_address_system')" class="field">
+
+                                    <!-- Email Address Field -->
+                                    <div v-if="!isHidden('email_address_system')" class="field">
                                         <label for="email_address_system" class="font-extrabold text-sm">
                                             Email Address: <span class="text-red-600">*</span>
                                         </label>
                                         <InputText id="email_address_system" v-model="localAddress.email_address_system"
+                                            :disabled="isFieldLocked('email_address_system')"
                                             class="w-full !border-secondary" />
                                     </div>
                                 </div>
                                 <hr class="mb-2 border-1 border-black">
                                 <div class="grid">
-
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-                                        <div class="field md:col-span-2">
+                                        <!-- Feedback Field -->
+                                        <div v-if="!isHidden('feedback')" class="field md:col-span-2">
                                             <label class="font-extrabold text-sm" for="feedback">
                                                 Feedback:
                                             </label>
                                             <Select id="feedback" v-model="localAddress.feedback"
                                                 class="w-full !border-secondary" :options="feedbackOptions"
-                                                optionValue="value" optionLabel="label" />
+                                                optionValue="value" optionLabel="label"
+                                                :disabled="isFieldLocked('feedback')" />
                                         </div>
-                                        <div class="field">
+                                        <!-- Interest Notes Field -->
+                                        <div v-if="!isHidden('interest_notes')" class="field">
                                             <label class="font-extrabold text-sm" for="interest_notes">
                                                 Interest Notes:
                                             </label>
                                             <Textarea id="interest_notes" v-model="logdata.interest_notes" rows="2"
-                                                class="w-full !border-secondary" />
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('interest_notes')" />
                                         </div>
-                                        <div class="field">
+                                        <!-- Personal Notes Field -->
+                                        <div v-if="!isHidden('personal_notes')" class="field">
                                             <label class="font-extrabold text-sm" for="personal_notes">
                                                 Personal Notes:
                                             </label>
                                             <Textarea id="personal_notes" v-model="logdata.personal_notes" rows="2"
-                                                class="w-full !border-secondary" />
+                                                class="w-full !border-secondary"
+                                                :disabled="isFieldLocked('personal_notes')" />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex justify-center flex-wrap my-1">
                                     <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
-                                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
-                                        <!-- SVG and Text for Button remain unchanged -->
+                                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
                                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -189,13 +218,11 @@
                                             <path d="M15.0433 2.26105L20.3483 7.56605M20.3483 2.26105L15.0433 7.56605"
                                                 stroke="white" stroke-width="2" stroke-linecap="round"
                                                 stroke-linejoin="round" />
-
                                         </svg>
                                         <span class="mx-2 my-1">Not Reached</span>
                                     </button>
                                     <button @click="showFollowModal = true" :disabled="isButtonDisabled"
-                                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed  text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
-                                        <!-- SVG and Text for Button remain unchanged -->
+                                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <svg width="33" height="33" viewBox="0 0 33 33" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white"
@@ -208,22 +235,19 @@
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                             <path d="M7.57593 8.95673H19.5116" stroke="white" stroke-width="2"
                                                 stroke-linecap="round" />
-
                                         </svg>
                                         <span class="mx-2 my-1">Follow-Ups</span>
                                     </button>
                                     <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
-                                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto  py-3 text-xl mx-2 rounded mb-2 ">
+                                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-save !text-2xl"></i>
-                                        <span class="mx-2 my-1 text-center">
-                                            Save & Next
-                                        </span>
+                                        <span class="mx-2 my-1 text-center">Save & Next</span>
                                     </button>
                                 </div>
                             </template>
                         </Card>
-
                     </div>
+
                 </div>
                 <!-- Notes and Buttons remain unchanged as they have flexible widths -->
                 <!-- <div class="border m-4 my-1 lg:mx-7 rounded-lg shadow shadow-blue-200">
@@ -700,6 +724,13 @@ export default {
 
         isFieldLocked() {
             return (fieldName) => this.locallockfields.includes(fieldName);
+        },
+        isHidden() {
+            return (fieldName) => {
+                return this.localAddress.subproject?.field_visibilities.some(
+                    (visibility) => visibility.field_name === fieldName && visibility.is_hidden === 1
+                );
+            };
         },
         formattedReverseCountdown() {
             const minutes = Math.floor(this.ReverseCountdown / 60);

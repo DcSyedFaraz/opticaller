@@ -71,11 +71,16 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('users', UsersController::class);
     Route::resource('statistics', StatisticsController::class);
     Route::resource('feedbacks', FeedbackController::class);
+    Route::post('/feedbacks/reorder', [FeedbackController::class, 'reorder'])->name('feedbacks.reorder');
+
     Route::put('/feedbacks/validation/{id}', [FeedbackController::class, 'validation'])->name('feedbacks.validation');
     Route::get('/address/search/{contact_id}/{sub_project_id}', [AddressController::class, 'getAddressByContactId'])->name('address.getByContactId');
 
     Route::resource('field-visibility', SubProjectFieldVisibilityController::class)->only([
-        'index', 'store', 'update', 'destroy'
+        'index',
+        'store',
+        'update',
+        'destroy'
     ]);
     Route::post('/field-visibility/bulk-update', [SubProjectFieldVisibilityController::class, 'bulkUpdate'])->name('field-visibility.bulkUpdate');
 

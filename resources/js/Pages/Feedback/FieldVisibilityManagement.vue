@@ -1,4 +1,6 @@
 <template>
+
+    <Head title="Manage Field Visibility" />
     <AuthenticatedLayout>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <!-- Page Header -->
@@ -9,14 +11,14 @@
             <!-- PrimeVue Toast -->
 
             <!-- Field Visibility Form Card -->
-            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <!-- <div class="bg-white shadow-md rounded-lg p-6 mb-6">
                 <FieldVisibilityForm :fields="fields" :subProjects="subProjects" @submit="handleSubmit" />
-            </div>
+            </div> -->
 
             <!-- Field Visibility DataTable Card -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <DataTable :value="fields" class="w-full" responsiveLayout="scroll" :emptyMessage="'No fields found.'">
-                    <Column field="name" header="Field Name" class="text-center w-32" />
+                    <!-- <Column field="name" header="Field Name" class="text-center w-32" /> -->
                     <Column field="label" header="Field Label" class="text-left" />
                     <Column header="Hidden in Sub-Projects" class="text-left">
                         <template #body="slotProps">
@@ -174,12 +176,12 @@ export default {
                     },
                     onSuccess: () => {
                         console.log('Update successful');
-                        this.$toast.add({
-                            severity: 'success',
-                            summary: 'Success',
-                            detail: 'Field visibility settings updated.',
-                            life: 3000,
-                        });
+                        // this.$toast.add({
+                        //     severity: 'success',
+                        //     summary: 'Success',
+                        //     detail: 'Field visibility settings updated.',
+                        //     life: 3000,
+                        // });
                         this.editDialogVisible = false;
                         this.fetchFieldVisibilities();
                     },

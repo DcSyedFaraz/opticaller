@@ -52,7 +52,7 @@ class AddressService
         $addressesPerPage = 1;
 
         // Fetch addresses dynamically
-        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users', 'project')
+        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.fieldVisibilities', 'subproject.feedbacks', 'calLogs.users', 'project')
             ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id') // Join sub_projects
             ->orderBy('sub_projects.priority', 'desc')
             ->whereIn('sub_project_id', $subProjectIds)
