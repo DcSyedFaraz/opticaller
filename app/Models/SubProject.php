@@ -27,7 +27,7 @@ class SubProject extends Model
     }
     public function feedbacks()
     {
-        return $this->belongsToMany(Feedback::class, 'feedback_sub_project');
+        return $this->belongsToMany(Feedback::class, 'feedback_sub_project')->orderby('order');
     }
     public function addresses()
     {

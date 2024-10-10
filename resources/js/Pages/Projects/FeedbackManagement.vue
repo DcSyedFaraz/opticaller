@@ -17,15 +17,17 @@
 
             <!-- Feedbacks DataTable Card -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <DataTable :value="feedbacks" class="w-full" responsiveLayout="scroll"
-                    :emptyMessage="'No feedback found.'">
+                <DataTable :value="localFeedbacks" class="w-full" responsiveLayout="scroll" rowReorder
+                    @rowReorder="onRowReorder" :emptyMessage="'No feedback found.'">
+                    <Column rowReorder headerStyle="width: 3rem" :reorderableColumn="false" class="text-center" />
+
                     <Column field="id" header="ID" class="text-center w-16" />
                     <Column field="label" header="Label" class="text-left" />
                     <Column field="value" header="Value" class="text-left" />
                     <Column field="no_validation" header="No Validation" class="text-center w-24">
                         <template #body="slotProps">
-                            <Checkbox v-model="slotProps.data.no_validation"
-                                @change="toggleValidation(slotProps.data)" binary />
+                            <Checkbox v-model="slotProps.data.no_validation" @change="toggleValidation(slotProps.data)"
+                                binary />
                         </template>
                     </Column>
                     <Column header="Sub-Projects" class="text-left">
@@ -87,6 +89,7 @@ export default {
     },
     data() {
         return {
+            localFeedbacks: [...this.feedbacks],
             editFeedback: {
                 id: null,
                 label: '',
@@ -99,6 +102,12 @@ export default {
             loading: false,
         };
     },
+    watch: {
+        feedbacks(newFeedbacks) {
+            this.localFeedbacks = [...newFeedbacks];
+        }
+    },
+
     methods: {
         /**
          * Creates a new feedback and assigns it to selected subprojects.
@@ -157,6 +166,26 @@ export default {
                 sub_project_ids: feedback.sub_projects.map((sp) => sp.id),
             };
             this.editDialogVisible = true;
+        },
+        onRowReorder(event) {
+            this.localFeedbacks = event.value;
+
+            // Extract the reordered IDs
+            const reorderedIds = this.localFeedbacks.map(feedback => feedback.id);
+
+            this.$inertia.post(route('feedbacks.reorder'), {
+                orderedIds: reorderedIds
+            }, {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    console.log(page);
+
+                },
+                onError: () => {
+                    toast.value.add({ severity: 'error', summary: 'Error', detail: 'Failed to reorder feedbacks.', life: 3000 });
+                }
+            });
+
         },
 
         /**

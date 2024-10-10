@@ -161,8 +161,14 @@ class StatisticsController extends Controller
         $user = auth()->user(); // Get the authenticated user
 
         // Retrieve date range from request or set default
-        $startDate = $request->input('startDate') ? Carbon::parse($request->input('startDate')) : Carbon::now()->subHours(24);
-        $endDate = $request->input('endDate') ? Carbon::parse($request->input('endDate'))->endOfDay() : Carbon::now();
+        $startDate = $request->input('startDate')
+            ? Carbon::parse($request->input('startDate'))->startOfDay()
+            : Carbon::today()->startOfDay();
+
+        // Set endDate to the end of today if not provided
+        $endDate = $request->input('endDate')
+            ? Carbon::parse($request->input('endDate'))->endOfDay()
+            : Carbon::today()->endOfDay();
 
         // Today's Call-Out Count for the authenticated user
         $todaysCallOutCount = Activity::where('activity_type', 'call')
@@ -194,13 +200,16 @@ class StatisticsController extends Controller
         })->map(function ($row) {
             return $row->avg('total_duration');
         });
+        $yesterdayStartDate = Carbon::yesterday()->startOfDay();
+        $yesterdayEndDate = Carbon::yesterday()->endOfDay();
 
 
         // Today's Break Times
         $todaysBreakTime = Activity::where('activity_type', 'break')
-            ->where('user_id', $user->id)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('total_duration');
+        ->where('user_id', $user->id)
+        ->whereBetween('created_at', [$yesterdayStartDate, $yesterdayEndDate])
+        ->sum('total_duration');
+
 
         // Break Time Data for the last 7 days (for graph)
         $last7DaysBreakTimes = Activity::where('activity_type', 'break')
@@ -214,11 +223,9 @@ class StatisticsController extends Controller
             return $row->sum('total_duration');
         });
 
-        // Yesterday's Working Hours
-        $yesterdayStart = Carbon::yesterday()->startOfDay();
-        $yesterdayEnd = Carbon::yesterday()->endOfDay();
+
         $yesterdayWorkingHours = LoginTime::where('user_id', $user->id)
-            ->whereBetween('login_time', [$yesterdayStart, $yesterdayEnd])
+            ->whereBetween('login_time', [$yesterdayStartDate, $yesterdayEndDate])
             ->whereNotNull('logout_time')
             ->get()
             ->reduce(function ($carry, $loginTime) {
