@@ -224,10 +224,19 @@
 
                     </Column> -->
                     <!-- Dynamic Feedback Count Columns -->
-                    <template v-for="(value, key) in userData[0].feedback_counts" :key="key">
-                        <Column :field="`feedback_counts.${key}`" :header="formatHeader(key)">
+                    <template v-if="hasFeedbackCounts">
+                        <template v-for="(value, key) in feedbackCounts" :key="key">
+                            <Column :field="`feedback_counts.${key}`" :header="formatHeader(key)">
+                                <template #body="slotProps">
+                                    {{ slotProps.data.feedback_counts[key] ?? 0 }}
+                                </template>
+                            </Column>
+                        </template>
+                    </template>
+                    <template v-else>
+                        <Column field="message" header="Message">
                             <template #body="slotProps">
-                                {{ slotProps.data.feedback_counts[key] ?? 0 }}
+                                No feedback counts available.
                             </template>
                         </Column>
                     </template>
@@ -270,7 +279,7 @@
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
                             <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
-                                data.totalBreak) }}</p>
+                                    data.totalBreak) }}</p>
                         </div>
 
 
@@ -304,6 +313,17 @@ export default {
         };
     },
     computed: {
+        hasFeedbackCounts() {
+            return (
+                Array.isArray(this.userData) &&
+                this.userData.length > 0 &&
+                this.userData[0].feedback_counts &&
+                typeof this.userData[0].feedback_counts === 'object'
+            );
+        },
+        feedbackCounts() {
+            return this.userData[0]?.feedback_counts || {};
+        },
         strokeDashoffset() {
             const progressValue = this.data.successRateData;
             const circleLength = 314;
