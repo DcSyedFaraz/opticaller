@@ -442,9 +442,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                            + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -580,9 +580,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -727,11 +727,12 @@ export default {
         },
         isHidden() {
             return (fieldName) => {
-                return this.localAddress.subproject?.field_visibilities.some(
+                return this.localAddress.subproject?.field_visibilities?.some(
                     (visibility) => visibility.field_name === fieldName && visibility.is_hidden === 1
-                );
+                ) ?? false; // Default to false if undefined
             };
         },
+
         formattedReverseCountdown() {
             const minutes = Math.floor(this.ReverseCountdown / 60);
             const seconds = this.ReverseCountdown % 60;
