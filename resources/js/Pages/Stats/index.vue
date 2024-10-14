@@ -181,7 +181,7 @@
                         User Productivity and Call Statistics
                     </span>
                 </div>
-                <DataTable :value="userData" class="p-datatable-sm " paginator :rows="10"
+                <DataTable :value="userData" resizableColumns columnResizeMode="fit" showGridlines  class="p-datatable-sm " paginator :rows="10"
                     :rowsPerPageOptions="[5, 10, 20, 50]" v-model:filters="filters"
                     :globalFilterFields="['user_name', 'total_logged_in_time', 'total_break_time', 'addresses_processed', 'average_processing_time', 'total_effective_working_time']">
                     <template #header>
@@ -225,7 +225,7 @@
                     </Column> -->
                     <!-- Dynamic Feedback Count Columns -->
                     <template v-if="hasFeedbackCounts">
-                        <template v-for="(value, key) in feedbackCounts" :key="key">
+                        <template v-for="key in feedbackCounts" v-if="feedbackCounts.length > 0" :key="key">
                             <Column :field="`feedback_counts.${key}`" :header="formatHeader(key)">
                                 <template #body="slotProps">
                                     {{ slotProps.data.feedback_counts[key] ?? 0 }}
@@ -240,6 +240,7 @@
                             </template>
                         </Column>
                     </template>
+
                 </DataTable>
             </div>
 
@@ -279,7 +280,7 @@
                         <div class="p-2">
                             <h3 class="text-sm font-medium my-2">Effective Productivity Rate</h3>
                             <p class="text-2xl font-bold ">{{ formatSeconds(data.total_logged_in_time -
-                                    data.totalBreak) }}</p>
+                                data.totalBreak) }}</p>
                         </div>
 
 
@@ -314,15 +315,23 @@ export default {
     },
     computed: {
         hasFeedbackCounts() {
-            return (
-                Array.isArray(this.userData) &&
-                this.userData.length > 0 &&
-                this.userData[0].feedback_counts &&
-                typeof this.userData[0].feedback_counts === 'object'
-            );
+            return this.feedbackCounts.length > 0;
+
         },
         feedbackCounts() {
-            return this.userData[0]?.feedback_counts || {};
+            const counts = new Set();
+            if (Array.isArray(this.userData) && this.userData.length > 0) {
+                this.userData.forEach((user, index) => {
+                    if (user.feedback_counts && typeof user.feedback_counts === 'object') {
+                        Object.keys(user.feedback_counts).forEach(key => counts.add(key));
+                    } else {
+                        console.warn(`User at index ${index} has no feedback_counts`, user);
+                    }
+                });
+            } else {
+                console.warn('userData is empty or not an array:', this.userData);
+            }
+            return Array.from(counts);
         },
         strokeDashoffset() {
             const progressValue = this.data.successRateData;
@@ -343,7 +352,8 @@ export default {
     },
     methods: {
         formatHeader(key) {
-            // Converts keys like "saved_and_next" to "Saved & Next"
+            // console.log('feedback', key);
+
             return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
         },
         formatFeedbackCounts(feedbackCounts) {
@@ -357,16 +367,31 @@ export default {
             return formatted;
         },
         onDateChange() {
-            console.log('sad');
+            // console.log(this.startDate, this.endDate);
 
             // Only fetch data if both startDate and endDate have values
             if (this.startDate && this.endDate) {
                 this.fetchData();
             }
         },
+        formatDate(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        },
         fetchData() {
+            const formattedStartDate = this.startDate ? this.formatDate(this.startDate) : null;
+            const formattedEndDate = this.endDate ? this.formatDate(this.endDate) : null;
+            console.log(formattedStartDate, formattedEndDate);
+
+
             // Perform an Inertia request to fetch data based on the date range
-            this.$inertia.get(route('statistics.index'), { startDate: this.startDate, endDate: this.endDate }, {
+            this.$inertia.get(route('statistics.index'), {
+                startDate: formattedStartDate,
+                endDate: formattedEndDate
+            }, {
                 preserveState: true, // Preserve state to maintain form input values
                 preserveScroll: true, // Preserve scroll position
                 onSuccess: (page) => {
