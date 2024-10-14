@@ -15,14 +15,19 @@
                             optionValue="name" placeholder="--Select--" required />
                     </div>
 
-                    <!-- Salutation Input -->
                     <div class="flex flex-col">
-                        <label for="salutation" class=" text-gray-700 mb-1 font-extrabold text-lg">Salutation <span
-                                class="text-red-600 font-bold">*</span></label>
-                        <InputText id="salutation" v-model="formData.salutation" placeholder="Salutation" required
+                        <label for="company" class=" text-gray-700 mb-1 font-extrabold text-lg">Company </label>
+                            <InputText id="company" v-model="formData.company" placeholder="Company" required
                             class="p-inputtext-sm" />
-                    </div>
+                        </div>
 
+                        <!-- Salutation Input -->
+                        <div class="flex flex-col">
+                            <label for="salutation" class=" text-gray-700 mb-1 font-extrabold text-lg">Salutation <span
+                                    class="text-red-600 font-bold">*</span></label>
+                            <InputText id="salutation" v-model="formData.salutation" placeholder="Salutation" required
+                                class="p-inputtext-sm" />
+                        </div>
                     <!-- First Name Input -->
                     <div class="flex flex-col">
                         <label for="firstName" class=" text-gray-700 mb-1 font-extrabold text-lg">First Name <span

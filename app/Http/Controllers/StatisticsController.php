@@ -18,9 +18,28 @@ class StatisticsController extends Controller
     public function index(Request $request)
     {
         // Retrieve date range from request or set default
-        $startDate = $request->input('startDate') ? Carbon::parse($request->input('startDate')) : Carbon::now()->subHours(24);
-        $endDate = $request->input('endDate') ? Carbon::parse($request->input('endDate'))->endOfDay() : Carbon::now();
+        $inputStartDate = $request->input('startDate');
+        $inputEndDate = $request->input('endDate');
+        $timezone = config('app.timezone');
 
+        // Initialize startDate and endDate
+        if ($inputStartDate && $inputEndDate) {
+            // Parse startDate
+            $startDate = Carbon::createFromFormat('Y-m-d', $inputStartDate, $timezone)->startOfDay();
+
+            // Parse endDate
+            $endDate = Carbon::createFromFormat('Y-m-d', $inputEndDate, $timezone)->endOfDay();
+
+        } else {
+            // Default to the last 24 hours if no dates are provided
+            $startDate = Carbon::now($timezone)->subHours(24);
+            $endDate = Carbon::now($timezone);
+        }
+
+
+        // Debugging: Uncomment to check the dates
+// dd($startDate, $endDate);
+        // dd($startDate,$endDate,$request->all(),$timezone);
         // Fetch users with login times and activities within the specified date range
         $users = User::with([
             'loginTimess' => function ($query) use ($startDate, $endDate) {
@@ -206,9 +225,9 @@ class StatisticsController extends Controller
 
         // Today's Break Times
         $todaysBreakTime = Activity::where('activity_type', 'break')
-        ->where('user_id', $user->id)
-        ->whereBetween('created_at', [$yesterdayStartDate, $yesterdayEndDate])
-        ->sum('total_duration');
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$yesterdayStartDate, $yesterdayEndDate])
+            ->sum('total_duration');
 
 
         // Break Time Data for the last 7 days (for graph)
