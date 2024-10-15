@@ -16,9 +16,7 @@ class WebexController extends Controller
     public $client;
     public function __construct()
     {
-        // Twilio credentials
-        // $this->account_sid = 'ACb2a01284e5e5466f344f8c13fa90e550';
-        // $this->auth_token = '2f0b5f1564ba3c8c8076f54a3fb10608';
+        
         $this->account_sid = env('TWILIO_ACCOUNT_SID');
         $this->auth_token = env('TWILIO_AUTH_TOKEN');
 
