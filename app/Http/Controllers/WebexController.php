@@ -2,11 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Http;
 use Illuminate\Http\Request;
+use Twilio\Exceptions\RestException;
+use Twilio\Rest\Client;
 
 class WebexController extends Controller
 {
+    public $account_sid;
+    public $auth_token;
+    public $from;
+    public $client;
+    public function __construct()
+    {
+        // Twilio credentials
+        // $this->account_sid = 'ACb2a01284e5e5466f344f8c13fa90e550';
+        // $this->auth_token = '2f0b5f1564ba3c8c8076f54a3fb10608';
+        $this->account_sid = env('TWILIO_ACCOUNT_SID');
+        $this->auth_token = env('TWILIO_AUTH_TOKEN');
+
+        //The twilio number you purchased
+        $this->from = env('TWILIO_PHONE_NUMBER');
+        // dd($this->account_sid, $this->auth_token);
+        // Initialize the Programmable Voice API
+        // dd(new Client($this->account_sid, $this->auth_token));
+        $this->client = new Client($this->account_sid, $this->auth_token);
+    }
     public function index()
     {
         return inertia('Users/new call');
@@ -25,18 +47,41 @@ class WebexController extends Controller
 
     public function callback(Request $request)
     {
-        $response = Http::asForm()->post('https://webexapis.com/v1/access_token', [
-            'grant_type' => 'authorization_code',
-            'client_id' => config('services.webex.client_id'),
-            'client_secret' => config('services.webex.client_secret'),
-            'redirect_uri' => config('services.webex.redirect_uri'),
-            'code' => $request->code,
+
+        $this->validate($request, [
+            'phone_number' => 'required|string',
         ]);
 
-        $accessToken = $response->json()['access_token'];
+        try {
+            // Lookup the phone number to ensure it's valid
+//             $phone_number = $this->client->lookups->v1->phoneNumbers($request->phone_number)->fetch();
+// dd($phone_number);
+            // If the phone number is valid
+            // if ($phone_number) {
+                // Initiate the call and record it
+                dd($request->phone_number);
+                $call = $this->client->calls->create(
+                    $request->phone_number, // Destination phone number
+                    $this->from, // Valid Twilio phone number
+                    [
+                        // "record" => true,
+                        "url" => "http://demo.twilio.com/docs/voice.xml"
+                    ]
+                );
 
-        // Store the access token for future requests
-        session(['webex_access_token' => $accessToken]);
+                // Check if the call was successfully initiated
+                if ($call) {
+                    return response()->json(['message' => 'Call initiated successfully']);
+                } else {
+                    return response()->json(['message' => 'Call initiation failed'], 500);
+                }
+            // }
+        } catch (RestException $e) {
+            return response()->json(['error' => 'Twilio API error: ' . $e->getMessage()], 500);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        }
+
 
         return redirect('/webex/index')->with('success', 'Successfully authenticated with Webex!');
     }

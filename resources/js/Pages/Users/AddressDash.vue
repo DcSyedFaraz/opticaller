@@ -21,6 +21,12 @@
                                     <i class="pi pi-file-pdf "></i>
                                 </a>
                             </div>
+                            <!-- <div class="mt-2">
+                                <Button @click="makeCall()"
+                                    class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                    <i class="pi pi-file-pdf "></i>
+                                </Button>
+                            </div> -->
                         </div>
 
                     </div>
@@ -383,7 +389,7 @@
                     </div>
                     <div class="my-3" v-for="(item, index) in callHistory.slice(0, 3)" :key="index"
                         v-if="callHistory.length > 0">
-                        <div class="mb-2 p-4">
+                        <div class="px-4">
                             <span
                                 class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-secondary mb-1">
                                 Last call on: {{ formatnewDate(item.created_at) }}
@@ -420,8 +426,7 @@
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Personal Notes:</span>
                                 </div>
-                                <p
-                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                <p class="text-sm text-gray-700 font-bold overflow-hidden max-w-[200px]">
                                     {{ item.notes?.personal_notes }}
                                 </p>
                             </div>
@@ -442,9 +447,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -580,9 +585,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -779,6 +784,8 @@ export default {
             this.localAddress.follow_up_date = null
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
+
+
         // this.country_names = country.names();
 
 
@@ -797,6 +804,17 @@ export default {
         closeContactIdDialog() {
             this.showContactIdDialog = false;
         },
+        async makeCall() {
+            try {
+                const response = await axios.post(route('call'), {
+                    phone_number: this.localAddress.phone_number,
+                });
+                console.log('Call SID:', response.data);
+            } catch (error) {
+                console.error('Error making call:', error);
+            }
+        },
+
 
         // Method to handle the submission of the new Contact ID
         async submitNewContactId() {
