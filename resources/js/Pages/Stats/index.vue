@@ -181,20 +181,23 @@
                         User Productivity and Call Statistics
                     </span>
                 </div>
-                <DataTable :value="userData" resizableColumns columnResizeMode="fit" showGridlines  class="p-datatable-sm " paginator :rows="10"
+                <DataTable :value="userData" resizableColumns scrollable  columnResizeMode="fit" ref="dt" showGridlines  class="p-datatable-sm " paginator :rows="10"
                     :rowsPerPageOptions="[5, 10, 20, 50]" v-model:filters="filters"
                     :globalFilterFields="['user_name', 'total_logged_in_time', 'total_break_time', 'addresses_processed', 'average_processing_time', 'total_effective_working_time']">
                     <template #header>
+                        <div class="text-end pb-4">
+                        </div>
                         <div class="md:flex hidden justify-end my-3">
-                            <IconField>
+                            <IconField class="mx-2">
                                 <InputIcon>
                                     <i class="pi pi-search" />
                                 </InputIcon>
                                 <InputText v-model="filters.global.value" placeholder="Keyword Search" />
                             </IconField>
+                            <Button icon="pi pi-external-link" severity="contrast" label="Export" @click="exportCSV($event)" />
                         </div>
                     </template>
-                    <Column field="user_name" header="User Name"></Column>
+                    <Column field="user_name" header="User Name" frozen style="min-width: 150px" alignFrozen="left" class="font-bold"></Column>
                     <Column field="total_logged_in_time" header="Logged-In Time">
                         <template #body="slotProps">
                             {{ formatSeconds(slotProps.data.total_logged_in_time) }}
@@ -223,6 +226,10 @@
                         </template>
 
                     </Column> -->
+                    <template #empty>
+                        <p class="text-center">no record found</p>
+
+                    </template>
                     <!-- Dynamic Feedback Count Columns -->
                     <template v-if="hasFeedbackCounts">
                         <template v-for="key in feedbackCounts" v-if="feedbackCounts.length > 0" :key="key">
@@ -351,6 +358,9 @@ export default {
 
     },
     methods: {
+        exportCSV() {
+            this.$refs.dt.exportCSV();
+        },
         formatHeader(key) {
             // console.log('feedback', key);
 
