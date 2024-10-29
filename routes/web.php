@@ -94,11 +94,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');
 
 
-    // Route::get('/webex/callback', [WebexController::class, 'index'])->name('webex.call');
-    Route::get('/webex/authorize', [WebexController::class, 'authorizeWebex']);
-    Route::get('/webex/callback', [WebexController::class, 'callback']);
-    Route::post('/webex/call', [WebexController::class, 'makeCall'])->name('call');
-    Route::post('/webex/candidate', [WebexController::class, 'handleCandidate']);
+    Route::get('/webex/login', [WebexController::class, 'redirectToWebex'])->name('webex.login');
+    Route::get('/webex/newcall', [WebexController::class, 'index']);
+    Route::get('/webex/callback', [WebexController::class, 'handleWebexCallback'])->name('webex.callback');
+    Route::post('/webex/call', [WebexController::class, 'makeCall'])->name('webex.call');
+    Route::post('/webex/refresh-token', [WebexController::class, 'refreshToken'])->name('webex.refresh_token');
+
 
 });
 Route::middleware(['auth'])->group(function () {
