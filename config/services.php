@@ -16,7 +16,7 @@ return [
     'webex' => [
         'client_id' => env('WEBEX_CLIENT_ID'),
         'client_secret' => env('WEBEX_CLIENT_SECRET'),
-        'redirect_uri' => env('WEBEX_REDIRECT_URI'),
+        'redirect' => env('WEBEX_REDIRECT_URI'),
     ],
 
     'mailgun' => [

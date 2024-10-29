@@ -5,105 +5,114 @@ namespace App\Http\Controllers;
 use Exception;
 use Http;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Twilio\Exceptions\RestException;
 use Twilio\Rest\Client;
 
 class WebexController extends Controller
 {
-    public $account_sid;
-    public $auth_token;
-    public $from;
-    public $client;
-    public function __construct()
+    public function index(Request $request)
     {
-        
-        $this->account_sid = env('TWILIO_ACCOUNT_SID');
-        $this->auth_token = env('TWILIO_AUTH_TOKEN');
-
-        //The twilio number you purchased
-        $this->from = env('TWILIO_PHONE_NUMBER');
-        // dd($this->account_sid, $this->auth_token);
-        // Initialize the Programmable Voice API
-        // dd(new Client($this->account_sid, $this->auth_token));
-        $this->client = new Client($this->account_sid, $this->auth_token);
-    }
-    public function index()
-    {
-        return inertia('Users/new call');
-    }
-    public function authorizeWebex()
-    {
-        $query = http_build_query([
-            'client_id' => config('services.webex.client_id'),
-            'redirect_uri' => config('services.webex.redirect_uri'),
-            'response_type' => 'code',
-            'scope' => 'spark:all', // Adjust based on your needs
+        return Inertia::render('Users/call', [
+            'webexAuthenticated' => session()->has('webex_access_token'),
+            'webexAccessToken' => session('webex_access_token'),
         ]);
-
-        return redirect('https://webexapis.com/v1/authorize?' . $query);
     }
-
-    public function callback(Request $request)
+    public function refreshToken()
     {
+        $refreshToken = session('webex_refresh_token');
 
-        $this->validate($request, [
-            'phone_number' => 'required|string',
-        ]);
-
-        try {
-            // Lookup the phone number to ensure it's valid
-//             $phone_number = $this->client->lookups->v1->phoneNumbers($request->phone_number)->fetch();
-// dd($phone_number);
-            // If the phone number is valid
-            // if ($phone_number) {
-                // Initiate the call and record it
-                dd($request->phone_number);
-                $call = $this->client->calls->create(
-                    $request->phone_number, // Destination phone number
-                    $this->from, // Valid Twilio phone number
-                    [
-                        // "record" => true,
-                        "url" => "http://demo.twilio.com/docs/voice.xml"
-                    ]
-                );
-
-                // Check if the call was successfully initiated
-                if ($call) {
-                    return response()->json(['message' => 'Call initiated successfully']);
-                } else {
-                    return response()->json(['message' => 'Call initiation failed'], 500);
-                }
-            // }
-        } catch (RestException $e) {
-            return response()->json(['error' => 'Twilio API error: ' . $e->getMessage()], 500);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        if (!$refreshToken) {
+            return response()->json(['error' => 'No refresh token available'], 401);
         }
 
+        $response = Http::asForm()->post('https://webexapis.com/v1/access_token', [
+            'grant_type' => 'refresh_token',
+            'client_id' => config('services.webex.client_id'),
+            'client_secret' => config('services.webex.client_secret'),
+            'refresh_token' => $refreshToken,
+        ]);
 
-        return redirect('/webex/index')->with('success', 'Successfully authenticated with Webex!');
+        if ($response->failed()) {
+            return response()->json(['error' => 'Failed to refresh token'], 500);
+        }
+
+        $data = $response->json();
+
+        // Update session with new tokens
+        session([
+            'webex_access_token' => $data['access_token'],
+            'webex_refresh_token' => $data['refresh_token'],
+            'webex_token_expires' => now()->addSeconds($data['expires_in']),
+        ]);
+
+        return response()->json(['message' => 'Token refreshed']);
     }
+
+    public function redirectToWebex()
+    {
+        $clientId = config('services.webex.client_id');
+        $redirectUri = config('services.webex.redirect');
+        $scope = 'spark:all';
+        $responseType = 'code';
+        $state = csrf_token();
+
+        $url = 'https://webexapis.com/v1/authorize?' . http_build_query([
+            'client_id' => $clientId,
+            'response_type' => $responseType,
+            'redirect_uri' => $redirectUri,
+            'scope' => $scope,
+            'state' => $state,
+        ]);
+
+        return redirect($url);
+    }
+
+    public function handleWebexCallback(Request $request)
+    {
+        $code = $request->input('code');
+        $state = $request->input('state');
+
+        if ($state !== $request->session()->token()) {
+            abort(403, 'Invalid state parameter');
+        }
+
+        $response = Http::asForm()->post('https://webexapis.com/v1/access_token', [
+            'grant_type' => 'authorization_code',
+            'client_id' => config('services.webex.client_id'),
+            'client_secret' => config('services.webex.client_secret'),
+            'code' => $code,
+            'redirect_uri' => config('services.webex.redirect'),
+        ]);
+
+        if ($response->failed()) {
+            return redirect('/')->withErrors('Failed to authenticate with Webex');
+        }
+
+        $data = $response->json();
+dd($data);
+        // Store tokens securely
+        session([
+            'webex_access_token' => $data['access_token'],
+            'webex_refresh_token' => $data['refresh_token'],
+            'webex_token_expires' => now()->addSeconds($data['expires_in']),
+        ]);
+
+        return redirect()->route('dashboard');
+    }
+
     public function makeCall(Request $request)
     {
         $accessToken = session('webex_access_token');
 
-        $response = Http::withToken($accessToken)->post('https://webexapis.com/v1/telephony/calls', [
-            'destination' => $request->input('destination'),
-        ]);
+        if (!$accessToken) {
+            return response()->json(['error' => 'Not authenticated with Webex'], 401);
+        }
 
-        return response()->json($response->json());
-    }
-    public function handleCandidate(Request $request)
-    {
-        $accessToken = session('webex_access_token');
+        $destination = $request->input('destination');
 
-        // Forward the ICE candidate to Webex or to the other peer
-        $response = Http::withToken($accessToken)->post('https://webexapis.com/v1/telephony/candidates', [
-            'candidate' => $request->input('candidate'),
-            // Additional necessary data
-        ]);
-
-        return response()->json($response->json());
+        // Placeholder response; actual implementation will use Webex JavaScript SDK
+        return response()->json(['message' => 'Call initiated to ' . $destination]);
     }
 
 }
