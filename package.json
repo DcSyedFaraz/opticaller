@@ -8,6 +8,7 @@
     "devDependencies": {
         "@inertiajs/vue3": "^1.0.0",
         "@primevue/auto-import-resolver": "^4.0.3",
+        "@rollup/plugin-commonjs": "^28.0.1",
         "@tailwindcss/forms": "^0.5.3",
         "@vitejs/plugin-vue": "^5.0.0",
         "autoprefixer": "^10.4.12",
@@ -21,6 +22,7 @@
     },
     "dependencies": {
         "@primevue/themes": "^4.0.3",
+        "@webex/calling": "^3.5.0",
         "@webex/package-tools": "^0.0.0-next.1",
         "chart.js": "^4.4.4",
         "country-list-js": "^3.1.8",
@@ -32,6 +34,6 @@
         "pusher-js": "^8.4.0-rc2",
         "vite-plugin-node-polyfills": "^0.22.0",
         "vuex": "^4.0.2",
-        "webex": "^3.4.0"
+        "webex": "^3.5.0"
     }
 }

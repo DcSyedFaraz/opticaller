@@ -90,7 +90,7 @@ class WebexController extends Controller
         }
 
         $data = $response->json();
-dd($data);
+// dd($data);
         // Store tokens securely
         session([
             'webex_access_token' => $data['access_token'],
