@@ -6,21 +6,9 @@
     </div>
 </template>
 
-<script >
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable jsdoc/require-jsdoc */
-/* eslint-env browser */
-/* global Calling */
+<script>
 
-/* eslint-disable require-jsdoc */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
-/* eslint-disable no-global-assign */
-/* eslint-disable no-multi-assign */
-/* eslint-disable max-len */
-
-import Calling from "@webex/calling";
+import { Calling } from "@webex/calling";
 
 export default {
     data() {
@@ -33,7 +21,7 @@ export default {
     methods: {
         async login() {
             const webexConfig = {
-                credentials: { access_token: 'NWJhMTNkZGUtNGExOS00MTQ4LTkwOTUtZDJkYjI4OGZlNDhmMmI5NmM2MDQtMzUw_PE93_5aa90450-7bd4-496a-b679-2da9dbca94a5' },
+                credentials: { access_token: 'access_token' },
                 config: {
                     logger: {
                         level: 'debug' // Set the desired log level
@@ -76,10 +64,10 @@ export default {
 
             this.callings = await Calling.init({ webexConfig, callingConfig });
             // await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('ddd', this.callings,webexConfig);
             this.callings.on("ready", async () => {
 
                 await this.callings.register();
+                console.log('ddd', this.callings.callingClient.getLines());
                 this.line = Object.values(this.callings.callingClient.getLines())[0];
                 this.line.on("registered", () => console.log("Line registered"));
             });
