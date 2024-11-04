@@ -8,7 +8,7 @@
 
 <script>
 
-import { Calling } from "@webex/calling";
+// import { Calling } from "@webex/calling";
 
 export default {
     data() {
