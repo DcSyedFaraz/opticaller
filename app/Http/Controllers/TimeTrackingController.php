@@ -217,9 +217,10 @@ class TimeTrackingController extends Controller
                 $address->update($validatedData['address']);
 
                 if ($notreached) {
-                    NotReached::create(['address_id' => $address->id]);
-                    $address->follow_up_date = null;
-                    $address->feedback = 'notreached';
+                    // NotReached::create(['address_id' => $address->id]);
+                    // $address->follow_up_date = null;
+                    // $address->feedback = 'notreached';
+                    $this->handleNotReached($address);
                 }
 
                 if ($address->follow_up_date) {
@@ -229,7 +230,7 @@ class TimeTrackingController extends Controller
                 }
 
                 $address->save();
-// dd($validatedData['address']['feedback'],$request->address['subproject']['title']);
+                // dd($validatedData['address']['feedback'],$request->address['subproject']['title']);
                 // Log activity
                 $seconds = $validatedData['total_duration'];
                 $timeLog = new Activity();
@@ -265,6 +266,104 @@ class TimeTrackingController extends Controller
             return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }
+    private function handleNotReached(Address $address)
+    {
+        $now = Carbon::now();
+        $latestNotReached = $address->notreached()->latest()->first();
+// dd($now);
+        if ($latestNotReached) {
+            // Check if the address is currently paused
+            // if ($latestNotReached->paused_until && $now->lessThan($latestNotReached->paused_until)) {
+            //     throw new \Exception('Address is currently paused and cannot be marked as not reached.');
+            // }
 
+            // Increment attempt count
+            $latestNotReached->attempt_count += 1;
+
+            // Determine the next action based on the attempt count
+            if (in_array($latestNotReached->attempt_count, [3, 6])) {
+                // Pause for 5 business days
+                $pausedUntil = $this->calculatePausedUntil($now, 5);
+                $latestNotReached->paused_until = $pausedUntil;
+                $address->follow_up_date = null;
+                $address->feedback = 'notreached';
+            } elseif ($latestNotReached->attempt_count > 9) {
+                // Notify the team and remove the address
+                Log::channel('address')->info('Address processing limit reached', [
+                    'timestamp' => $now->toDateTimeString(),
+                    'user_id' => auth()->id(),
+                    'message' => 'Address removed after exceeding maximum retry attempts.',
+                    'address_details' => $address->toArray(),
+                ]);
+                // $this->notifyTeam($address);
+                // $address->delete();
+                // throw new \Exception('Address removed after 10 unsuccessful attempts.');
+            }
+
+            // Save the updated NotReached record
+            $latestNotReached->save();
+        } else {
+            // If no NotReached record exists, create one
+            NotReached::create([
+                'address_id' => $address->id,
+                'attempt_count' => 1,
+                'paused_until' => null,
+            ]);
+            // Set initial follow-up date (e.g., after 1 day)
+            // $address->follow_up_date = $now->addDay();
+            $address->feedback = 'notreached';
+        }
+
+        // Save the address changes
+        $address->save();
+    }
+
+    /**
+     * Calculate the date after adding a specified number of business days.
+     *
+     * @param \Carbon\Carbon $start
+     * @param int $businessDays
+     * @return \Carbon\Carbon
+     */
+    private function calculatePausedUntil(Carbon $start, int $businessDays)
+    {
+        $pausedUntil = $start->copy();
+        $daysAdded = 0;
+
+        while ($daysAdded < $businessDays) {
+            $pausedUntil->addDay();
+            if (!$pausedUntil->isWeekend()) { // Assuming weekends are non-business days
+                $daysAdded++;
+            }
+        }
+
+        return $pausedUntil;
+    }
+
+    /**
+     * Notify the team that an address has reached the maximum number of attempts.
+     *
+     * @param \App\Models\Address $address
+     * @return void
+     */
+    private function notifyTeam(Address $address)
+    {
+        // Implement your notification logic here
+        // Example: Send an email, Slack message, or trigger a webhook
+
+        // Example using a webhook:
+        $webhookUrl = 'https://your-notification-endpoint.com/webhook';
+        $response = Http::post($webhookUrl, [
+            'address_id' => $address->id,
+            'contact_id' => $address->contact_id,
+            'message' => 'Maximum number of attempts reached for this address.',
+        ]);
+
+        if ($response->successful()) {
+            Log::info('Team notified about maximum attempts for address ID: ' . $address->id);
+        } else {
+            Log::error('Failed to notify team for address ID: ' . $address->id . '. Response: ' . $response->body());
+        }
+    }
 
 }

@@ -57,34 +57,47 @@ class AddressService
             ->orderBy('sub_projects.priority', 'desc')
             ->whereIn('sub_project_id', $subProjectIds)
             ->where(function ($query) {
-                $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
-                    // ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
-                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
+                $query->whereNull('addresses.seen')
+                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
             })
             // ->where('seen', 0)
             ->whereNull('follow_up_date')
+
             // ->where(function ($query) {
-            //     $query->where('addresses.updated_at', '<', $now->subDay())
-            //         ->orWhere(function ($subQuery) {
-            //             $subQuery->where('addresses.updated_at', '>=', $now->subDay())
-            //                 ->whereNull('addresses.feedback');
-            //         });
+
+            //     $query->whereHas('notreached', function ($q) {
+            //     })
+            //         ->withCount(['notreached'])
+            //         ->having('notreached_count', '<=', 10)
+            //         ->orWhereDoesntHave('notreached');
             // })
-            ->where(function ($query) {
-                // Combine conditions for addresses with or without notreached entries
-                $query->whereHas('notreached', function ($q) {
-                    // Remove the condition on notreached created_at since we are using updated_at on Address
+            ->where(function ($query) use ($now) {
+                $query->whereHas('notreached', function ($q) use ($now) {
+                    $q->where(function ($subQuery) use ($now) {
+                        $subQuery->whereNull('paused_until')
+                                 ->orWhere('paused_until', '<=', $now);
+                    })->where('attempt_count', '<=', 9);
                 })
-                    ->withCount(['notreached'])
-                    ->having('notreached_count', '<=', 10)
-                    ->orWhereDoesntHave('notreached');
+                // ->withCount(['notreached'])
+                // ->having('notreached_count', '<=', 10)
+                ->orWhereDoesntHave('notreached');
             })
+            // ->where(function ($query) use ($now) {
+            //     $query->where(function ($q) use ($now) {
+            //         $q->has('notreached')
+            //           ->where(function ($sub) use ($now) {
+            //               $sub->whereNull('not_reacheds.paused_until')
+            //                   ->orWhere('not_reacheds.paused_until', '<=', $now);
+            //           });
+            //     })
+            //     ->orWhereDoesntHave('notreached');
+            // })
+
             ->select('addresses.*')
             ->paginate($addressesPerPage);
 
-        // dd($addresses->first());
-        // Use pagination to control the number of results per page
-        // Get the first address from the paginated results
+
+
         $address = $addresses->first();
 
         // Check if there are no more addresses to process

@@ -41,8 +41,8 @@ class DatabaseSeeder extends Seeder
 
         Project::factory(5)->create();
         SubProject::factory(5)->create();
-        Address::factory(30)->create();
-        Activity::factory(50)->create();
+        Address::factory(3)->create();
+        // Activity::factory(50)->create();
         // LoginTime::factory(50)->create();
     }
 }
