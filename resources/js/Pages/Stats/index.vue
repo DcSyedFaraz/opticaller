@@ -181,7 +181,7 @@
                         User Productivity and Call Statistics
                     </span>
                 </div>
-                <DataTable :value="userData" resizableColumns scrollable  columnResizeMode="fit" ref="dt" showGridlines  class="p-datatable-sm " paginator :rows="10"
+                <DataTable :value="userData" resizableColumns scrollable scrollDirection="horizontal" columnResizeMode="fit" ref="dt" showGridlines  class="p-datatable-sm " paginator :rows="10"
                     :rowsPerPageOptions="[5, 10, 20, 50]" v-model:filters="filters"
                     :globalFilterFields="['user_name', 'total_logged_in_time', 'total_break_time', 'addresses_processed', 'average_processing_time', 'total_effective_working_time']">
                     <template #header>
