@@ -1025,7 +1025,13 @@ export default {
                 });
                 this.notreached = false;
                 this.saveEdits = false;
-                this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
+                if (res.data.limit) {
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: '🚫 We tried to reach this address 10 times without success. Please contact the admin for further assistance.', life: 6000 });
+
+                } else {
+
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
+                }
                 console.log(res.data);
                 clearInterval(this.timer);
                 clearInterval(this.reversetimer);

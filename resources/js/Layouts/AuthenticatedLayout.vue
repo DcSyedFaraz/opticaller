@@ -4,6 +4,8 @@ import { usePage } from '@inertiajs/vue3';
 export default {
 
     updated() {
+        // console.log(this.$page.props.flash);
+
         if (this.$page.props.flash.message) {
             this.$toast.add({ severity: 'success', summary: 'Success', detail: this.$page.props.flash.message, life: 3000 });
             this.$page.props.flash.message = null;

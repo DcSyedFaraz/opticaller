@@ -17,6 +17,7 @@ use Log;
 
 class TimeTrackingController extends Controller
 {
+    private $limitexceed = false;
     public function startTracking(Request $request)
     {
         $timeLog = Activity::create([
@@ -257,7 +258,7 @@ class TimeTrackingController extends Controller
             $address = $addressService->getDueAddress();
             $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
-            return response()->json(['address' => $address, 'lockfields' => $globalLockedFields]);
+            return response()->json(['address' => $address, 'lockfields' => $globalLockedFields, 'limit' => $this->limitexceed]);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -270,7 +271,7 @@ class TimeTrackingController extends Controller
     {
         $now = Carbon::now();
         $latestNotReached = $address->notreached()->latest()->first();
-// dd($now);
+        // dd($now);
         if ($latestNotReached) {
             // Check if the address is currently paused
             // if ($latestNotReached->paused_until && $now->lessThan($latestNotReached->paused_until)) {
@@ -288,6 +289,7 @@ class TimeTrackingController extends Controller
                 $address->follow_up_date = null;
                 $address->feedback = 'notreached';
             } elseif ($latestNotReached->attempt_count > 9) {
+                // dd($latestNotReached->attempt_count);
                 // Notify the team and remove the address
                 Log::channel('address')->info('Address processing limit reached', [
                     'timestamp' => $now->toDateTimeString(),
@@ -295,7 +297,9 @@ class TimeTrackingController extends Controller
                     'message' => 'Address removed after exceeding maximum retry attempts.',
                     'address_details' => $address->toArray(),
                 ]);
+                $this->limitexceed = true;
                 // $this->notifyTeam($address);
+                // dd( session('message'));
                 // $address->delete();
                 // throw new \Exception('Address removed after 10 unsuccessful attempts.');
             }
@@ -348,22 +352,9 @@ class TimeTrackingController extends Controller
      */
     private function notifyTeam(Address $address)
     {
-        // Implement your notification logic here
-        // Example: Send an email, Slack message, or trigger a webhook
-
-        // Example using a webhook:
-        $webhookUrl = 'https://your-notification-endpoint.com/webhook';
-        $response = Http::post($webhookUrl, [
-            'address_id' => $address->id,
-            'contact_id' => $address->contact_id,
-            'message' => 'Maximum number of attempts reached for this address.',
-        ]);
-
-        if ($response->successful()) {
-            Log::info('Team notified about maximum attempts for address ID: ' . $address->id);
-        } else {
-            Log::error('Failed to notify team for address ID: ' . $address->id . '. Response: ' . $response->body());
-        }
+        // Use session()->flash() to set a flash message for the next request
+        session()->flash('message', '🚫 We tried to reach this address 10 times without success. Please contact the admin for further assistance.');
     }
+
 
 }
