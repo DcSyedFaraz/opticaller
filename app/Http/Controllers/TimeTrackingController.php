@@ -81,7 +81,8 @@ class TimeTrackingController extends Controller
                 'address.email_address_system' => [
                     'required',
                     'email',
-                    'regex:/^((?!no-mail).)*$/i'
+                    'regex:/^((?!no-mail).)*$/i',
+                    'not_in:k.ansork@pflegemobil-erlangen.de,another@example.com'
                 ],
                 'address.email_address_new' => 'nullable|email',
                 'address.feedback' => 'required|string',
@@ -106,6 +107,7 @@ class TimeTrackingController extends Controller
 
                 $validatedData = $request->validate($rules, [
                     'personal_notes.string' => 'Personal notes must be a string',
+                    'address.email_address_system.not_in' => 'The provided email address is not allowed.',
                     'interest_notes.string' => 'Interest notes must be a string',
                     'address.id.required' => 'Address ID is required',
                     'address.id.integer' => 'Address ID must be an integer',
