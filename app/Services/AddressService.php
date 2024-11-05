@@ -111,8 +111,8 @@ class AddressService
             return response()->json(['message' => 'No more addresses to process'], 404);
         }
 
-        $address->seen = $now;
-        $address->save();
+        // $address->seen = $now;
+        // $address->save();
         // dd($address);
 
         Log::channel('address')->info('Address Processed', [
