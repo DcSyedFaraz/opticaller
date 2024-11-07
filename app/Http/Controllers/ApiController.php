@@ -7,8 +7,10 @@ use App\Models\Activity;
 use App\Models\Address;
 use App\Models\Project;
 use App\Models\SubProject;
+use App\Models\User;
 use DB;
 use Exception;
+use Hash;
 use Illuminate\Http\Request;
 use Log;
 use Validator;
@@ -138,8 +140,27 @@ class ApiController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // Check if the email matches the specific email
+        if ($credentials['email'] !== 'api@vim-solution.com') {
+            return response()->json(['error' => 'Unauthorized, Email not matched.'], 401);
+        }
+
+        // Attempt to find the user by email
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            // This case should not occur if the email is fixed, but it's good to handle it
+            return response()->json(['error' => 'Unauthorized, User Not Found.'], 401);
+        }
+
+        // Verify the password using Laravel's Hash facade
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['error' => 'Unauthorized, Password Not Matched.'], 401);
         }
         // Fetch search parameters
         $contactId = $request->input('contact_id');
