@@ -78,8 +78,6 @@
 
 <script>
 import { FilterMatchMode } from '@primevue/core/api';
-import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
 
 export default {
     props: {
@@ -99,12 +97,12 @@ export default {
     },
     methods: {
         initializeWebSocket() {
-            console.log(window.Echo);
-            // Listen for real-time changes in user status (online/offline)
-            window.Echo.channel('online-users')
-                .listen('UserStatusChanged', (event) => {
-                    this.updateUserStatus(event.user_id, event.status);
-                });
+            // console.log(window.Echo);
+            // // Listen for real-time changes in user status (online/offline)
+            // window.Echo.channel('online-users')
+            //     .listen('UserStatusChanged', (event) => {
+            //         this.updateUserStatus(event.user_id, event.status);
+            //     });
         },
         updateUserStatus(userId, status) {
             const user = this.users.find(u => u.id === userId);
