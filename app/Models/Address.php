@@ -57,10 +57,21 @@ class Address extends Model
     {
         return $this->belongsTo(Feedback::class, 'feedback', 'value');
     }
-
     public function project()
     {
         return $this->hasOneThrough(Project::class, SubProject::class, 'id', 'id', 'sub_project_id', 'project_id');
+    }
+    public function statuses()
+    {
+        return $this->hasMany(AddressStatus::class);
+    }
+
+    /**
+     * Get the latest status record for the address.
+     */
+    public function latestStatus()
+    {
+        return $this->hasOne(AddressStatus::class)->latestOfMany();
     }
 
 }
