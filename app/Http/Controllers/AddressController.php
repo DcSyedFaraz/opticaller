@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\CallbackMail;
 use App\Models\Address;
+use App\Models\AddressStatus;
 use App\Models\GlobalLockedFields;
 use App\Models\Project;
 use App\Models\SubProject;
@@ -13,9 +14,41 @@ use Http;
 use Illuminate\Http\Request;
 use Log;
 use Mail;
+use Validator;
 
 class AddressController extends Controller
 {
+    public function updateStatus(Request $request)
+    {
+        // Define validation rules
+        $validator = Validator::make($request->all(), [
+            'address_id' => 'required|integer|exists:addresses,id',
+            'status' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $addressId = $request->input('address_id');
+        $status = $request->input('status');
+
+        try {
+            $address = Address::findOrFail($addressId);
+
+            // Create a new status entry
+            $addressStatus = new AddressStatus([
+                'status' => $status,
+            ]);
+
+            $address->statuses()->save($addressStatus);
+
+            return response()->json(['message' => 'Status updated successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error updating address status: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update status.'], 500);
+        }
+    }
     public function getAddressByContactId($contact_id, $sub_project_id)
     {
         // Fetch the address using the Contact ID

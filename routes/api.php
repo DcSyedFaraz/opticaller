@@ -25,4 +25,6 @@ Route::post('/store_addresses', [ApiController::class, 'store']);
 Route::post('/store_project_sub_project', [ApiController::class, 'handleProjectsAndSubprojects']);
 Route::post('/delete_address', [ApiController::class, 'deleteAddress']);
 Route::post('/restore_address', [ApiController::class, 'restoreAddress']);
+Route::post('/address/update-status', [ApiController::class, 'updateStatus']);
+
 
