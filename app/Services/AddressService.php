@@ -12,9 +12,23 @@ class AddressService
     public function getDueAddress()
     {
         $now = Carbon::now();
-        // $nowInUtc = Carbon::now('Europe/Berlin');
-        // dd($now);
-        // $now = $nowInUtc->copy()->setTimezone('UTC');
+
+        $threshold = now()->subMinutes(1);
+        $staleAddresses = Address::whereHas('latestStatus', function ($query) use ($threshold) {
+            $query->where('updated_at', '<', $threshold)
+                ->where('status', '!=', 'Finished');
+        })->get();
+
+        // dd($staleAddresses);
+        if ($staleAddresses->isNotEmpty()) {
+
+            Log::channel('address')->warning('Webhook Not Working.', [
+                'timestamp' => $now->toDateTimeString(),
+                'addresses' => $staleAddresses,
+            ]);
+
+            return response()->json(['warning' => 'Oops! The system is having trouble connecting. Please contact admin as the webhook is not working properly.'], 404);
+        }
 
         // Convert $now to UTC for storing in the database and for comparison
         $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
@@ -75,12 +89,12 @@ class AddressService
                 $query->whereHas('notreached', function ($q) use ($now) {
                     $q->where(function ($subQuery) use ($now) {
                         $subQuery->whereNull('paused_until')
-                                 ->orWhere('paused_until', '<=', $now);
+                            ->orWhere('paused_until', '<=', $now);
                     })->where('attempt_count', '<=', 9);
                 })
-                // ->withCount(['notreached'])
-                // ->having('notreached_count', '<=', 10)
-                ->orWhereDoesntHave('notreached');
+                    // ->withCount(['notreached'])
+                    // ->having('notreached_count', '<=', 10)
+                    ->orWhereDoesntHave('notreached');
             })
             // ->where(function ($query) use ($now) {
             //     $query->where(function ($q) use ($now) {

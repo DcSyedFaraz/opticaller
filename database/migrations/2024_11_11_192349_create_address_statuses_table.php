@@ -15,6 +15,8 @@ return new class extends Migration {
             $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
             $table->string('status');
             $table->timestamps();
+
+            $table->index(['address_id', 'updated_at']);
         });
     }
 

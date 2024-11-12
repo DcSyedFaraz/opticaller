@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\AddressResource;
 use App\Models\Activity;
 use App\Models\Address;
+use App\Models\AddressStatus;
 use App\Models\Project;
 use App\Models\SubProject;
 use App\Models\User;
@@ -136,6 +137,39 @@ class ApiController extends Controller
             'projects' => $projects,
             'subprojects' => $subProjects
         ]);
+    }
+    public function updateStatus(Request $request)
+    {
+        // Define validation rules
+        $validator = Validator::make($request->all(), [
+            'address_id' => 'required|integer|exists:addresses,id',
+            'status' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $addressId = $request->input('address_id');
+        $status = $request->input('status');
+
+        try {
+            // $address = Address::findOrFail($addressId);
+
+            $addressStatus = AddressStatus::updateOrCreate(
+                [
+                    'address_id' => $addressId,
+                ],
+                [
+                    'status' => $status,
+                ]
+            );
+
+            return response()->json(['message' => 'Status updated successfully.'], 200);
+        } catch (Exception $e) {
+            Log::channel('address')->error('Error updating address status: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to update status.'], 500);
+        }
     }
 
     public function index(Request $request)

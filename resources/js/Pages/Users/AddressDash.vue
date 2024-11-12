@@ -615,7 +615,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9m0 0h3.03M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9" />
             </svg>
-            <p class="font-semibold">
+            <p class="font-semibold text-red-500" v-if="this.localAddress.original?.warning">
+                {{ this.localAddress.original.warning }}
+            </p>
+            <p class="font-semibold" v-else>
                 No address available at the moment. Please check back later or contact support for assistance.
             </p>
         </div>
@@ -777,6 +780,7 @@ export default {
         }
     },
     mounted() {
+
         if (this.localAddress && this.localAddress.id) {
 
             this.startTracking();
