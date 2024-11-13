@@ -95,13 +95,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
 
     Route::get('/webex/login', [WebexController::class, 'redirectToWebex'])->name('webex.login');
-    Route::get('/webex/newcall', [WebexController::class, 'index']);
     Route::get('/webex/callback', [WebexController::class, 'handleWebexCallback'])->name('webex.callback');
     Route::post('/webex/call', [WebexController::class, 'makeCall'])->name('webex.call');
     Route::post('/webex/refresh-token', [WebexController::class, 'refreshToken'])->name('webex.refresh_token');
 
 
 });
+
+Route::get('/webex/newcall', [WebexController::class, 'index']);
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/address/dashboard', [UsersController::class, 'dash'])->name('dash');
 
