@@ -14,7 +14,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <!-- Scripts -->
-    <script src='https://unpkg.com/webex/umd/calling.min.js'></script>
+    {{-- <script src='https://unpkg.com/webex/umd/calling.min.js'></script> --}}
     <!-- Add inside the <head> tag in your Blade template -->
     <meta name="webex-access-token" content="{{ env('VITE_WEBEX_ACCESS_TOKEN') }}">
     <!-- Add inside the <head> tag in your Blade template, before your Vue app scripts -->
