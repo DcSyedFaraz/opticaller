@@ -81,6 +81,7 @@ class TimeTrackingController extends Controller
                 'address.email_address_system' => [
                     'required',
                     'email',
+                    'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/',
                     'regex:/^((?!no-mail).)*$/i',
                     'not_in:k.ansork@pflegemobil-erlangen.de,another@example.com'
                 ],
@@ -136,7 +137,7 @@ class TimeTrackingController extends Controller
                     'address.feedback.required' => 'Feedback is required',
                     'address.email_address_system.email' => 'Email address must be a valid email address',
                     'address.email_address_new.email' => 'New email address must be a valid email address',
-                    'address.email_address_system.regex' => 'The email address must not contain "no-mail".',
+                    'address.email_address_system.regex' => 'The email address must not contain "no-mail" and must be a valid email address.',
                     'address.feedback.string' => 'Feedback must be a string',
                     'address.follow_up_date.after' => 'Follow up date must be after today',
                 ]);
