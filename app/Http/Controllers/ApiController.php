@@ -20,11 +20,27 @@ class ApiController extends Controller
 {
     public function deleteAddress(Request $request)
     {
-        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // Check if the email matches the specific email
+        if ($credentials['email'] !== 'api@vim-solution.com') {
+            return response()->json(['error' => 'Unauthorized, Email not matched.'], 401);
         }
-        if (!$request->contact_id || !$request->sub_project_id) {
-            return response()->json(['error' => 'Both contact ID and sub-project ID are required.'], 422);
+
+        // Attempt to find the user by email
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            // This case should not occur if the email is fixed, but it's good to handle it
+            return response()->json(['error' => 'Unauthorized, User Not Found.'], 401);
+        }
+
+        // Verify the password using Laravel's Hash facade
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['error' => 'Unauthorized, Password Not Matched.'], 401);
         }
 
         DB::beginTransaction();
@@ -117,15 +133,27 @@ class ApiController extends Controller
     }
     public function getProjectsAndSubprojects(Request $request)
     {
-        if ($request->email !== 'max@vimtronix.com' || $request->password !== '#xf?$RsLko@grH5NME') {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-        $validatedData = Validator::make($request->all(), [
-            'limit' => 'nullable|integer|min:1',
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
         ]);
 
-        if ($validatedData->fails()) {
-            return response()->json(['error' => $validatedData->messages()], 422);
+        // Check if the email matches the specific email
+        if ($credentials['email'] !== 'api@vim-solution.com') {
+            return response()->json(['error' => 'Unauthorized, Email not matched.'], 401);
+        }
+
+        // Attempt to find the user by email
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            // This case should not occur if the email is fixed, but it's good to handle it
+            return response()->json(['error' => 'Unauthorized, User Not Found.'], 401);
+        }
+
+        // Verify the password using Laravel's Hash facade
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return response()->json(['error' => 'Unauthorized, Password Not Matched.'], 401);
         }
 
         $limit = $request->input('limit', 10);
