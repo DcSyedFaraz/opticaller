@@ -166,6 +166,15 @@ class ApiController extends Controller
             'subprojects' => $subProjects
         ]);
     }
+    public function checkStatus()
+    {
+        $projects = AddressStatus::get();
+
+        return response()->json([
+            'projects' => $projects,
+        ]);
+
+    }
     public function updateStatus(Request $request)
     {
         // Define validation rules
