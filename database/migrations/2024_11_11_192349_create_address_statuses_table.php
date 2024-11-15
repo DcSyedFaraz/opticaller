@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('address_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('address_id')->constrained('addresses')->onDelete('cascade');
+            $table->string('address_id');
             $table->string('status');
             $table->timestamps();
 
