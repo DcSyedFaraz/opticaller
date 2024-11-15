@@ -168,7 +168,8 @@ class ApiController extends Controller
     }
     public function checkStatus()
     {
-        $projects = AddressStatus::get();
+        $projects = AddressStatus::all();
+        // dd($projects);
 
         return response()->json([
             'projects' => $projects,
