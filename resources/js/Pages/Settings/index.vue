@@ -185,6 +185,7 @@ export default {
             ],
             stats: [
                 { id: 1, content: 'Visual charts displaying overall project performance, user activity, and call outcomes.', title: 'Performance Metrics', routeName: 'statistics.index', buttonText: 'Proceed' },
+                { id: 2, content: 'Check Addresses webhook status.', title: 'Address Statuses', routeName: 'addresses.statuses.index', buttonText: 'Proceed' },
             ],
             profile: [
                 { id: 1, content: 'Option to update security settings, including password requirements.', title: 'Password protection', routeName: 'profile.edit', buttonText: 'Proceed' },
