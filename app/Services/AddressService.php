@@ -5,6 +5,7 @@ use App\Models\Address;
 use App\Models\SubProject;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Log;
 
 class AddressService
@@ -14,14 +15,14 @@ class AddressService
         $now = Carbon::now();
 
         $threshold = now()->subMinutes(1);
+
+        // Check for stale addresses as before
         $staleAddresses = Address::whereHas('latestStatus', function ($query) use ($threshold) {
             $query->where('updated_at', '<', $threshold)
                 ->where('status', '!=', 'Finished');
         })->get();
 
-        // dd($staleAddresses);
         if ($staleAddresses->isNotEmpty()) {
-
             Log::channel('address')->warning('Webhook Not Working.', [
                 'timestamp' => $now->toDateTimeString(),
                 'addresses' => $staleAddresses,
@@ -30,111 +31,87 @@ class AddressService
             return response()->json(['warning' => 'Oops! The system is having trouble connecting. Please contact admin as the webhook is not working properly.'], 404);
         }
 
-        // Convert $now to UTC for storing in the database and for comparison
-        $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
-        // Session::forget('addresses');
+        // Start a database transaction
+        return DB::transaction(function () use ($now) {
+            $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
 
-        $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
-            ->whereIn('sub_project_id', $subProjectIds)
-            ->where(function ($query) {
-                $query->whereNull('addresses.seen')  // Checks if 'seen' is null (empty)
-                    // ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(3));  // Checks if 'seen' is older than 24 hours
-                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());  // Checks if 'seen' is older than 24 hours
-            })
-            ->where(function ($query) use ($now) {
-                $query->where('follow_up_date', '<=', $now)
-                    ->orWhere('follow_up_date', '=', $now);
-            })
-            ->orderBy('follow_up_date', 'asc')
-            ->first();
-
-        if ($dueAddress) {
-            $dueAddress->seen = $now;
-            $dueAddress->save();
-            // dd($now,  $dueAddress->follow_up_date);
-
-            Log::channel('address')->info('Due Address Processed', [
-                'timestamp' => $now->toDateTimeString(),
-                'user_id' => auth()->id(),
-                'address' => $dueAddress->toArray(),
-            ]);
-
-            return $dueAddress;
-        }
-
-
-        $addressesPerPage = 1;
-
-        // Fetch addresses dynamically
-        $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.fieldVisibilities', 'subproject.feedbacks', 'calLogs.users', 'project')
-            ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id') // Join sub_projects
-            ->orderBy('sub_projects.priority', 'desc')
-            ->whereIn('sub_project_id', $subProjectIds)
-            ->where(function ($query) {
-                $query->whereNull('addresses.seen')
-                    ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
-            })
-            // ->where('seen', 0)
-            ->whereNull('follow_up_date')
-
-            // ->where(function ($query) {
-
-            //     $query->whereHas('notreached', function ($q) {
-            //     })
-            //         ->withCount(['notreached'])
-            //         ->having('notreached_count', '<=', 10)
-            //         ->orWhereDoesntHave('notreached');
-            // })
-            ->where(function ($query) use ($now) {
-                $query->whereHas('notreached', function ($q) use ($now) {
-                    $q->where(function ($subQuery) use ($now) {
-                        $subQuery->whereNull('paused_until')
-                            ->orWhere('paused_until', '<=', $now);
-                    })->where('attempt_count', '<=', 9);
+            // Try to fetch a due address with locking
+            $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+                ->whereIn('sub_project_id', $subProjectIds)
+                ->where(function ($query) {
+                    $query->whereNull('addresses.seen')
+                        ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
                 })
-                    // ->withCount(['notreached'])
-                    // ->having('notreached_count', '<=', 10)
-                    ->orWhereDoesntHave('notreached');
-            })
-            // ->where(function ($query) use ($now) {
-            //     $query->where(function ($q) use ($now) {
-            //         $q->has('notreached')
-            //           ->where(function ($sub) use ($now) {
-            //               $sub->whereNull('not_reacheds.paused_until')
-            //                   ->orWhere('not_reacheds.paused_until', '<=', $now);
-            //           });
-            //     })
-            //     ->orWhereDoesntHave('notreached');
-            // })
+                ->where(function ($query) use ($now) {
+                    $query->where('follow_up_date', '<=', $now)
+                        ->orWhere('follow_up_date', '=', $now);
+                })
+                ->orderBy('follow_up_date', 'asc')
+                ->lockForUpdate() // Lock the selected rows for update
+                ->first();
 
-            ->select('addresses.*')
-            ->paginate($addressesPerPage);
+            if ($dueAddress) {
+                $dueAddress->seen = $now;
+                $dueAddress->save();
 
+                Log::channel('address')->info('Due Address Processed', [
+                    'timestamp' => $now->toDateTimeString(),
+                    'user_id' => auth()->id(),
+                    'address' => $dueAddress->toArray(),
+                ]);
 
+                return $dueAddress;
+            }
 
-        $address = $addresses->first();
+            // If no due address, fetch addresses dynamically
+            $addressesPerPage = 1;
 
-        // Check if there are no more addresses to process
-        if ($addresses->isEmpty()) {
+            $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
 
-            Log::channel('address')->warning('No Addresses to Process', [
+            $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.fieldVisibilities', 'subproject.feedbacks', 'calLogs.users', 'project')
+                ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
+                ->orderBy('sub_projects.priority', 'desc')
+                ->whereIn('sub_project_id', $subProjectIds)
+                ->where(function ($query) {
+                    $query->whereNull('addresses.seen')
+                        ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
+                })
+                ->whereNull('follow_up_date')
+                ->where(function ($query) use ($now) {
+                    $query->whereHas('notreached', function ($q) use ($now) {
+                        $q->where(function ($subQuery) use ($now) {
+                            $subQuery->whereNull('paused_until')
+                                ->orWhere('paused_until', '<=', $now);
+                        })->where('attempt_count', '<=', 9);
+                    })
+                        ->orWhereDoesntHave('notreached');
+                })
+                ->select('addresses.*')
+                ->lockForUpdate() // Lock the selected rows for update
+                ->paginate($addressesPerPage);
+
+            $address = $addresses->first();
+
+            if (!$address) {
+                Log::channel('address')->warning('No Addresses to Process', [
+                    'timestamp' => $now->toDateTimeString(),
+                    'user_id' => auth()->id(),
+                ]);
+
+                return response()->json(['message' => 'No more addresses to process'], 404);
+            }
+
+            $address->seen = $now;
+            $address->save();
+
+            Log::channel('address')->info('Address Processed', [
                 'timestamp' => $now->toDateTimeString(),
                 'user_id' => auth()->id(),
+                'address' => $address->toArray(),
             ]);
 
-            return response()->json(['message' => 'No more addresses to process'], 404);
-        }
-
-        $address->seen = $now;
-        $address->save();
-        // dd($address);
-
-        Log::channel('address')->info('Address Processed', [
-            'timestamp' => $now->toDateTimeString(),
-            'user_id' => auth()->id(),
-            'address' => $address->toArray(),
-        ]);
-
-        return $address;
+            return $address;
+        });
     }
 }
+
