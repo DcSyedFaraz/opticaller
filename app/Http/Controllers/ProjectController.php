@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AddressStatus;
 use App\Models\Project;
 use App\Models\SubProject;
 use App\Models\User;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Toast;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Inertia\Inertia;
 use Storage;// Import the toast.js file
 
 class ProjectController extends Controller
@@ -18,6 +20,27 @@ class ProjectController extends Controller
         $projects = Project::all();
         return inertia('Projects/Index', ['projects' => $projects]);
     }
+    public function AddressStatuses(Request $request)
+    {
+        $query = AddressStatus::orderBy('updated_at', 'desc');
+
+        // Optional: Implement search or filtering here if needed
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('status', 'like', "%{$search}%")
+                ->orWhere('address_id', 'like', "%{$search}%");
+        }
+
+        // Pagination with a reasonable number of items per page
+        $addressStatuses = $query->paginate(10)->withQueryString();
+
+        return Inertia::render('AddressStatuses/Index', [
+            'addressStatuses' => $addressStatuses,
+            'filters' => $request->all('search', 'sortField', 'sortOrder', 'page'),
+        ]);
+    }
+
+
     public function assign()
     {
         $users = User::select('name', 'id')->get();
