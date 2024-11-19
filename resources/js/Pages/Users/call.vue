@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import AircallPhone from 'aircall-everywhere'
+import { Device } from '@twilio/voice-sdk';
 
 export default {
     name: 'AircallDialer',

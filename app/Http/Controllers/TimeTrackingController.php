@@ -144,7 +144,7 @@ class TimeTrackingController extends Controller
             } else {
                 // If not validating, ensure 'address' and 'feedback' exist to prevent issues
                 $validatedData = $request->only(['address', 'personal_notes', 'interest_notes', 'total_duration']);
-                $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? '';
+                $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? 'notreached';
             }
 
             // Ensure 'feedback' is present and not empty when saveEdits is true
@@ -292,6 +292,7 @@ class TimeTrackingController extends Controller
                 $address->follow_up_date = null;
                 $address->feedback = 'notreached';
             } elseif ($latestNotReached->attempt_count > 9) {
+                $address->feedback = 'notreached';
                 // dd($latestNotReached->attempt_count);
                 // Notify the team and remove the address
                 Log::channel('address')->info('Address processing limit reached', [
