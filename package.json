@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@primevue/themes": "^4.0.3",
+        "@twilio/voice-sdk": "^2.12.2",
         "@webex/calling": "^3.5.0",
         "@webex/package-tools": "^0.0.0-next.1",
         "aircall-everywhere": "^1.8.0",
