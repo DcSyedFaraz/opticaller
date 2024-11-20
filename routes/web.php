@@ -9,7 +9,7 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SubProjectFieldVisibilityController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\WebexController;
+use App\Http\Controllers\CallController;
 use App\Models\GlobalLockedFields;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +36,7 @@ Route::get('/', function () {
     // ]);
 });
 // routes/web.php
+Route::get('/call-data', [CallController::class, 'call_data']);
 
 
 // Route::get('/dashboard', function () {
@@ -95,16 +96,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     })->name('settings.index');
     Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');
 
-
-    Route::get('/webex/login', [WebexController::class, 'redirectToWebex'])->name('webex.login');
-    Route::get('/webex/callback', [WebexController::class, 'handleWebexCallback'])->name('webex.callback');
-    Route::post('/webex/call', [WebexController::class, 'makeCall'])->name('webex.call');
-    Route::post('/webex/refresh-token', [WebexController::class, 'refreshToken'])->name('webex.refresh_token');
+    Route::get('/api/token', [CallController::class, 'getToken'])->name('refresh_token');
 
 
 });
 
-Route::get('/webex/newcall', [WebexController::class, 'index']);
+Route::get('/newcall', [CallController::class, 'index']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/address/dashboard', [UsersController::class, 'dash'])->name('dash');

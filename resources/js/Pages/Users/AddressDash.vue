@@ -605,7 +605,34 @@
                 </div>
             </Dialog>
 
+            <!-- Twilio Call Component -->
+            <TwilioCallComponent :phoneNumber="localAddress.phone_number" ref="twilioCallComponent" :isPaused="isPaused"
+                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
+                @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
 
+            <!-- Incoming Call Dialog -->
+            <Dialog header="Incoming Call" v-model:visible="showIncomingCallDialog" :closable="false" draggable
+                resizable class="w-11/12 md:w-1/3">
+                <div class="flex flex-col items-center">
+                    <p class="text-lg">Incoming call from: {{ incomingCallFrom }}</p>
+                    <div class="flex space-x-4 mt-4">
+                        <Button label="Accept" icon="pi pi-check" class="p-button-success"
+                            @click="acceptIncomingCall" />
+                        <Button label="Reject" icon="pi pi-times" class="p-button-danger" @click="rejectIncomingCall" />
+                    </div>
+                </div>
+            </Dialog>
+
+            <!-- Active Call Dialog -->
+            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
+                :closable="false" class="w-11/12 md:w-1/3">
+                <div class="flex flex-col items-center">
+                    <p class="text-lg">Calling: {{ activeCallNumber }}</p>
+                    <div class="flex space-x-4 mt-4">
+                        <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger" @click="hangUp" />
+                    </div>
+                </div>
+            </Dialog>
         </div>
 
         <div v-else
@@ -621,7 +648,9 @@
             <p class="font-semibold" v-else>
                 No address available at the moment. Please check back later or contact support for assistance.
             </p>
+
         </div>
+
         <div v-if="isLoading" class="loading-overlay">
             <ProgressSpinner style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
         </div>
@@ -634,10 +663,12 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
+import TwilioCallComponent from './TwilioCallComponent.vue';
 
 
 
 export default {
+    components: { TwilioCallComponent },
     props: {
         address: Object,
         subproject: Object,
@@ -645,6 +676,10 @@ export default {
     },
     data() {
         return {
+            showIncomingCallDialog: false,
+            incomingCallFrom: "",
+            showActiveCallDialog: false,
+            activeCallNumber: "",
             localAddress: { ...this.address },
             locallockfields: this.lockfields ? [...this.lockfields] : [],
             callHistory: [...(this.address?.cal_logs ?? [])],
@@ -780,7 +815,6 @@ export default {
         }
     },
     mounted() {
-
         if (this.localAddress && this.localAddress.id) {
 
             this.startTracking();
@@ -788,14 +822,51 @@ export default {
             this.localAddress.follow_up_date = null
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
-
-
-        // this.country_names = country.names();
-
-
     },
 
     methods: {
+        handleIncomingCall(payload) {
+            this.incomingCallFrom = payload.from;
+            this.showIncomingCallDialog = true;
+            // Optionally, you can store the connection if you need to accept/reject manually
+            this.activeConnection = payload.connection;
+        },
+        handleCallConnected(toNumber) {
+            this.activeCallNumber = toNumber;
+            this.showActiveCallDialog = true;
+        },
+        handleCallDisconnected() {
+            this.showActiveCallDialog = false;
+            this.activeCallNumber = "";
+        },
+        handleTwilioError(errorMessage) {
+            this.$toast.add({
+                severity: "error",
+                summary: "Twilio Error",
+                detail: errorMessage,
+                life: 4000,
+            });
+        },
+        acceptIncomingCall() {
+            if (this.activeConnection) {
+                this.activeConnection.accept();
+                this.showIncomingCallDialog = false;
+                this.activeConnection = null;
+            }
+        },
+        rejectIncomingCall() {
+            if (this.activeConnection) {
+                this.activeConnection.reject();
+                this.showIncomingCallDialog = false;
+                this.activeConnection = null;
+            }
+        },
+        hangUp() {
+            // Emit a custom event or call a method on TwilioCallComponent via ref to hang up
+            this.$refs.twilioCallComponent.hangUp();
+            this.showActiveCallDialog = false;
+            this.activeCallNumber = "";
+        },
         openContactIdDialog() {
             this.newContactId = '';
             this.newsubproject = '';
@@ -818,8 +889,6 @@ export default {
                 console.error('Error making call:', error);
             }
         },
-
-
         // Method to handle the submission of the new Contact ID
         async submitNewContactId() {
             // Validate input
