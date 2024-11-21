@@ -447,9 +447,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                            + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -585,9 +585,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -1002,7 +1002,24 @@ export default {
             await this.submitFeedback();
         },
         formatnewDate(date) {
-            return moment(date).locale('de').format('DD.MM.YYYY, HH:mm');
+            const userLocale = navigator.language || navigator.userLanguage || 'en';
+
+            // Define formatting options
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true, // 24-hour format
+            };
+// console.log(userLocale, options);
+
+            // Create a formatter instance
+            const formatter = new Intl.DateTimeFormat(userLocale, options);
+
+            return formatter.format(new Date(date));
+            // return moment(date).locale('de').format('DD.MM.YYYY, HH:mm');
         },
         showNotes(notes) {
             // this.selectedNotes = notes
