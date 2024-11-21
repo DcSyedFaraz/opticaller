@@ -1002,7 +1002,7 @@ export default {
             await this.submitFeedback();
         },
         formatnewDate(date) {
-            const userLocale = navigator.language || navigator.userLanguage || 'en';
+            const userLocale =  'de';
 
             // Define formatting options
             const options = {
@@ -1011,7 +1011,7 @@ export default {
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: true, // 24-hour format
+                hour12: false, // 24-hour format
             };
 // console.log(userLocale, options);
 
