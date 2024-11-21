@@ -624,12 +624,34 @@
             </Dialog>
 
             <!-- Active Call Dialog -->
-            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
+            <!-- <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
                 :closable="false" class="w-11/12 md:w-1/3">
                 <div class="flex flex-col items-center">
                     <p class="text-lg">Calling: {{ activeCallNumber }}</p>
                     <div class="flex space-x-4 mt-4">
                         <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger" @click="hangUp" />
+                    </div>
+                </div>
+            </Dialog> -->
+            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
+                :closable="false" class="w-11/12 md:w-1/3 p-6">
+                <div class="flex flex-col items-center space-y-4">
+                    <!-- Call Information -->
+                    <div class="flex items-center space-x-2">
+                        <i class="pi pi-phone text-3xl text-blue-500"></i>
+                        <p class="text-lg font-semibold">Calling: {{ activeCallNumber }}</p>
+                    </div>
+
+                    <!-- Call Duration (Visible After Call is Accepted) -->
+                    <div  class="flex items-center space-x-2">
+                        <i class="pi pi-clock text-2xl text-gray-600"></i>
+                        <p class="text-md font-medium">Duration: 00:00</p>
+                    </div>
+
+                    <!-- Hang Up Button -->
+                    <div class="flex space-x-4 mt-6">
+                        <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger p-button-rounded"
+                            @click="hangUp" />
                     </div>
                 </div>
             </Dialog>
@@ -1002,7 +1024,7 @@ export default {
             await this.submitFeedback();
         },
         formatnewDate(date) {
-            const userLocale =  'de';
+            const userLocale = 'de';
 
             // Define formatting options
             const options = {
@@ -1013,7 +1035,7 @@ export default {
                 minute: '2-digit',
                 hour12: false, // 24-hour format
             };
-// console.log(userLocale, options);
+            // console.log(userLocale, options);
 
             // Create a formatter instance
             const formatter = new Intl.DateTimeFormat(userLocale, options);
