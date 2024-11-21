@@ -606,9 +606,9 @@
             </Dialog>
 
             <!-- Twilio Call Component -->
-            <!-- <TwilioCallComponent :phoneNumber="localAddress.phone_number" ref="twilioCallComponent" :isPaused="isPaused"
+            <TwilioCallComponent :phoneNumber="localAddress.phone_number" ref="twilioCallComponent" :isPaused="isPaused"
                 @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
-                @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" /> -->
+                @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
 
             <!-- Incoming Call Dialog -->
             <Dialog header="Incoming Call" v-model:visible="showIncomingCallDialog" :closable="false" draggable
@@ -663,12 +663,12 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
-// import TwilioCallComponent from './TwilioCallComponent.vue';
+import TwilioCallComponent from './TwilioCallComponent.vue';
 
 
 
 export default {
-    // components: { TwilioCallComponent },
+    components: { TwilioCallComponent },
     props: {
         address: Object,
         subproject: Object,
