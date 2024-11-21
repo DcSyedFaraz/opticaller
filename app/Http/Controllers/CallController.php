@@ -38,7 +38,7 @@ class CallController extends Controller
             $twilioAccountSid,
             $twilioApiKey,
             $twilioApiSecret,
-            3600, // Token validity in seconds (e.g., 1 hour)
+            32400, // Token validity in seconds (e.g., 1 hour)
             $identity
         );
 
