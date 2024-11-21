@@ -55,7 +55,7 @@ class AddressService
                 $dueAddress->save();
 
                 Log::channel('address')->info('Due Address Processed', [
-                    'timestamp' => $now->toDateTimeString(),
+                    'seen' => $dueAddress->seen,
                     'user_id' => auth()->id(),
                     'address' => $dueAddress->toArray(),
                 ]);
@@ -100,12 +100,12 @@ class AddressService
 
                 return response()->json(['message' => 'No more addresses to process'], 404);
             }
-
+            $seen = $address->seen;
             $address->seen = $now;
             $address->save();
 
             Log::channel('address')->info('Address Processed', [
-                'timestamp' => $now->toDateTimeString(),
+                'seen' => $seen,
                 'user_id' => auth()->id(),
                 'address' => $address->toArray(),
             ]);
