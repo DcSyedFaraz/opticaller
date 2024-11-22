@@ -31,11 +31,11 @@ export default {
         this.activeConnection = null
     },
     watch: {
-        phoneNumber(newNumber) {
-            if (newNumber && this.deviceInitialized && !this.isPaused) {
-                this.makeCall(newNumber);
-            }
-        },
+        // phoneNumber(newNumber) {
+        //     if (newNumber && this.deviceInitialized && !this.isPaused) {
+        //         this.makeCall(newNumber);
+        //     }
+        // },
         isPaused(newVal) {
             if (newVal && this.calling) {
                 this.hangUp();
@@ -53,6 +53,13 @@ export default {
         }
     },
     methods: {
+        triggerCall() {
+            if (this.phoneNumber) {
+                this.makeCall(this.phoneNumber);
+            } else {
+                this.log("No valid phone number available to make a call.");
+            }
+        },
         log(message) {
             this.logs.push(message);
             console.log(`[TwilioCallComponent]: ${message}`);

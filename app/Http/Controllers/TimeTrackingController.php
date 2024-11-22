@@ -144,7 +144,7 @@ class TimeTrackingController extends Controller
             } else {
                 // If not validating, ensure 'address' and 'feedback' exist to prevent issues
                 $validatedData = $request->only(['address', 'personal_notes', 'interest_notes', 'total_duration']);
-                $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? 'notreached';
+                $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? null;
             }
 
             // Ensure 'feedback' is present and not empty when saveEdits is true
@@ -169,11 +169,18 @@ class TimeTrackingController extends Controller
 
             // live hook
             $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
+            $feedbackvalue = $validatedData['address']['feedback'];
+            $excludeFeedbacks = ['Follow-up', 'notreached'];
 
             // Enhanced condition to trigger webhook
-            if (!$notreached && !empty($validatedData['address']['feedback'])) {
+            if (
+                !$notreached && !empty($feedbackvalue) &&
+                !in_array($feedbackvalue, $excludeFeedbacks)
+            ) {
                 // Check if the application is not running in the 'local' environment
-                Log::info('Triggering webhook for contact ID: ' . $address->contact_id);
+                Log::info('Triggering webhook for contact ID: ' . $address->contact_id . 'Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                    ', notreached: ' . ($notreached ? 'true' : 'false') .
+                    ', feedback: ' . $validatedData['address']['feedback']);
 
                 // Option 1: Directly trigger (synchronous)
                 // Uncomment if you prefer synchronous execution
