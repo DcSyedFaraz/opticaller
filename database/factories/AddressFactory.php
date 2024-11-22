@@ -32,7 +32,12 @@ class AddressFactory extends Factory
             'country' => $this->faker->country,
             'website' => $this->faker->url,
             // 'phone_number' => $this->faker->phoneNumber,
-            'phone_number' => '+923102769351',
+            'phone_number' => $this->faker->randomElement([
+                '+4976619094940',
+                '+4976619094960',
+                '+4976619094980',
+            ]),
+
             'email_address_system' => fake()->unique()->safeEmail(),
             'email_address_new' => $this->faker->safeEmail,
             'contact_id' => $this->faker->numberBetween(1111, 9999),

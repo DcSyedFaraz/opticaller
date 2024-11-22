@@ -606,7 +606,7 @@
             </Dialog>
 
             <!-- Twilio Call Component -->
-            <TwilioCallComponent :phoneNumber="localAddress.phone_number" ref="twilioCallComponent" :isPaused="isPaused"
+            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" ref="twilioCallComponent" :isPaused="isPaused"
                 @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
                 @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
 
@@ -643,9 +643,9 @@
                     </div>
 
                     <!-- Call Duration (Visible After Call is Accepted) -->
-                    <div  class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2">
                         <i class="pi pi-clock text-2xl text-gray-600"></i>
-                        <p class="text-md font-medium">Duration: 00:00</p>
+                        <p class="text-md font-medium">Duration: {{ formattedCallDuration }}</p>
                     </div>
 
                     <!-- Hang Up Button -->
@@ -698,6 +698,8 @@ export default {
     },
     data() {
         return {
+            callDuration: 0,
+            callDurationTimer: null,
             showIncomingCallDialog: false,
             incomingCallFrom: "",
             showActiveCallDialog: false,
@@ -786,7 +788,14 @@ export default {
         };
     },
     computed: {
-
+        formattedPhoneNumber() {
+            return this.formatPhoneNumber(this.localAddress.phone_number);
+        },
+        formattedCallDuration() {
+            const minutes = Math.floor(this.callDuration / 60);
+            const seconds = this.callDuration % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        },
         isFieldLocked() {
             return (fieldName) => this.locallockfields.includes(fieldName);
         },
@@ -836,6 +845,15 @@ export default {
             return (this.countdown / (5 * 60)) * 100; // Assume 5 minutes as full progress for demo
         }
     },
+    beforeDestroy() {
+
+
+        if (this.callDurationTimer) {
+            clearInterval(this.callDurationTimer);
+            this.callDurationTimer = null;
+        }
+    },
+
     mounted() {
         if (this.localAddress && this.localAddress.id) {
 
@@ -847,6 +865,49 @@ export default {
     },
 
     methods: {
+        formatPhoneNumber(number) {
+            // Remove all non-digit characters
+            const cleaned = ('' + number).replace(/\D/g, '');
+
+            // If the cleaned number has more than 10 digits, assume it includes a country code
+            if (cleaned.length > 10) {
+                return `+${cleaned}`;
+            }
+
+            // If the number is exactly 10 digits, assume it's missing a country code
+            // You can replace '1' with a default country code if needed
+            if (cleaned.length === 10) {
+                return `+1${cleaned}`; // Default to US country code
+            }
+
+            // Return the original number if it doesn't match expected patterns
+            return number;
+        },
+
+        /**
+         * Trigger a call via TwilioCallComponent when a new record is loaded.
+         */
+        triggerCallOnNewRecord() {
+            if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
+                this.$refs.twilioCallComponent.triggerCall();
+            }
+        },
+        startCallDurationTimer() {
+            this.callDuration = 0; // Reset duration at the start of a call
+            this.callDurationTimer = setInterval(() => {
+                this.callDuration += 1;
+            }, 1000);
+        },
+
+        /**
+         * Stops the call duration timer.
+         */
+        stopCallDurationTimer() {
+            if (this.callDurationTimer) {
+                clearInterval(this.callDurationTimer);
+                this.callDurationTimer = null;
+            }
+        },
         handleIncomingCall(payload) {
             this.incomingCallFrom = payload.from;
             this.showIncomingCallDialog = true;
@@ -856,10 +917,12 @@ export default {
         handleCallConnected(toNumber) {
             this.activeCallNumber = toNumber;
             this.showActiveCallDialog = true;
+            this.startCallDurationTimer();
         },
         handleCallDisconnected() {
             this.showActiveCallDialog = false;
             this.activeCallNumber = "";
+            this.stopCallDurationTimer();
         },
         handleTwilioError(errorMessage) {
             this.$toast.add({
@@ -943,6 +1006,7 @@ export default {
                     // Reset existing timers
                     clearInterval(this.timer);
                     clearInterval(this.reversetimer);
+                    this.triggerCallOnNewRecord();
                     this.countdown = 0;
                     this.ReverseCountdown = 180;
 
@@ -1131,10 +1195,12 @@ export default {
                 const res = await axios.post(route('stop.tracking'), {
                     ...this.logdata,
                     address: this.localAddress,
+                    call_duration: this.callDuration,
                     total_duration: this.countdown,
                     notreached: this.notreached,
                     saveEdits: this.saveEdits,
                 });
+                this.triggerCallOnNewRecord();
                 this.notreached = false;
                 this.saveEdits = false;
                 if (res.data.limit) {
