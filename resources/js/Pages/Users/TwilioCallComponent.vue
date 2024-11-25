@@ -55,7 +55,12 @@ export default {
     methods: {
         triggerCall() {
             if (this.phoneNumber) {
-                this.makeCall(this.phoneNumber);
+                // console.log(this.phoneNumber, 'number2');
+
+                setTimeout(() => {
+                    // console.log(this.phoneNumber, 'number3');
+                    this.makeCall(this.phoneNumber);
+                }, 500);
             } else {
                 this.log("No valid phone number available to make a call.");
             }

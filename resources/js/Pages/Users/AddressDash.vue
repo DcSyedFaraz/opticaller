@@ -455,7 +455,7 @@
                                     {{
                                         item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                             Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                        + ' Seconds' }} </span>
+                                            + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -593,7 +593,7 @@
                                 {{
                                     item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                         Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                                    + ' Seconds' }} </span>
+                                        + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -895,6 +895,7 @@ export default {
          */
         triggerCallOnNewRecord() {
             if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
+                // console.log(this.formattedPhoneNumber,'number1');
                 this.$refs.twilioCallComponent.triggerCall();
             }
         },
@@ -1012,7 +1013,9 @@ export default {
                     // Reset existing timers
                     clearInterval(this.timer);
                     clearInterval(this.reversetimer);
-                    this.triggerCallOnNewRecord();
+                    this.$nextTick(() => {
+                        this.triggerCallOnNewRecord();
+                    });
                     this.countdown = 0;
                     this.ReverseCountdown = 180;
 
@@ -1219,6 +1222,7 @@ export default {
                 clearInterval(this.timer);
                 clearInterval(this.reversetimer);
                 this.localAddress = res.data.address;
+                // console.log(this.formattedPhoneNumber, 'new');
                 this.triggerCallOnNewRecord();
 
                 const newProjectTitle = this.localAddress.subproject?.projects?.title;
