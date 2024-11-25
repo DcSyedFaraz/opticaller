@@ -161,14 +161,20 @@
                                     </div>
 
                                     <!-- Phone Number Field -->
+                                    <!-- Phone Number Field with Call Button -->
                                     <div v-if="!isHidden('phone_number')" class="field">
-                                        <label class="font-extrabold text-sm" for="phone_number">
+                                        <label class="font-extrabold text-sm mr-2" for="phone_number">
                                             Phone Number:
                                         </label>
-                                        <InputText id="phone_number" v-model="localAddress.phone_number"
-                                            :disabled="isFieldLocked('phone_number')"
-                                            class="w-full !border-secondary" />
+                                        <div class="flex items-center">
+
+                                            <InputText id="phone_number" v-model="localAddress.phone_number"
+                                                :disabled="isFieldLocked('phone_number')"
+                                                class="w-full !border-secondary" />
+                                            <Button icon="pi pi-phone" class="ml-2" @click="triggerCallOnNewRecord" />
+                                        </div>
                                     </div>
+
 
                                     <!-- Email Address Field -->
                                     <div v-if="!isHidden('email_address_system')" class="field">
@@ -447,9 +453,9 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        + ' Seconds' }} </span>
                                 </span>
                         </div>
                     </div>
@@ -585,9 +591,9 @@
                             Call Duration:
                             <span class="font-bold">
                                 {{
-            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
-                + ' Seconds' }} </span>
+                                    item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                        Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                    + ' Seconds' }} </span>
                             </span>
                     </div>
                 </div>
@@ -1200,7 +1206,6 @@ export default {
                     notreached: this.notreached,
                     saveEdits: this.saveEdits,
                 });
-                this.triggerCallOnNewRecord();
                 this.notreached = false;
                 this.saveEdits = false;
                 if (res.data.limit) {
@@ -1214,6 +1219,7 @@ export default {
                 clearInterval(this.timer);
                 clearInterval(this.reversetimer);
                 this.localAddress = res.data.address;
+                this.triggerCallOnNewRecord();
 
                 const newProjectTitle = this.localAddress.subproject?.projects?.title;
 
