@@ -51,12 +51,14 @@ class AddressResource extends JsonResource
                         'user_name' => optional($activity->users)->name,
                         'timestamp' => $timestamp,
                         'sub_project' => $activity->sub_project_id,
+                        'feedback' => $activity->feedback,
                     ];
                 }
 
                 return [
                     'user_name' => optional($activity->users)->name,
                     'sub_project' => $activity->sub_project_id,
+                    'feedback' => $activity->feedback,
                     'personal_notes' => $personalNotes,
                     'interest_notes' => $interestNotes,
                     'timestamp' => $timestamp,

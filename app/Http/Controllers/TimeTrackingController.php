@@ -174,7 +174,7 @@ class TimeTrackingController extends Controller
 
             // Enhanced condition to trigger webhook
             if (
-                !$notreached && !empty($feedbackvalue) &&
+                !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date'])&&
                 !in_array($feedbackvalue, $excludeFeedbacks)
             ) {
                 // Check if the application is not running in the 'local' environment
