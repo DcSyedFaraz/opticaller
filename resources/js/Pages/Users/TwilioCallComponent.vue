@@ -193,8 +193,15 @@ export default {
                 });
 
                 this.$emit("call-connected", toNumber);
+
+                console.log(this.activeConnection);
                 this.activeConnection.on("accept", () => {
                     this.log("Call accepted.");
+                    this.$emit("call-accepted");
+
+                    if (this.activeConnection.status() == 'accept') {
+                        this.log("Call picked up.");
+                    }
                 });
 
                 this.activeConnection.on("disconnect", () => {

@@ -36,6 +36,12 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678'),
         ]);
         $user->assignRole('user');
+        $user2 = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'api@vim-solution.com',
+            'password' => bcrypt('12345678'),
+        ]);
+        $user2->assignRole('user');
         // User::factory()->count(5)->admin()->create();
         // User::factory()->count(5)->user()->create();
 

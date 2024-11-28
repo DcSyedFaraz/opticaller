@@ -613,7 +613,7 @@
 
             <!-- Twilio Call Component -->
             <TwilioCallComponent :phoneNumber="formattedPhoneNumber" ref="twilioCallComponent" :isPaused="isPaused"
-                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
+                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected" @call-accepted="startCallDurationTimer"
                 @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
 
             <!-- Incoming Call Dialog -->
@@ -639,8 +639,14 @@
                     </div>
                 </div>
             </Dialog> -->
-            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
-                :closable="false" class="w-11/12 md:w-1/3 p-6">
+            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" :closable="false"
+                class="w-11/12 md:w-1/3 p-6">
+                <template #header>
+                    <div class="flex items-center justify-between bg-gray-100 cursor-move" style="user-select: none;">
+                        <span class="font-semibold text-gray-800">Call in Progress &nbsp; </span>
+                        <i class="pi pi-bars text-gray-600"></i>
+                    </div>
+                </template>
                 <div class="flex flex-col items-center space-y-4">
                     <!-- Call Information -->
                     <div class="flex items-center space-x-2">
@@ -864,6 +870,7 @@ export default {
         if (this.localAddress && this.localAddress.id) {
 
             this.startTracking();
+            // this.reverseCountdownFunc();
             this.localAddress.feedback = '';
             this.localAddress.follow_up_date = null
             this.previousProject = this.localAddress.subproject?.projects?.title;
@@ -896,6 +903,8 @@ export default {
         triggerCallOnNewRecord() {
             if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
                 // console.log(this.formattedPhoneNumber,'number1');
+                clearInterval(this.reversetimer);
+                this.ReverseCountdown = 180;
                 this.$refs.twilioCallComponent.triggerCall();
             }
         },
@@ -924,7 +933,8 @@ export default {
         handleCallConnected(toNumber) {
             this.activeCallNumber = toNumber;
             this.showActiveCallDialog = true;
-            this.startCallDurationTimer();
+            this.callDuration = 0;
+            // this.startCallDurationTimer();
         },
         handleCallDisconnected() {
             this.showActiveCallDialog = false;
@@ -956,6 +966,8 @@ export default {
         hangUp() {
             // Emit a custom event or call a method on TwilioCallComponent via ref to hang up
             this.$refs.twilioCallComponent.hangUp();
+            this.reverseCountdownFunc();
+            this.stopCallDurationTimer();
             this.showActiveCallDialog = false;
             this.activeCallNumber = "";
         },
@@ -1021,6 +1033,7 @@ export default {
 
                     // Restart tracking for the new address
                     await this.startTracking();
+                    // await this.reverseCountdownFunc();
 
                     // Notify the user of success
                     this.$toast.add({
@@ -1146,6 +1159,8 @@ export default {
                     this.countdown = Math.floor((new Date().getTime() - this.startTime) / 1000);
                 }
             }, 1000);
+        },
+        reverseCountdownFunc() {
             this.reversetimer = setInterval(() => {
                 if (!this.isPaused) {
                     this.ReverseCountdown--;
@@ -1243,6 +1258,7 @@ export default {
                     this.localAddress.feedback = '';
                     this.logdata.interest_notes = '';
                     await this.startTracking();
+                    // await this.reverseCountdownFunc();
                 }
                 this.ReverseCountdown = 180;
                 this.notreached = false;
@@ -1321,6 +1337,13 @@ export default {
 </script>
 
 <style>
+/* Adding a cursor style to indicate the header is draggable */
+.cursor-move {
+    cursor: move;
+    /* This changes the cursor to a 'move' cursor on hover */
+}
+
+
 ::-webkit-scrollbar {
     display: none;
 }
