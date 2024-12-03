@@ -67,7 +67,7 @@ export default {
         },
         log(message) {
             this.logs.push(message);
-            console.log(`[TwilioCallComponent]: ${message}`);
+            // console.log(`[TwilioCallComponent]: ${message}`);
         },
         async initializeDevice() {
             this.initializing = true;

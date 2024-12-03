@@ -613,8 +613,9 @@
 
             <!-- Twilio Call Component -->
             <TwilioCallComponent :phoneNumber="formattedPhoneNumber" ref="twilioCallComponent" :isPaused="isPaused"
-                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected" @call-accepted="startCallDurationTimer"
-                @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
+                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
+                @call-accepted="startCallDurationTimer" @call-disconnected="handleCallDisconnected"
+                @twilio-error="handleTwilioError" />
 
             <!-- Incoming Call Dialog -->
             <Dialog header="Incoming Call" v-model:visible="showIncomingCallDialog" :closable="false" draggable
@@ -691,15 +692,11 @@
     </AuthenticatedLayout>
 </template>
 
-
-
 <script>
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
 import TwilioCallComponent from './TwilioCallComponent.vue';
-
-
 
 export default {
     components: { TwilioCallComponent },
@@ -723,7 +720,7 @@ export default {
             errors: {},
             form: {},
             countdown: 0,
-            ReverseCountdown: 180,
+            ReverseCountdown: this.address.subproject?.reverse_countdown, // Initialize dynamically
             pauseTime: 0,
             projectTitle: '',
             feedback: '',
@@ -762,7 +759,6 @@ export default {
                 { label: 'Dr.', value: 'Dr.' },
                 { label: 'Prof.', value: 'Prof.' },
                 { label: 'Prof. Dr.', value: 'Prof. Dr.' },
-
             ],
             previousProject: '',
             projectChanged: false,
@@ -788,15 +784,12 @@ export default {
                 { label: '16', value: 16 },
                 { label: '17', value: 17 },
             ],
-
             minuteOptions: [
                 { label: '00', value: '00' },
                 { label: '15', value: '15' },
                 { label: '30', value: '30' },
                 { label: '45', value: '45' },
             ],
-
-
         };
     },
     computed: {
@@ -818,11 +811,12 @@ export default {
                 ) ?? false; // Default to false if undefined
             };
         },
-
         formattedReverseCountdown() {
             const minutes = Math.floor(this.ReverseCountdown / 60);
             const seconds = this.ReverseCountdown % 60;
-            return minutes > 0 ? `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` : `00:${seconds.toString().padStart(2, '0')}`;
+            return minutes > 0
+                ? `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                : `00:${seconds.toString().padStart(2, '0')}`;
         },
         projectOptions() {
             return [
@@ -832,14 +826,12 @@ export default {
             ];
         },
         feedbackOptions() {
-            // Check if the subproject and its feedbacks are available
             if (this.localAddress.subproject && this.localAddress.subproject.feedbacks) {
                 return this.localAddress.subproject.feedbacks.map(fb => ({
                     label: fb.label,
                     value: fb.value,
                 }));
             }
-            // Fallback to a default option if no feedbacks are found
             return [
                 { label: 'Not interested', value: 'Not Interested' },
                 { label: 'Customer is interested', value: 'Interested' },
@@ -848,7 +840,6 @@ export default {
             ];
         },
         formattedCountdown() {
-            // console.log(this.countdown);
             const minutes = Math.floor(this.countdown / 60);
             const seconds = this.countdown % 60;
             return `${minutes}m ${seconds}s`;
@@ -857,55 +848,59 @@ export default {
             return (this.countdown / (5 * 60)) * 100; // Assume 5 minutes as full progress for demo
         }
     },
+    watch: {
+        'localAddress.subproject': {
+            handler(newSubproject) {
+                console.log(newSubproject);
+                this.ReverseCountdown = newSubproject?.reverse_countdown || 180;
+                this.resetReverseCountdown();
+            },
+            deep: true,
+        },
+    },
     beforeDestroy() {
-
-
         if (this.callDurationTimer) {
             clearInterval(this.callDurationTimer);
             this.callDurationTimer = null;
         }
+        if (this.reversetimer) {
+            clearInterval(this.reversetimer);
+            this.reversetimer = null;
+        }
     },
-
     mounted() {
         if (this.localAddress && this.localAddress.id) {
-
+            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
             this.startTracking();
-            // this.reverseCountdownFunc();
+            this.reverseCountdownFunc();
             this.localAddress.feedback = '';
-            this.localAddress.follow_up_date = null
+            this.localAddress.follow_up_date = null;
             this.previousProject = this.localAddress.subproject?.projects?.title;
         }
     },
-
     methods: {
         formatPhoneNumber(number) {
-            // Remove all non-digit characters
             const cleaned = ('' + number).replace(/\D/g, '');
 
-            // If the cleaned number has more than 10 digits, assume it includes a country code
             if (cleaned.length > 10) {
                 return `+${cleaned}`;
             }
 
-            // If the number is exactly 10 digits, assume it's missing a country code
-            // You can replace '1' with a default country code if needed
             if (cleaned.length === 10) {
                 return `+1${cleaned}`; // Default to US country code
             }
 
-            // Return the original number if it doesn't match expected patterns
             return number;
         },
-
         /**
          * Trigger a call via TwilioCallComponent when a new record is loaded.
          */
         triggerCallOnNewRecord() {
             if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
-                // console.log(this.formattedPhoneNumber,'number1');
                 clearInterval(this.reversetimer);
-                this.ReverseCountdown = 180;
+                this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
                 this.$refs.twilioCallComponent.triggerCall();
+                this.reverseCountdownFunc();
             }
         },
         startCallDurationTimer() {
@@ -914,7 +909,6 @@ export default {
                 this.callDuration += 1;
             }, 1000);
         },
-
         /**
          * Stops the call duration timer.
          */
@@ -927,7 +921,6 @@ export default {
         handleIncomingCall(payload) {
             this.incomingCallFrom = payload.from;
             this.showIncomingCallDialog = true;
-            // Optionally, you can store the connection if you need to accept/reject manually
             this.activeConnection = payload.connection;
         },
         handleCallConnected(toNumber) {
@@ -964,9 +957,8 @@ export default {
             }
         },
         hangUp() {
-            // Emit a custom event or call a method on TwilioCallComponent via ref to hang up
             this.$refs.twilioCallComponent.hangUp();
-            this.reverseCountdownFunc();
+            this.resetReverseCountdown();
             this.stopCallDurationTimer();
             this.showActiveCallDialog = false;
             this.activeCallNumber = "";
@@ -978,7 +970,6 @@ export default {
             this.subprojectError = '';
             this.showContactIdDialog = true;
         },
-
         // Method to close the Contact ID dialog
         closeContactIdDialog() {
             this.showContactIdDialog = false;
@@ -995,7 +986,6 @@ export default {
         },
         // Method to handle the submission of the new Contact ID
         async submitNewContactId() {
-            // Validate input
             if (!this.newContactId) {
                 this.contactIdError = 'Contact ID is required.';
                 return;
@@ -1010,32 +1000,26 @@ export default {
             this.subprojectError = '';
 
             try {
-                // Replace 'address.getByContactId' with your actual route name
                 const response = await axios.get(route('address.getByContactId', { contact_id: this.newContactId, sub_project_id: this.newsubproject }));
 
                 if (response.data && response.data.address) {
                     console.log(response.data);
 
-                    // Update localAddress with the new address data
                     this.localAddress = response.data.address;
                     this.locallockfields = response.data.lockfields || [];
                     this.callHistory = response.data.address.cal_logs || [];
                     this.previousProject = this.localAddress.subproject?.projects?.title || '';
 
-                    // Reset existing timers
                     clearInterval(this.timer);
                     clearInterval(this.reversetimer);
                     this.$nextTick(() => {
                         this.triggerCallOnNewRecord();
                     });
                     this.countdown = 0;
-                    this.ReverseCountdown = 180;
+                    this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
 
-                    // Restart tracking for the new address
                     await this.startTracking();
-                    // await this.reverseCountdownFunc();
 
-                    // Notify the user of success
                     this.$toast.add({
                         severity: 'success',
                         summary: 'Success',
@@ -1043,7 +1027,6 @@ export default {
                         life: 3000
                     });
 
-                    // Close the dialog
                     this.showContactIdDialog = false;
                 } else {
                     this.contactIdError = 'No address found for the provided Contact ID.';
@@ -1075,44 +1058,34 @@ export default {
                 '#6E0B0B': 'ring-[#6E0B0B] bg-[#6E0B0B]',
             };
 
-            // Return mapped class or a default if color not found
             return colorMap[color] || 'bg-primary ring-primary';
         },
-
         async scheduleFollowUp() {
-            // Reset previous errors
             if (!this.selectedDate || this.selectedHour === null || this.selectedMinute === null) {
                 this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Please select date, hour, and minute.', life: 4000 });
                 return;
             }
 
-            // Clone the selectedDate to avoid mutating the original object
             let followUpMoment = timezone(this.selectedDate);
 
-            // Set the hour and minute
             followUpMoment.hour(this.selectedHour);
             followUpMoment.minute(this.selectedMinute);
             followUpMoment.second(0);
 
-            // Convert to JavaScript Date object
             const followUpDateTime = followUpMoment.toDate();
 
-            // Optional: Log for debugging
             console.log('Selected Date:', this.selectedDate);
             console.log('Selected Hour:', this.selectedHour);
             console.log('Selected Minute:', this.selectedMinute);
             console.log('Combined Follow-Up DateTime:', followUpDateTime);
 
-            // Assign to localAddress.follow_up_date
             this.localAddress.follow_up_date = followUpDateTime;
 
-            // Submit the form
             await this.submitFeedback();
         },
         formatnewDate(date) {
             const userLocale = 'de';
 
-            // Define formatting options
             const options = {
                 year: 'numeric',
                 month: '2-digit',
@@ -1121,19 +1094,15 @@ export default {
                 minute: '2-digit',
                 hour12: false, // 24-hour format
             };
-            // console.log(userLocale, options);
 
-            // Create a formatter instance
             const formatter = new Intl.DateTimeFormat(userLocale, options);
 
             return formatter.format(new Date(date));
-            // return moment(date).locale('de').format('DD.MM.YYYY, HH:mm');
         },
         showNotes(notes) {
-            // this.selectedNotes = notes
-            this.showNotesModal = true
+            this.showNotesModal = true;
+            this.selectedNotes = notes;
         },
-
         formatDate(data) {
             const date = new Date(data.starting_time);
             return date.toLocaleDateString();
@@ -1141,10 +1110,6 @@ export default {
         async startTracking() {
             try {
                 this.isPaused = false;
-                // const response = await axios.post('/start-tracking', {
-                //     address_id: this.localAddress.id,
-                // });
-                // this.timeLogId = response.data.id;
                 this.countdown = 0;
                 await this.startCountdown();
             } catch (error) {
@@ -1161,24 +1126,36 @@ export default {
             }, 1000);
         },
         reverseCountdownFunc() {
+            if (this.reversetimer) clearInterval(this.reversetimer);
             this.reversetimer = setInterval(() => {
-                if (!this.isPaused) {
+                if (!this.isPaused && this.ReverseCountdown > 0) {
                     this.ReverseCountdown--;
-                    if (this.ReverseCountdown < 0) {
+                    if (this.ReverseCountdown <= 0) {
                         this.ReverseCountdown = 0;
                         clearInterval(this.reversetimer);
+                        // Optionally, trigger some action when countdown reaches zero
+                        this.$toast.add({
+                            severity: 'info',
+                            summary: 'Countdown Finished',
+                            detail: 'Reverse countdown has reached zero.',
+                            life: 6000,
+                        });
+                        this.saveEdits = true;
+                        this.submitFeedback();
                     }
                 }
             }, 1000);
+        },
+        resetReverseCountdown() {
+            clearInterval(this.reversetimer);
+            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+            this.reverseCountdownFunc();
         },
         async togglePause() {
             this.isPaused = !this.isPaused;
             try {
                 if (this.isPaused) {
                     this.pauseTime = new Date().getTime(); // Store the pause time
-                    // const res = await axios.post(`/pause-tracking/${this.address.id}`);
-                    // this.pauseLogId = res.data.id;
-                    // console.log(this.pauseLogId);
                 } else {
                     const resumeTime = new Date().getTime();
                     this.breakDuration += Math.floor((resumeTime - this.pauseTime) / 1000);
@@ -1192,29 +1169,18 @@ export default {
                 console.error('Error toggling pause:', error);
             }
         },
-
         async submitFeedback() {
-
-            // if (!this.logdata.call_attempts || this.logdata.call_attempts <= 0) {
-            //     this.$toast.add({ severity: 'error', summary: 'Error', detail: 'Please enter a positive number for call attempts', life: 4000 });
-            //     return;
-            // }
             this.isButtonDisabled = true;
             setTimeout(() => {
                 this.isButtonDisabled = false;
             }, 5000);
 
-
             this.isLoading = true;
             this.showFollowModal = false;
             try {
-
-
                 if (this.isPaused) {
                     await this.togglePause(); // Resume the tracking if it's paused
                 }
-                // this.isPaused = true;
-                // console.log(this.countdown);
 
                 const res = await axios.post(route('stop.tracking'), {
                     ...this.logdata,
@@ -1222,22 +1188,19 @@ export default {
                     call_duration: this.callDuration,
                     total_duration: this.countdown,
                     notreached: this.notreached,
-                    saveEdits: this.saveEdits,
+                    save_edits: this.saveEdits,
                 });
                 this.notreached = false;
                 this.saveEdits = false;
                 if (res.data.limit) {
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: '🚫 We tried to reach this address 10 times without success. Please contact the admin for further assistance.', life: 6000 });
-
                 } else {
-
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
                 }
                 console.log(res.data);
                 clearInterval(this.timer);
                 clearInterval(this.reversetimer);
                 this.localAddress = res.data.address;
-                // console.log(this.formattedPhoneNumber, 'new');
                 this.triggerCallOnNewRecord();
 
                 const newProjectTitle = this.localAddress.subproject?.projects?.title;
@@ -1250,7 +1213,6 @@ export default {
                 this.previousProject = newProjectTitle;
                 this.locallockfields = res.data.lockfields;
                 if (this.localAddress && this.localAddress.id) {
-
                     this.callHistory = res.data.address.cal_logs;
                     this.timer = null;
                     this.logdata.call_attempts = null;
@@ -1258,22 +1220,19 @@ export default {
                     this.localAddress.feedback = '';
                     this.logdata.interest_notes = '';
                     await this.startTracking();
-                    // await this.reverseCountdownFunc();
                 }
-                this.ReverseCountdown = 180;
+                this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
                 this.notreached = false;
                 this.isLoading = false;
-                this.localAddress.follow_up_date = null
-
+                this.localAddress.follow_up_date = null;
             } catch (error) {
                 this.notreached = false;
                 this.saveEdits = false;
                 this.isLoading = false;
-                this.localAddress.follow_up_date = null
+                this.localAddress.follow_up_date = null;
                 console.log(error);
 
                 if (error.response.data.error) {
-
                     this.$toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 4000 });
                 }
                 if (error.response?.status === 422) {
@@ -1289,16 +1248,6 @@ export default {
                     this.$toast.add({ severity: 'error', summary: 'Error', detail: errors, life: 4000 });
                 }
             }
-            // if (res.data) {
-            //     this.address = res.data;
-            //     this.countdown = 0;
-            //     this.startTracking();
-            // }
-            // Save the edits
-            //   await axios.post('/api/save-address', this.address);
-            // console.log(res.data, 'new');
-            // Fetch the next address (for demo, we'll just reset the current address)
-            // this.$inertia.reload();
         },
         async submitCallbackRequest() {
             const emailMap = {
@@ -1310,13 +1259,13 @@ export default {
             const emailAddress = emailMap[this.callbackForm.project];
             const subject = 'Rückruf bitte';
             const body = `
-        Project: ${this.callbackForm.project}
-        Salutation: ${this.callbackForm.salutation}
-        First Name: ${this.callbackForm.firstName}
-        Last Name: ${this.callbackForm.lastName}
-        Phone Number: ${this.callbackForm.phoneNumber}
-        Notes: ${this.callbackForm.notes}
-      `;
+          Project: ${this.callbackForm.project}
+          Salutation: ${this.callbackForm.salutation}
+          First Name: ${this.callbackForm.firstName}
+          Last Name: ${this.callbackForm.lastName}
+          Phone Number: ${this.callbackForm.phoneNumber}
+          Notes: ${this.callbackForm.notes}
+        `;
 
             // Simulate sending an email
             alert(`Email sent to: ${emailAddress}\nSubject: ${subject}\nBody: ${body}`);
@@ -1335,6 +1284,10 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+/* Your existing styles */
+</style>
 
 <style>
 /* Adding a cursor style to indicate the header is draggable */

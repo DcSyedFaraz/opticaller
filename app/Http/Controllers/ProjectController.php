@@ -75,10 +75,11 @@ class ProjectController extends Controller
             'priority' => 'nullable',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
+            'reverse_countdown' => 'required|integer|min:0',
             'pdf' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        $data = $request->only(['title', 'description', 'project_id', 'priority']);
+        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown']);
 
         if ($request->hasFile('pdf')) {
             $path = $request->file('pdf')->store('pdfs', 'public');
@@ -98,12 +99,13 @@ class ProjectController extends Controller
             'priority' => 'nullable',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
+            'reverse_countdown' => 'required|integer|min:0',
             'pdf' => 'nullable|file|mimes:pdf|max:2048',
 
         ]);
         $subproject = SubProject::findOrFail($id);
         // dd($request->all(), $project);
-        $data = $request->only(['title', 'description', 'project_id', 'priority']);
+        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown']);
 
         if ($request->hasFile('pdf')) {
             // Delete old PDF if exists
