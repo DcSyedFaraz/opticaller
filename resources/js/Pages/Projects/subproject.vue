@@ -14,6 +14,11 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
+                        <label for="title" class="block text-sm font-medium text-gray-700">Reverse Countdown (Sec) (Sec)</label>
+                        <InputNumber fluid v-model="newProject.reverse_countdown"
+                            class="mt-1 block w-full " />
+                    </div>
+                    <div class="sm:col-span-12">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                         <Textarea v-model="newProject.description" rows="5" cols="30"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
@@ -106,6 +111,11 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
                     </div>
                     <div class="field">
+                        <label for="title" class="block text-sm font-medium text-gray-700">Reverse Countdown (Sec)</label>
+                        <InputNumber fluid v-model="editProjectData.reverse_countdown" 
+                            class="mt-1 block w-full" />
+                    </div>
+                    <div class="field">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                         <Textarea v-model="editProjectData.description" rows="5" cols="30"
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
@@ -186,6 +196,7 @@ export default {
         createProject() {
             const formData = new FormData();
             formData.append('title', this.newProject.title);
+            formData.append('reverse_countdown', this.newProject.reverse_countdown);
             formData.append('description', this.newProject.description);
             formData.append('project_id', this.newProject.project_id);
             formData.append('priority', this.newProject.priority);
@@ -216,6 +227,7 @@ export default {
         updateProject() {
             const formData = new FormData();
             formData.append('title', this.editProjectData.title);
+            formData.append('reverse_countdown', this.editProjectData.reverse_countdown);
             formData.append('description', this.editProjectData.description);
             formData.append('project_id', this.editProjectData.project_id);
             formData.append('priority', this.editProjectData.priority);
