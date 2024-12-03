@@ -696,8 +696,7 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
-// import TwilioCallComponent from './TwilioCallComponent.vue';
-import TwilioCallComponent from './CloudTalkCallComponent.vue';
+import TwilioCallComponent from './TwilioCallComponent.vue';
 
 export default {
     components: { TwilioCallComponent },
@@ -1141,8 +1140,8 @@ export default {
                             detail: 'Reverse countdown has reached zero.',
                             life: 6000,
                         });
-                        // this.saveEdits = true;
-                        // this.submitFeedback();
+                        this.saveEdits = true;
+                        this.submitFeedback();
                     }
                 }
             }, 1000);

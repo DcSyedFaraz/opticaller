@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CallEnded;
+use App\Events\CallInitiated;
+use App\Events\IncomingCall;
+use Http;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
@@ -82,4 +86,127 @@ class CallController extends Controller
         return response($response)->header('Content-Type', 'text/xml');
     }
 
+    // new code
+    protected $baseUrl = 'https://my.cloudtalk.io/api/';
+
+    // CloudTalk API credentials
+    protected $apiKey;
+    protected $apiSecret;
+
+    public function __construct()
+    {
+        $this->apiKey = env('CLOUDTALK_API_KEY'); // Fetch from .env file
+        $this->apiSecret = env('CLOUDTALK_API_SECRET'); // Fetch from .env file
+    }
+    public function initiateCall(Request $request)
+    {
+        $request->validate([
+            'phoneNumber' => 'required|string',
+        ]);
+
+        $phoneNumber = $request->phoneNumber;
+
+        try {
+            $response = Http::withBasicAuth(env('CLOUDTALK_API_KEY'), env('CLOUDTALK_API_SECRET'))
+                ->get('https://my.cloudtalk.io/api/calls/index.json', [
+                    'phone_number' => $phoneNumber,
+                ]);
+            // dd($response);
+            if ($response->successful()) {
+                Log::alert($response->json());
+                $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
+                    ->get("{$this->baseUrl}agents/index.json");
+
+                if ($response->successful()) {
+                    Log::alert('Agents Retrieved: ' . json_encode($response->json()));
+                    $agents = $response->json()['responseData']['data'];
+                    if ($agents) {
+                        $firstAgent = $agents[0]['Agent']; // Example: use the first agent
+                        Log::alert('Agents Retrieved data: ' . json_encode($firstAgent));
+                        // $phoneNumber = $phoneNumber; // The phone number to call
+
+                        // Make the call using the first agent's ID
+                        $this->makeCall($phoneNumber, $firstAgent['id']);
+                    }
+                }
+                // Broadcast the call initiation
+                broadcast(new CallInitiated($phoneNumber));
+
+                return response()->json(['message' => 'Call initiated successfully.'], 200);
+            } else {
+                return response()->json(['error' => 'Failed to initiate call.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error initiating call: ' . $e], 500);
+        }
+    }
+    public function makeCall($phoneNumber, $agentId)
+    {
+        $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
+            ->get($this->baseUrl . 'calls/index.json', [
+                'phone_number' => $phoneNumber,
+                'agent_id' => $agentId,
+            ]);
+
+        if ($response->successful()) {
+            Log::alert('Call Initiated: ' . json_encode($response->json()));
+            return $response->json();
+        }
+
+        Log::error('Error initiating call: ' . $response->body());
+        return null;
+    }
+    /**
+     * Hang up a call via CloudTalk API.
+     * Note: You may need to pass additional identifiers to hang up a specific call.
+     */
+    public function hangUpCall(Request $request)
+    {
+        $request->validate([
+            'callId' => 'required|string',
+        ]);
+
+        $callId = $request->callId;
+
+        try {
+            $response = Http::withBasicAuth(env('CLOUDTALK_API_KEY'), env('CLOUDTALK_API_SECRET'))
+                ->post("https://my.cloudtalk.io/api/v3/calls/{$callId}/hangup");
+
+            if ($response->successful()) {
+                // Broadcast the call termination
+                broadcast(new CallEnded($callId));
+
+                return response()->json(['message' => 'Call ended successfully.'], 200);
+            } else {
+                return response()->json(['error' => 'Failed to end call.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error ending call: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Handle incoming call webhook from CloudTalk.
+     */
+    public function handleWebhook(Request $request)
+    {
+        // Verify webhook signature if CloudTalk provides one for security
+
+        $event = $request->input('event');
+        $data = $request->input('data');
+
+        switch ($event) {
+            case 'incoming_call':
+                $fromNumber = $data['from'];
+                broadcast(new IncomingCall($fromNumber));
+                break;
+
+            // Handle other events as needed
+            default:
+                // Handle other events or ignore
+                break;
+        }
+
+        return response()->json(['message' => 'Webhook handled.'], 200);
+    }
 }

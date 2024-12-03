@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\CallController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::post('/calls/initiate', [CallController::class, 'initiateCall']);
+Route::post('/calls/hangup', [CallController::class, 'hangUpCall']);
+Route::post('/webhooks/call', [CallController::class, 'handleWebhook']);
 
 Route::get('/get_addresses', [ApiController::class, 'index']);
 Route::get('/get_projects', [ApiController::class, 'getProjectsAndSubprojects']);
