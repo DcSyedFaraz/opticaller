@@ -59,11 +59,17 @@ return [
         ],
 
         'address' => [
-            'driver' => 'single',
+            'driver' => 'daily',
             'path' => storage_path('logs/address.log'),
             'level' => 'debug',
+            'days' => 180,
         ],
-
+        'address_deletion' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/address_deletion.log'),
+            'level' => 'info',
+            // 'days' => 14,
+        ],
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
