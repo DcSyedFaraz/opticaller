@@ -27,6 +27,7 @@ class ApiController extends Controller
 
         // Check if the email matches the specific email
         if ($credentials['email'] !== 'api@vim-solution.com') {
+            Log::channel('address_deletion')->warning('Unauthorized access attempt: Email not matched.', ['email' => $credentials['email']]);
             return response()->json(['error' => 'Unauthorized, Email not matched.'], 401);
         }
 
@@ -34,31 +35,59 @@ class ApiController extends Controller
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
-            // This case should not occur if the email is fixed, but it's good to handle it
+            Log::channel('address_deletion')->warning('Unauthorized access attempt: User not found.', ['email' => $credentials['email']]);
             return response()->json(['error' => 'Unauthorized, User Not Found.'], 401);
         }
 
         // Verify the password using Laravel's Hash facade
         if (!Hash::check($credentials['password'], $user->password)) {
+            Log::channel('address_deletion')->warning('Unauthorized access attempt: Password not matched.', ['email' => $credentials['email']]);
             return response()->json(['error' => 'Unauthorized, Password Not Matched.'], 401);
         }
 
+        // Begin transaction
         DB::beginTransaction();
-
         try {
-            $address = Address::where('contact_id', $request->contact_id)->where('sub_project_id', $request->sub_project_id)->first();
+            // Log the incoming request data for debugging purposes
+            Log::channel('address_deletion')->info('Received request to delete address', ['contact_id' => $request->contact_id, 'sub_project_id' => $request->sub_project_id]);
+
+            // Find the address
+            $address = Address::where('contact_id', $request->contact_id)
+                ->where('sub_project_id', $request->sub_project_id)
+                ->first();
+
             if ($address) {
+                // Log that the address was found and proceeding to delete
+                Log::channel('address_deletion')->info('Address found, proceeding with deletion.', ['address_id' => $address->id]);
+
+                // Force delete the address
                 $address->forceDelete();
+
+                // Commit the transaction
                 DB::commit();
+
+                // Log successful deletion
+                Log::channel('address_deletion')->info('Address successfully deleted.', ['address_id' => $address->id]);
 
                 return response()->json(['message' => 'Address deleted successfully.'], 200);
             }
 
+            // Log that the address was not found or already deleted
+            Log::channel('address_deletion')->info('Address not found or already deleted.', ['contact_id' => $request->contact_id, 'sub_project_id' => $request->sub_project_id]);
+
             return response()->json(['message' => 'Address already deleted or not found.'], 200);
         } catch (Exception $e) {
+            // Rollback transaction on error
             DB::rollBack();
-            Log::info('Failed to delete address.' . $e->getMessage());
-            return response()->json(['error' => 'Failed to delete address.' . $e->getMessage()], 500);
+
+            // Log error details
+            Log::channel('address_deletion')->error('Failed to delete address.', [
+                'error' => $e->getMessage(),
+                'contact_id' => $request->contact_id,
+                'sub_project_id' => $request->sub_project_id
+            ]);
+
+            return response()->json(['error' => 'Failed to delete address. ' . $e->getMessage()], 500);
         }
     }
     public function restoreAddress(Request $request)
