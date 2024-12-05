@@ -453,10 +453,19 @@
                                 Call Duration:
                                 <span class="font-bold">
                                     {{
-                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                        item.call_duration < 60 ? item.call_duration + ' Seconds' :
+                                            Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
                                             + ' Seconds' }} </span>
                                 </span>
+                                <span
+                                    class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
+                                    On Page Duration:
+                                    <span class="font-bold">
+                                        {{
+                                            item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration %
+                                                    60) + ' Seconds' }} </span>
+                                    </span>
                         </div>
                     </div>
                     <div v-else>
@@ -587,14 +596,23 @@
                             <p class="text-sm font-bold">{{ item.notes?.interest_notes }}</p>
                         </div>
                         <span
-                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
-                            Call Duration:
+                            class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 mr-2 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
+                            On Page Duration:
                             <span class="font-bold">
                                 {{
                                     item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                         Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
                                         + ' Seconds' }} </span>
                             </span>
+                            <span
+                                class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
+                                Call Duration:
+                                <span class="font-bold">
+                                    {{
+                                        item.call_duration < 60 ? item.call_duration + ' Seconds' :
+                                            Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
+                                            + ' Seconds' }} </span>
+                                </span>
                     </div>
                 </div>
             </Dialog>
@@ -641,13 +659,25 @@
                 </div>
             </Dialog> -->
             <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" :closable="false"
-                class="w-11/12 md:w-1/3 p-6">
+                class="w-11/12 md:w-1/3 p-2">
                 <template #header>
-                    <div class="flex items-center justify-between bg-gray-100 cursor-move" style="user-select: none;">
-                        <span class="font-semibold text-gray-800">Call in Progress &nbsp; </span>
+                    <div class="w-full">
+                      <!-- Draggable Bar -->
+                      <div
+                        class="w-full h-4 bg-gray-400 cursor-move mb-2 rounded-t"
+                        style="user-select: none;"
+                      ></div>
+
+                      <!-- Header Content -->
+                      <div
+                        class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-b cursor-move"
+                        style="user-select: none;"
+                      >
+                        <span class="font-semibold text-gray-800">Call in Progress</span>
                         <i class="pi pi-bars text-gray-600"></i>
+                      </div>
                     </div>
-                </template>
+                  </template>
                 <div class="flex flex-col items-center space-y-4">
                     <!-- Call Information -->
                     <div class="flex items-center space-x-2">
@@ -696,8 +726,8 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
-// import TwilioCallComponent from './TwilioCallComponent.vue';
-import TwilioCallComponent from './CloudTalkCallComponent.vue';
+import TwilioCallComponent from './TwilioCallComponent.vue';
+// import TwilioCallComponent from './CloudTalkCallComponent.vue';
 
 export default {
     components: { TwilioCallComponent },
@@ -893,9 +923,34 @@ export default {
 
             return number;
         },
-        /**
-         * Trigger a call via TwilioCallComponent when a new record is loaded.
-         */
+        convertSeconds(seconds) {
+            if (seconds === null || seconds === 0) {
+                return '0 seconds';
+            }
+
+            // Ensure the input is an integer
+            seconds = parseInt(seconds);
+
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = seconds % 60;
+
+            let parts = [];
+
+            if (hours > 0) {
+                parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+            }
+
+            if (minutes > 0) {
+                parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+            }
+
+            if (remainingSeconds > 0) {
+                parts.push(`${remainingSeconds} second${remainingSeconds > 1 ? 's' : ''}`);
+            }
+
+            return parts.join(' ');
+        },
         triggerCallOnNewRecord() {
             if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
                 clearInterval(this.reversetimer);
@@ -1141,8 +1196,8 @@ export default {
                             detail: 'Reverse countdown has reached zero.',
                             life: 6000,
                         });
-                        // this.saveEdits = true;
-                        // this.submitFeedback();
+                        this.saveEdits = true;
+                        this.submitFeedback();
                     }
                 }
             }, 1000);
@@ -1394,5 +1449,8 @@ main {
 
 .p-card-body {
     @apply !py-0
+}
+.p-dialog-header {
+    @apply !p-0
 }
 </style>
