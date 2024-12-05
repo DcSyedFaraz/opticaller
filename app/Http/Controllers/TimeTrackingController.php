@@ -58,7 +58,7 @@ class TimeTrackingController extends Controller
 
     public function stopTracking(Request $request)
     {
-        // dd();
+        // dd($request->all());
         DB::beginTransaction();
 
         try {
@@ -174,7 +174,7 @@ class TimeTrackingController extends Controller
 
             // Enhanced condition to trigger webhook
             if (
-                !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date'])&&
+                !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date']) &&
                 !in_array($feedbackvalue, $excludeFeedbacks)
             ) {
                 // Check if the application is not running in the 'local' environment
@@ -230,7 +230,7 @@ class TimeTrackingController extends Controller
                 if ($notreached) {
                     // NotReached::create(['address_id' => $address->id]);
                     // $address->follow_up_date = null;
-                    // $address->feedback = 'notreached';
+                    $address->feedback = 'notreached';
                     $this->handleNotReached($address);
                 }
 
@@ -241,7 +241,7 @@ class TimeTrackingController extends Controller
                 }
 
                 $address->save();
-                // dd($validatedData['address']['feedback'],$request->address['subproject']['title']);
+                // dd($address->feedback);
                 // Log activity
                 $seconds = $validatedData['total_duration'];
                 $timeLog = new Activity();
@@ -249,6 +249,7 @@ class TimeTrackingController extends Controller
                 $timeLog->user_id = auth()->id();
                 $timeLog->address_id = $addressID;
                 $timeLog->total_duration = $seconds;
+                $timeLog->call_duration = $request->call_duration ?? 0;
                 $timeLog->feedback = $address->feedback;
                 $timeLog->contact_id = $address->contact_id;
                 $timeLog->sub_project_id = $request->address['subproject']['title'];
