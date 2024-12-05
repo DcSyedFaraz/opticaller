@@ -143,11 +143,11 @@ class CallController extends Controller
     public function makeCall($phoneNumber, $agentId)
     {
         $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
-            ->get($this->baseUrl . 'calls/index.json', [
-                'phone_number' => $phoneNumber,
+            ->post("{$this->baseUrl}calls/create.json", [
+                'callee_number' => $phoneNumber,
                 'agent_id' => $agentId,
             ]);
-
+// dd( $phoneNumber,$agentId);
         if ($response->successful()) {
             Log::alert('Call Initiated: ' . json_encode($response->json()));
             return $response->json();
