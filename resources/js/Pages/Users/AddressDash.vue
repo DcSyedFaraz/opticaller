@@ -726,8 +726,8 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
-import TwilioCallComponent from './TwilioCallComponent.vue';
-// import TwilioCallComponent from './CloudTalkCallComponent.vue';
+// import TwilioCallComponent from './TwilioCallComponent.vue';
+import TwilioCallComponent from './CloudTalkCallComponent.vue';
 
 export default {
     components: { TwilioCallComponent },

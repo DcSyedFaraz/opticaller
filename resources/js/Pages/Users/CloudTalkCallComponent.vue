@@ -52,6 +52,18 @@ export default {
             });
     },
     methods: {
+        triggerCall() {
+            if (this.phoneNumber) {
+                // console.log(this.phoneNumber, 'number2');
+
+                setTimeout(() => {
+                    // console.log(this.phoneNumber, 'number3');
+                    this.makeCall(this.phoneNumber);
+                }, 500);
+            } else {
+                this.log("No valid phone number available to make a call.");
+            }
+        },
         log(message) {
             this.logs.push(message);
             console.log(`[CloudTalkCallComponent]: ${message}`);
@@ -69,7 +81,7 @@ export default {
                     phoneNumber: toNumber,
                 });
 
-                if (response.status === 200) {
+                if (response.status == 200) {
                     this.calling = true;
                     this.log(`Call initiated to ${toNumber}.`);
                     this.$emit("call-connected", toNumber);
@@ -84,6 +96,7 @@ export default {
             }
         },
         async hangUp() {
+            this.calling = false;
             if (this.calling && this.callId) {
                 this.log("Ending the call.");
 
