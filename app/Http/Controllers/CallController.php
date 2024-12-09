@@ -113,7 +113,7 @@ class CallController extends Controller
                 ]);
             // dd($response);
             if ($response->successful()) {
-                Log::alert($response->json());
+                // Log::alert($response->json());
                 $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
                     ->get("{$this->baseUrl}agents/index.json");
 
@@ -125,8 +125,11 @@ class CallController extends Controller
                         Log::alert('Agents Retrieved data: ' . json_encode($firstAgent));
                         // $phoneNumber = $phoneNumber; // The phone number to call
 
+                        // return response()->json(['message' => $response->json()], 200);
                         // Make the call using the first agent's ID
-                        $this->makeCall($phoneNumber, $firstAgent['id']);
+                       $new = $this->makeCall($phoneNumber, $firstAgent['id']);
+                    //    dd($new->json());
+                    //    Log::alert("new: $new");
                     }
                 }
                 // Broadcast the call initiation
@@ -143,18 +146,19 @@ class CallController extends Controller
     public function makeCall($phoneNumber, $agentId)
     {
         $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
-            ->post("{$this->baseUrl}calls/create.json", [
+        ->post("{$this->baseUrl}calls/create.json", [
                 'callee_number' => $phoneNumber,
                 'agent_id' => $agentId,
             ]);
-// dd( $phoneNumber,$agentId);
-        if ($response->successful()) {
+            // dd( $phoneNumber,$agentId);
+            if ($response->successful()) {
             Log::alert('Call Initiated: ' . json_encode($response->json()));
             return $response->json();
         }
 
         Log::error('Error initiating call: ' . $response->body());
-        return null;
+        return response()->json(['error' => 'Failed to initiate call.'], $response->status());
+        // return null;
     }
     /**
      * Hang up a call via CloudTalk API.
