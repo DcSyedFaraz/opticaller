@@ -428,6 +428,15 @@
                                     {{ item.sub_project_id }}
                                 </p>
                             </div>
+                            <div v-if="item.project" class="mb-4">
+                                <div class="flex items-center mb-1">
+                                    <span class="text-md font-[1000]">Project:</span>
+                                </div>
+                                <p
+                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
+                                    {{ item.project }}
+                                </p>
+                            </div>
                             <div v-if="item.notes?.personal_notes" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Personal Notes:</span>
@@ -448,7 +457,7 @@
                                 </p>
                             </div>
 
-                            <span
+                            <!-- <span
                                 class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
                                 Call Duration:
                                 <span class="font-bold">
@@ -456,16 +465,16 @@
                                         item.call_duration < 60 ? item.call_duration + ' Seconds' :
                                             Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
                                             + ' Seconds' }} </span>
+                                </span> -->
+                            <span
+                                class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
+                                Page Duration:
+                                <span class="font-bold">
+                                    {{
+                                        item.total_duration < 60 ? item.total_duration + ' Seconds' :
+                                            Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
+                                            + ' Seconds' }} </span>
                                 </span>
-                                <span
-                                    class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
-                                    On Page Duration:
-                                    <span class="font-bold">
-                                        {{
-                                            item.total_duration < 60 ? item.total_duration + ' Seconds' :
-                                                Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration %
-                                                    60) + ' Seconds' }} </span>
-                                    </span>
                         </div>
                     </div>
                     <div v-else>
@@ -554,10 +563,10 @@
                             class="inline-flex items-center rounded-md bg-secondary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-secondary mb-1">
                             Last call on: {{ formatnewDate(item.created_at) }}
                         </span>
-                        <!-- <span
+                        <span
                             class="inline-flex items-center rounded-md bg-primary mx-2 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-primary">
-                            Country: {{ localAddress.country }}
-                        </span> -->
+                            Project: {{ item.project }}
+                        </span>
                         <span
                             class="inline-flex items-center rounded-md bg-[#3E3E3E] mx-2 my-1 px-2 py-1 text-[12px] font-large text-white ring-1 ring-inset ring-[#3E3E3E]">
                             Agent: {{ item.users?.name }}
@@ -597,14 +606,14 @@
                         </div>
                         <span
                             class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 mr-2 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
-                            On Page Duration:
+                            Page Duration:
                             <span class="font-bold">
                                 {{
                                     item.total_duration < 60 ? item.total_duration + ' Seconds' :
                                         Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
                                         + ' Seconds' }} </span>
                             </span>
-                            <span
+                            <!-- <span
                                 class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
                                 Call Duration:
                                 <span class="font-bold">
@@ -612,7 +621,7 @@
                                         item.call_duration < 60 ? item.call_duration + ' Seconds' :
                                             Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
                                             + ' Seconds' }} </span>
-                                </span>
+                                </span> -->
                     </div>
                 </div>
             </Dialog>
@@ -662,22 +671,17 @@
                 class="w-11/12 md:w-1/3 p-2">
                 <template #header>
                     <div class="w-full">
-                      <!-- Draggable Bar -->
-                      <div
-                        class="w-full h-4 bg-gray-400 cursor-move mb-2 rounded-t"
-                        style="user-select: none;"
-                      ></div>
+                        <!-- Draggable Bar -->
+                        <div class="w-full h-4 bg-gray-400 cursor-move mb-2 rounded-t" style="user-select: none;"></div>
 
-                      <!-- Header Content -->
-                      <div
-                        class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-b cursor-move"
-                        style="user-select: none;"
-                      >
-                        <span class="font-semibold text-gray-800">Call in Progress</span>
-                        <i class="pi pi-bars text-gray-600"></i>
-                      </div>
+                        <!-- Header Content -->
+                        <div class="flex items-center justify-between bg-gray-100 px-4 py-2 rounded-b cursor-move"
+                            style="user-select: none;">
+                            <span class="font-semibold text-gray-800">Call in Progress</span>
+                            <i class="pi pi-bars text-gray-600"></i>
+                        </div>
                     </div>
-                  </template>
+                </template>
                 <div class="flex flex-col items-center space-y-4">
                     <!-- Call Information -->
                     <div class="flex items-center space-x-2">
@@ -1450,6 +1454,7 @@ main {
 .p-card-body {
     @apply !py-0
 }
+
 .p-dialog-header {
     @apply !p-0
 }
