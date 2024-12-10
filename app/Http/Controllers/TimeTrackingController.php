@@ -209,7 +209,7 @@ class TimeTrackingController extends Controller
                 // Optional: Log why webhook is not triggered
                 Log::info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
-                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? 'present' : 'empty'));
+                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty'));
             }
 
 
@@ -225,8 +225,16 @@ class TimeTrackingController extends Controller
                 }
 
                 // Update address
+                if ($notreached) {
+                    $validatedData['address']['feedback'] = 'notreached';
+                }
+
+                if ($address->follow_up_date) {
+                    $validatedData['address']['feedback'] = 'Follow-up';
+                }
                 $address->update($validatedData['address']);
 
+                // dd($validatedData['address']);
                 if ($notreached) {
                     // NotReached::create(['address_id' => $address->id]);
                     // $address->follow_up_date = null;
@@ -241,7 +249,7 @@ class TimeTrackingController extends Controller
                 }
 
                 $address->save();
-                // dd($address->feedback);
+                // dd($request->address['project']['title']);
                 // Log activity
                 $seconds = $validatedData['total_duration'];
                 $timeLog = new Activity();
@@ -253,6 +261,7 @@ class TimeTrackingController extends Controller
                 $timeLog->feedback = $address->feedback;
                 $timeLog->contact_id = $address->contact_id;
                 $timeLog->sub_project_id = $request->address['subproject']['title'];
+                $timeLog->project = $request->address['project']['title'];
                 $timeLog->save();
 
                 if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
