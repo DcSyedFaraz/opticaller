@@ -21,6 +21,11 @@ class CallController extends Controller
             'Users/TwilioCallComponent'
         );
     }
+    public function status(Request $request): void
+    {
+        Log::info('status ' . $request->all());
+
+    }
     public function getToken(Request $request)
     {
         // dd($request->all());
@@ -75,7 +80,7 @@ class CallController extends Controller
         // dd($number);
         if ($to) {
             // Outgoing call
-            $dial = $response->dial('', ['callerId' => $number]);
+            $dial = $response->dial('', ['callerId' => $number, 'action' => route('call.status'),]);
             $dial->number($to);
         } else {
             // Incoming call
@@ -127,9 +132,9 @@ class CallController extends Controller
 
                         // return response()->json(['message' => $response->json()], 200);
                         // Make the call using the first agent's ID
-                       $new = $this->makeCall($phoneNumber, $firstAgent['id']);
-                    //    dd($new->json());
-                    //    Log::alert("new: $new");
+                        $new = $this->makeCall($phoneNumber, $firstAgent['id']);
+                        //    dd($new->json());
+                        //    Log::alert("new: $new");
                     }
                 }
                 // Broadcast the call initiation
@@ -146,12 +151,12 @@ class CallController extends Controller
     public function makeCall($phoneNumber, $agentId)
     {
         $response = Http::withBasicAuth($this->apiKey, $this->apiSecret)
-        ->post("{$this->baseUrl}calls/create.json", [
+            ->post("{$this->baseUrl}calls/create.json", [
                 'callee_number' => $phoneNumber,
                 'agent_id' => $agentId,
             ]);
-            // dd( $phoneNumber,$agentId);
-            if ($response->successful()) {
+        // dd( $phoneNumber,$agentId);
+        if ($response->successful()) {
             Log::alert('Call Initiated: ' . json_encode($response->json()));
             return $response->json();
         }

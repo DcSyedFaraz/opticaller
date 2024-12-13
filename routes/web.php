@@ -32,6 +32,7 @@ Route::get('/', function () {
 });
 // routes/web.php
 Route::get('/call-data', [CallController::class, 'call_data']);
+Route::any('/status', [CallController::class, 'status']);
 
 
 
