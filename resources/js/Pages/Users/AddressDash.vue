@@ -400,10 +400,10 @@
                                 class="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-secondary mb-1">
                                 Last call on: {{ formatnewDate(item.created_at) }}
                             </span>
-                            <!-- <span
+                            <span v-if="item.project"
                                 class="inline-flex mx-2 items-center rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-primary">
-                                Country: {{ localAddress.country }}
-                            </span> -->
+                                Project : {{ item.project }}
+                            </span>
                             <span
                                 class="inline-flex items-center rounded-md bg-[#3E3E3E] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#3E3E3E]">
                                 Agent: {{ item.users?.name }}
@@ -428,7 +428,7 @@
                                     {{ item.sub_project_id }}
                                 </p>
                             </div>
-                            <div v-if="item.project" class="mb-4">
+                            <!-- <div v-if="item.project" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Project:</span>
                                 </div>
@@ -436,7 +436,7 @@
                                     class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
                                     {{ item.project }}
                                 </p>
-                            </div>
+                            </div> -->
                             <div v-if="item.notes?.personal_notes" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Personal Notes:</span>
@@ -730,8 +730,8 @@
 import moment from "moment";
 import timezone from 'moment-timezone';
 // import country from 'country-list-js';
-// import TwilioCallComponent from './TwilioCallComponent.vue';
-import TwilioCallComponent from './CloudTalkCallComponent.vue';
+import TwilioCallComponent from './TwilioCallComponent.vue';
+// import TwilioCallComponent from './CloudTalkCallComponent.vue';
 
 export default {
     components: { TwilioCallComponent },
