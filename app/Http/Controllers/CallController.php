@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Log;
 use Twilio\Jwt\AccessToken;
 use Twilio\Jwt\Grants\VoiceGrant;
+use Twilio\Rest\Client;
 use Twilio\TwiML\VoiceResponse;
 
 class CallController extends Controller
@@ -21,10 +22,70 @@ class CallController extends Controller
             'Users/TwilioCallComponent'
         );
     }
-    public function status(Request $request): void
+    public function handleRecordingCallback(Request $request)
     {
-        Log::info('status ' . $request->all());
+        // Log recording details
+        Log::info('Recording Callback:', $request->all());
 
+        $recordingSid = $request->input('RecordingSid');
+        $recordingUrl = $request->input('RecordingUrl'); // URL to access the recording (without file extension)
+        $recordingDuration = $request->input('RecordingDuration');
+        $callSid = $request->input('CallSid');
+
+        // Initialize Twilio REST Client
+        $twilioSid = env('TWILIO_ACCOUNT_SID');
+        $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
+        $twilio = new Client($twilioSid, $twilioAuthToken);
+
+        try {
+            // Request transcription for the recording
+            $transcripts = $twilio->intelligence->v2->transcripts->read([]);
+
+
+            // print $transcription->accountSid;
+            foreach ($transcripts as $record) {
+                // print $record->accountSid;
+                // $transcript = $twilio->intelligence->v2
+                //     ->transcripts($record->sid)
+                //     ->fetch();
+
+                $transcriptText = $record->toArray();
+
+                Log::info('Transcription requested:', [
+                    'TranscriptText' => $transcriptText
+                ]);
+            }
+        } catch (\Twilio\Exceptions\RestException $e) {
+            Log::error('Error requesting transcription:', ['message' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            Log::error('General error:', ['message' => $e->getMessage()]);
+        }
+
+        // Optionally, save recording details to your database
+        // Recording::create([...]);
+
+        return response()->json(['status' => 'Recording received']);
+    }
+
+    public function handleTranscriptionCallback(Request $request)
+    {
+        // Log transcription details
+        Log::info('Transcription Callback:', $request->all());
+
+        $transcriptionSid = $request->input('TranscriptionSid');
+        $transcriptionText = $request->input('TranscriptionText');
+        $recordingSid = $request->input('RecordingSid');
+
+        // Optionally, save transcription details to your database
+        // Transcription::create([
+        //     'transcription_sid' => $transcriptionSid,
+        //     'recording_sid' => $recordingSid,
+        //     'transcription_text' => $transcriptionText,
+        // ]);
+
+        // You can also trigger other actions, such as notifying users or processing the text
+
+        return response()->json(['status' => 'Transcription received']);
     }
     public function getToken(Request $request)
     {
@@ -69,27 +130,53 @@ class CallController extends Controller
 
     public function call_data(Request $request)
     {
-        Log::info($request->all());
+        try {
+            Log::info($request->all());
 
-        // Placeholder response; actual implementation will use Webex JavaScript SDK
-        $response = new VoiceResponse();
+            // Placeholder response; actual implementation will use Webex JavaScript SDK
+            $response = new VoiceResponse();
 
-        // Get the 'To' parameter from the request
-        $to = $request->input('To');
-        $number = env('TWILIO_PHONE_NUMBER');
-        // dd($number);
-        if ($to) {
-            // Outgoing call
-            $dial = $response->dial('', ['callerId' => $number, 'action' => route('call.status'),]);
-            $dial->number($to);
-        } else {
-            // Incoming call
-            $response->say('Thank you for calling!');
+            // Get the 'To' parameter from the request
+            $to = $request->input('To');
+            $number = env('TWILIO_PHONE_NUMBER');
+
+            if ($to) {
+
+                $dial = $response->dial('', [
+                    'callerId' => $number,
+                    'transcribe' => "true",
+                    'record' => 'record-from-answer', // Options: 'record-from-ringing', 'record-from-answer', 'do-not-record'
+                    'recordingStatusCallback' => route('recording.callback'), // Define this route
+                    'recordingStatusCallbackMethod' => 'GET',
+                    'recordingChannels' => 'dual',
+                    'transcribeCallback' => route('transcription.callback')
+                ]);
+                // Outgoing call
+                $response->record([
+                    'transcribe' => true,
+                    'transcribeCallback' => route('transcription.callback')
+                ]);
+                $dial->number($to);
+            } else {
+                // Incoming call
+                $response->say('Thank you for calling!');
+            }
+
+            // Return the TwiML response as XML
+            return response($response)->header('Content-Type', 'text/xml');
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Error occurred in call_data: ' . $e->getMessage());
+
+            // Optionally, return a failure TwiML response
+            $response = new VoiceResponse();
+            $response->say('An error occurred while processing your request. Please try again later.');
+
+            // Return the error response as XML
+            return response($response)->header('Content-Type', 'text/xml');
         }
-
-        // Return the TwiML response as XML
-        return response($response)->header('Content-Type', 'text/xml');
     }
+
 
     // new code
     protected $baseUrl = 'https://my.cloudtalk.io/api/';

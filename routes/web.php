@@ -31,9 +31,9 @@ Route::get('/', function () {
 
 });
 // routes/web.php
-Route::get('/call-data', [CallController::class, 'call_data']);
-Route::any('/status', [CallController::class, 'status']);
-
+Route::any('/call-data', [CallController::class, 'call_data']);
+Route::any('/recording-callback', [CallController::class, 'handleRecordingCallback'])->name('recording.callback');
+Route::any('/transcription-callback', [CallController::class, 'handleTranscriptionCallback'])->name('transcription.callback');
 
 
 Route::middleware('auth')->group(function () {
