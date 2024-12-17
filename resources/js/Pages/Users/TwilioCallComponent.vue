@@ -189,6 +189,7 @@ export default {
                 this.activeConnection = await this.device.connect({
                     params: {
                         To: toNumber,
+                        AgentId: 'agentId',
                     },
                 });
 

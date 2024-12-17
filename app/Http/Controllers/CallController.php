@@ -39,22 +39,22 @@ class CallController extends Controller
 
         try {
             // Request transcription for the recording
-            $transcripts = $twilio->intelligence->v2->transcripts->read([]);
+            // $transcripts = $twilio->intelligence->v2->transcripts->read([]);
 
 
             // print $transcription->accountSid;
-            foreach ($transcripts as $record) {
-                // print $record->accountSid;
-                // $transcript = $twilio->intelligence->v2
-                //     ->transcripts($record->sid)
-                //     ->fetch();
+            // foreach ($transcripts as $record) {
+            // print $record->accountSid;
+            // $transcript = $twilio->intelligence->v2
+            //     ->transcripts($record->sid)
+            //     ->fetch();
 
-                $transcriptText = $record->toArray();
+            //     $transcriptText = $record->toArray();
 
-                Log::info('Transcription requested:', [
-                    'TranscriptText' => $transcriptText
-                ]);
-            }
+            //     Log::info('Transcription requested:', [
+            //         'TranscriptText' => $transcriptText
+            //     ]);
+            // }
         } catch (\Twilio\Exceptions\RestException $e) {
             Log::error('Error requesting transcription:', ['message' => $e->getMessage()]);
         } catch (\Exception $e) {
@@ -84,6 +84,25 @@ class CallController extends Controller
         // ]);
 
         // You can also trigger other actions, such as notifying users or processing the text
+
+        return response()->json(['status' => 'Transcription received']);
+    }
+    public function handleTranscriptionCallbacks(Request $request)
+    {
+        // Log transcription details
+        Log::info('Transcription Callbackssssss:', $request->all());
+        $twilioSid = env('TWILIO_ACCOUNT_SID');
+        $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
+        $twilio = new Client($twilioSid, $twilioAuthToken);
+        $transcript = $twilio->intelligence->v2
+            ->transcripts($request->TranscriptionSid)
+            ->fetch();
+
+        // $transcriptText = $$request->toArray();
+
+        Log::info('Transcription got:', [
+            'TranscriptText' => $transcript->toArray()
+        ]);
 
         return response()->json(['status' => 'Transcription received']);
     }

@@ -34,6 +34,7 @@ Route::get('/', function () {
 Route::any('/call-data', [CallController::class, 'call_data']);
 Route::any('/recording-callback', [CallController::class, 'handleRecordingCallback'])->name('recording.callback');
 Route::any('/transcription-callback', [CallController::class, 'handleTranscriptionCallback'])->name('transcription.callback');
+Route::any('/transcription-callbacks', [CallController::class, 'handleTranscriptionCallbacks'])->name('transcription.callbacks');
 
 
 Route::middleware('auth')->group(function () {
