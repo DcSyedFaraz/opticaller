@@ -152,30 +152,34 @@ class CallController extends Controller
         try {
             Log::info($request->all());
 
-            // Placeholder response; actual implementation will use Webex JavaScript SDK
             $response = new VoiceResponse();
 
-            // Get the 'To' parameter from the request
             $to = $request->input('To');
             $number = env('TWILIO_PHONE_NUMBER');
 
             if ($to) {
 
+                $conferenceName = 'SupportConference_' . uniqid();
                 $dial = $response->dial('', [
                     'callerId' => $number,
                     'transcribe' => "true",
-                    'record' => 'record-from-answer', // Options: 'record-from-ringing', 'record-from-answer', 'do-not-record'
-                    'recordingStatusCallback' => route('recording.callback'), // Define this route
+                    'record' => 'record-from-answer',
+                    'recordingStatusCallback' => route('recording.callback'),
                     'recordingStatusCallbackMethod' => 'GET',
                     'recordingChannels' => 'dual',
-                    'transcribeCallback' => route('transcription.callback')
+                    'transcribeCallback' => route('transcription.callback'),
+
                 ]);
-                // Outgoing call
-                $response->record([
-                    'transcribe' => true,
-                    'transcribeCallback' => route('transcription.callback')
+
+                // $dial->number($to);
+                $dial->conference($conferenceName, [
+                    'beep' => 'false',
+                    'startConferenceOnEnter' => true,
+                    'endConferenceOnExit' => true,
                 ]);
-                $dial->number($to);
+
+                // Initiate outbound call to add participant
+                $this->addParticipantToConference($conferenceName, $to);
             } else {
                 // Incoming call
                 $response->say('Thank you for calling!');
@@ -195,7 +199,126 @@ class CallController extends Controller
             return response($response)->header('Content-Type', 'text/xml');
         }
     }
+    protected function addParticipantToConference($conferenceName, $participantNumber)
+    {
+        $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName);
 
+        try {
+            $twilioSid = env('TWILIO_ACCOUNT_SID');
+            $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
+            $number = env('TWILIO_PHONE_NUMBER');
+
+            $twilio = new Client($twilioSid, $twilioAuthToken);
+            $call = $twilio->calls->create(
+                $participantNumber, // To
+                $number, // From
+                [
+                    'url' => $twimlUrl,
+                    'method' => 'POST',
+                    'record' => true,
+                    'transcribe' => 'true',
+                    'transcribeCallback' => route('transcription.callback'),
+                    'recordingStatusCallback' => route('recording.callback'),
+                    'recordingStatusCallbackMethod' => 'POST',
+                    'recordingChannels' => 'dual',
+                    'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
+                ]
+            );
+
+            Log::info("Outbound call initiated to {$participantNumber} with Call SID: {$call->sid}");
+        } catch (\Twilio\Exceptions\TwilioException $e) {
+            Log::error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
+        }
+    }
+    public function joinConference(Request $request)
+    {
+        Log::info($request->all());
+        $conferenceName = $request->query('conference_name');
+
+        if (!$conferenceName) {
+            return response('Conference name is missing.', 400);
+        }
+
+        $response = new VoiceResponse();
+
+        $dial = $response->dial('', [
+            'callerId' => env('TWILIO_PHONE_NUMBER'),
+            'record' => 'do-not-record',
+        ]);
+
+        $dial->conference($conferenceName, [
+            'beep' => false,
+            'startConferenceOnEnter' => true,
+            'endConferenceOnExit' => true,
+        ]);
+
+        return response($response)->header('Content-Type', 'text/xml');
+    }
+    public function listActiveConferences()
+    {
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        // Fetch active conferences
+        $conferences = $client->conferences->read([
+            'status' => 'in-progress'
+        ], 5);
+        // dd($conferences);
+        // $conferences = $client->conferences->read([
+        //     'status' => 'in-progress'
+        // ]);
+
+        // Transform the data as needed
+        // $conferenceList = collect($conferences)->map(function ($conf) {
+        //     return [
+        //         'sid' => $conf->sid,
+        //         'friendlyName' => $conf->friendlyName,
+        //         'dateCreated' => $conf->dateCreated,
+        //         'participantCount' => $conf->participantCount,
+        //     ];
+        // });
+
+        return response()->json([
+            'conferences' => $conferences[0]->toArray,
+        ]);
+    }
+    public function handleDialCallback(Request $request)
+    {
+        $dialCallStatus = $request->input('DialCallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
+        $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
+
+        Log::info("Dial Call Status: {$dialCallStatus}");
+        Log::info("Conference Name: {$conferenceName}");
+
+        $response = new VoiceResponse();
+
+        if (in_array($dialCallStatus, ['no-answer', 'busy', 'failed', 'canceled'])) {
+            // End the conference by removing the agent from the conference
+            $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+            try {
+                // Fetch all participants in the conference
+                $participants = $client->conferences($conferenceName)->participants->read();
+
+                foreach ($participants as $participant) {
+                    if ($participant->to === env('TWILIO_PHONE_NUMBER')) {
+                        // Remove the agent from the conference by updating their status to 'completed'
+                        $client->conferences($conferenceName)
+                            ->participants($participant->sid)
+                            ->update(['status' => 'completed']);
+
+                        Log::info("Agent removed from conference {$conferenceName} due to dial status {$dialCallStatus}.");
+                    }
+                }
+
+            } catch (\Exception $e) {
+                Log::error("Error ending conference {$conferenceName}: " . $e->getMessage());
+            }
+        }
+
+        // Optionally, you can redirect or provide further instructions
+        // For now, just respond with an empty response
+        return response($response)->header('Content-Type', 'text/xml');
+    }
 
     // new code
     protected $baseUrl = 'https://my.cloudtalk.io/api/';
