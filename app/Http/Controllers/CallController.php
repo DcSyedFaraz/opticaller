@@ -39,8 +39,8 @@ class CallController extends Controller
 
         try {
             $transcriptions = $twilio->recordings($recordingSid)
-            ->transcriptions
-            ->read();
+                ->transcriptions
+                ->read();
             Log::info('transcriptions Callback:', $transcriptions);
             // Request transcription for the recording
             // $transcripts = $twilio->intelligence->v2->transcripts->read([]);
@@ -230,13 +230,28 @@ class CallController extends Controller
                     'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
                 ]
             );
-            
+
 
             Log::info("Outbound call initiated to {$participantNumber} with Call SID: " . $call);
         } catch (\Twilio\Exceptions\TwilioException $e) {
             Log::error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
         }
     }
+    public function joinAdminConference(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'mute' => 'required|boolean',
+        ]);
+
+
+        $response = new VoiceResponse();
+        $dial = $response->dial('');
+        $dial->conference($request->name, ['muted' => 'false']);
+        Log::debug("message $response");
+        return back()->with('message', 'You have joined the conference.');
+    }
+
     public function joinConference(Request $request)
     {
         Log::info($request->all());
@@ -274,25 +289,19 @@ class CallController extends Controller
         $conferences = $client->conferences->read([
             'status' => 'in-progress'
         ], 5);
-        // dd($conferences);
-        // $conferences = $client->conferences->read([
-        //     'status' => 'in-progress'
-        // ]);
 
-        // Transform the data as needed
-        // $conferenceList = collect($conferences)->map(function ($conf) {
-        //     return [
-        //         'sid' => $conf->sid,
-        //         'friendlyName' => $conf->friendlyName,
-        //         'dateCreated' => $conf->dateCreated,
-        //         'participantCount' => $conf->participantCount,
-        //     ];
-        // });
+        $conferenceData = array_map(function ($conference) {
+            return [
+                'sid' => $conference->sid,
+                'friendlyName' => $conference->friendlyName,
+            ];
+        }, $conferences);
 
-        return response()->json([
-            'conferences' => $conferences[0]->toArray,
+        return inertia('Conferences/List', [
+            'conferences' => $conferenceData,
         ]);
     }
+
     public function handleDialCallback(Request $request)
     {
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
