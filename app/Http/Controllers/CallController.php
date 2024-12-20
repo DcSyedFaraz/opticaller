@@ -244,12 +244,25 @@ class CallController extends Controller
             'mute' => 'required|boolean',
         ]);
 
+        $conferenceName = $request->input('name');
+        $this->addParticipantToConference($conferenceName, env('ADMIN_PHONE_NUMBER'));
+        // $sid = env('TWILIO_ACCOUNT_SID');
+        // $token = env('TWILIO_AUTH_TOKEN');
+        // $twilio = new Client($sid, $token);
 
-        $response = new VoiceResponse();
-        $dial = $response->dial('');
-        $dial->conference($request->name, ['muted' => 'false']);
-        Log::debug("message $response");
-        return back()->with('message', 'You have joined the conference.');
+        // $adminNumber = env('ADMIN_PHONE_NUMBER');
+
+        // $call = $twilio->calls->create(
+        //     $adminNumber, // Admin's phone number
+        //     env('TWILIO_PHONE_NUMBER'), // Your Twilio number
+        //     [
+        //         "twiml" => "<Response><Dial><Conference>{$conferenceName}</Conference></Dial></Response>"
+        //     ]
+        // );
+        Log::debug("message ");
+        return response()->json(['message' => 'Admin added to conference']);
+
+        // return response($response)->header('Content-Type', 'text/xml');
     }
 
     public function joinConference(Request $request)
