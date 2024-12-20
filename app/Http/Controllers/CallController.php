@@ -245,7 +245,7 @@ class CallController extends Controller
         ]);
 
         $conferenceName = $request->input('name');
-        $this->addParticipantToConference($conferenceName, env('ADMIN_PHONE_NUMBER'));
+        // $this->addParticipantToConference($conferenceName, env('ADMIN_PHONE_NUMBER'));
         $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName);
 
         try {
