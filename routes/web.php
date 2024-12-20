@@ -35,8 +35,9 @@ Route::any('/call-data', [CallController::class, 'call_data']);
 Route::any('/recording-callback', [CallController::class, 'handleRecordingCallback'])->name('recording.callback');
 Route::any('/transcription-callback', [CallController::class, 'handleTranscriptionCallback'])->name('transcription.callback');
 Route::any('/transcription-callbacks', [CallController::class, 'handleTranscriptionCallbacks'])->name('transcription.callbacks');
-Route::get('/api/conferences', [CallController::class, 'listActiveConferences'])->name('api.conferences');
+Route::get('/api/conferences', [CallController::class, 'listActiveConferences'])->name('addresses.conferences');
 Route::any('/conference/join-conference', [CallController::class, 'joinConference'])->name('conference.joinConference');
+Route::any('/admin/join-conference', [CallController::class, 'joinAdminConference'])->name('admin.joinConference');
 Route::any('/dial/callback', [CallController::class, 'handleDialCallback'])->name('dial.callback');
 
 
