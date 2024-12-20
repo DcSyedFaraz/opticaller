@@ -246,19 +246,36 @@ class CallController extends Controller
 
         $conferenceName = $request->input('name');
         $this->addParticipantToConference($conferenceName, env('ADMIN_PHONE_NUMBER'));
-        // $sid = env('TWILIO_ACCOUNT_SID');
-        // $token = env('TWILIO_AUTH_TOKEN');
-        // $twilio = new Client($sid, $token);
+        $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName);
 
-        // $adminNumber = env('ADMIN_PHONE_NUMBER');
+        try {
+            $twilioSid = env('TWILIO_ACCOUNT_SID');
+            $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
+            $number = env('TWILIO_PHONE_NUMBER');
 
-        // $call = $twilio->calls->create(
-        //     $adminNumber, // Admin's phone number
-        //     env('TWILIO_PHONE_NUMBER'), // Your Twilio number
-        //     [
-        //         "twiml" => "<Response><Dial><Conference>{$conferenceName}</Conference></Dial></Response>"
-        //     ]
-        // );
+            $twilio = new Client($twilioSid, $twilioAuthToken);
+            $call = $twilio->calls->create(
+                $number, // From
+                env('ADMIN_PHONE_NUMBER'), // To
+                [
+                    'url' => $twimlUrl,
+                    'method' => 'POST',
+                    'record' => true,
+                    'transcribe' => 'true',
+                    // 'timeout' => 20,
+                    'transcribeCallback' => route('transcription.callback'),
+                    'recordingStatusCallback' => route('recording.callback'),
+                    'recordingStatusCallbackMethod' => 'POST',
+                    'recordingChannels' => 'dual',
+                    'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
+                ]
+            );
+
+
+            Log::info("Outbound call initiated to {$number} with Call SID: " . $call);
+        } catch (\Twilio\Exceptions\TwilioException $e) {
+            Log::error("Failed to initiate outbound call to {$number}: " . $e->getMessage());
+        }
         Log::debug("message ");
         return response()->json(['message' => 'Admin added to conference']);
 
