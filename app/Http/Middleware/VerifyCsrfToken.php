@@ -13,5 +13,7 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'call-data',
+        'admin/join-conference',
+        'dial/admincallback_data',
     ];
 }
