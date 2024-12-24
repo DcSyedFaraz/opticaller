@@ -1,47 +1,90 @@
 <template>
-
-    <Head title="Active Conferences" />
     <AuthenticatedLayout>
-        <div>
+        <div class="p-card">
+            <h2>Active Conferences</h2>
 
-            <div class="p-card">
-                <h2>Active Conferences</h2>
+            <DataTable :value="conferences" :paginator="true" :rows="5" :loading="loading">
+                <Column field="friendlyName" header="Conference Name"></Column>
+                <Column field="sid" header="Conference SID"></Column>
+                <Column header="Action" body="actionTemplate">
+                    <template #body="{ data }">
+                        <Button severity="success" label="Join" icon="pi pi-phone" class="p-button-primary"
+                            @click="joinConference(data)" />
+                    </template>
+                </Column>
+                <template #empty>
+                    <tr>
+                        <td colspan="3">No active conferences found.</td>
+                    </tr>
+                </template>
+            </DataTable>
 
-                <DataTable :value="conferences" :paginator="true" :rows="5">
-                    <Column field="friendlyName" header="Conference Name"></Column>
-                    <Column header="Action" body="actionTemplate">
-                        <template #body="{ data }">
-                            <Button severity="success" label="Join in Mute" icon="pi pi-microphone"
-                                class="p-button-secondary" @click="joinConference(data.friendlyName)" />
-                        </template>
-                    </Column>
-                    <template #empty> No active confrences found. </template>
-                </DataTable>
-                <TwilioCallComponent />
-            </div>
+            <!-- Twilio Voice Component -->
+            <TwilioVoiceComponent :conference="selectedConference" @conference-joined="handleConferenceJoined" />
         </div>
     </AuthenticatedLayout>
 </template>
 
 <script>
-import TwilioCallComponent from './../Users/TwilioCallComponent.vue';
-export default {
-    components: { TwilioCallComponent },
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import TwilioVoiceComponent from './TwilioVoiceComponent.vue'; // Ensure correct path
+// import TwilioVoiceComponent from './../Users/TwilioCallComponent.vue'; // Ensure correct path
 
+export default {
     props: {
         conferences: Array,
     },
-    methods: {
-        joinConference(friendlyName) {
-            // Here, you'll make an API call to join the conference.
-            // You can integrate Twilio's Participant API to handle this.
-            this.$inertia.post(route('admin.joinConference'), { friendlyName, mute: true });
-        },
+    components: {
+        TwilioVoiceComponent,
+    },
+    setup() {
+        // const conferences = ref([]);
+        const loading = ref(false);
+        const selectedConference = ref(null);
+
+        // const fetchActiveConferences = async () => {
+        //     loading.value = true;
+        //     try {
+        //         const response = await axios.get('/api/conferences/active');
+        //         conferences.value = response.data.conferences;
+        //     } catch (error) {
+        //         console.error('Error fetching active conferences:', error);
+        //         // Optionally, display an error message to the user
+        //     } finally {
+        //         loading.value = false;
+        //     }
+        // };
+
+        const joinConference = (conference) => {
+            selectedConference.value = conference;
+            console.log(conference);
+
+        };
+
+        const handleConferenceJoined = () => {
+            // Reset selectedConference after joining
+            selectedConference.value = null;
+            // Optionally, refresh the conference list
+            // fetchActiveConferences();
+        };
+
+        onMounted(() => {
+            // fetchActiveConferences();
+        });
+
+        return {
+            // conferences,
+            loading,
+            selectedConference,
+            joinConference,
+            handleConferenceJoined,
+        };
     },
 };
 </script>
 
-<style>
+<style scoped>
 .p-card {
     margin: 20px;
     padding: 20px;

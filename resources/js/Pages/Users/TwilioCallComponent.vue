@@ -67,7 +67,7 @@ export default {
         },
         log(message) {
             this.logs.push(message);
-            // console.log(`[TwilioCallComponent]: ${message}`);
+            console.log(`[TwilioCallComponent]: ${message}`);
         },
         async initializeDevice() {
             this.initializing = true;
@@ -123,7 +123,7 @@ export default {
                 fakeLocalDTMF: false,
                 enableRingingState: true,
             });
-
+            console.log('Twilio Device:', this.device);
             // Event: Device Ready
             this.device.on("ready", () => {
                 this.log("Twilio Device is ready.");

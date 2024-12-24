@@ -39,6 +39,7 @@ Route::get('/api/conferences', [CallController::class, 'listActiveConferences'])
 Route::any('/conference/join-conference', [CallController::class, 'joinConference'])->name('conference.joinConference');
 Route::any('/admin/join-conference', [CallController::class, 'joinAdminConference'])->name('admin.joinConference');
 Route::any('/dial/callback', [CallController::class, 'handleDialCallback'])->name('dial.callback');
+Route::any('/dial/admincallback_data', [CallController::class, 'admincallback_data'])->name('dial.admincallback_data');
 
 
 
@@ -98,6 +99,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');
 
     Route::get('/api/token', [CallController::class, 'getToken'])->name('refresh_token');
+    Route::get('/api/ADMIN_APP_SID', [CallController::class, 'adminToken'])->name('admin_token');
 
 
 });

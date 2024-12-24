@@ -149,8 +149,53 @@ class CallController extends Controller
             'token' => $token->toJWT(),
         ]);
     }
+    public function adminToken(Request $request)
+    {
+        // dd($request->all());
+        // Validate the request (optional)
+        $request->validate([
+            'identity' => 'required|string',
+        ]);
+
+        $identity = $request->input('identity');
+
+        // Retrieve Twilio credentials from .env
+        $twilioAccountSid = env('TWILIO_ACCOUNT_SID');
+        $twilioApiKey = env('TWILIO_API_KEY');
+        $twilioApiSecret = env('TWILIO_API_SECRET');
+        $twilioAppSid = env('ADMIN_APP_SID');
+
+        // Create access token
+        $token = new AccessToken(
+            $twilioAccountSid,
+            $twilioApiKey,
+            $twilioApiSecret,
+            32400, // Token validity in seconds (e.g., 1 hour)
+            $identity
+        );
+
+        // Create Voice grant
+        $voiceGrant = new VoiceGrant();
+        $voiceGrant->setOutgoingApplicationSid($twilioAppSid);
+        // Optional: Restrict access to specific TwiML applications
+        // $voiceGrant->setIncomingAllow(true);
+
+        // Add grant to token
+        $token->addGrant($voiceGrant);
+
+        // Return token as JSON
+        return response()->json([
+            'token' => $token->toJWT(),
+        ]);
+    }
 
 
+    public function admincallback_data(Request $request)
+    {
+
+        Log::info("admincallback_data " . json_encode($request->all()));
+        return response()->json(['status' => 'Transcription received']);
+    }
     public function call_data(Request $request)
     {
         try {
@@ -239,52 +284,80 @@ class CallController extends Controller
     }
     public function joinAdminConference(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'mute' => 'required|boolean',
+        Log::info("Full URL: " . $request->fullUrl());
+        Log::info("conference data: " . json_encode($request->all()));
+        $conferenceName = $request->input('conference_name') ?? $request->input('To');
+        Log::info("cconferenceName: " . $conferenceName);
+
+        if (!$conferenceName) {
+            return response('Conference name is missing.', 400);
+        }
+
+        $response = new VoiceResponse();
+
+        $dial = $response->dial('', [
+            'callerId' => env('TWILIO_PHONE_NUMBER'),
+            'record' => 'do-not-record',
+        ]);
+        $response->record([
+            'transcribe' => true,
+            'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
+            'action' => route('recording.callback'), // URL to handle recording status
+            'method' => 'POST'
+        ]);
+        $dial->conference($conferenceName, [
+            'beep' => false,
+            'startConferenceOnEnter' => true,
+            'endConferenceOnExit' => false,
         ]);
 
-        $conferenceName = $request->input('name');
-        // $this->addParticipantToConference($conferenceName, env('ADMIN_PHONE_NUMBER'));
-        $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName);
+        return response($response)->header('Content-Type', 'text/xml');
+        // $request->validate([
+        //     'name' => 'required|string',
+        //     'mute' => 'required|boolean',
+        // ]);
 
-        try {
-            $twilioSid = env('TWILIO_ACCOUNT_SID');
-            $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
-            $number = env('TWILIO_PHONE_NUMBER');
+        // $conferenceName = $request->input('name');
+        // $mute = $request->input('mute', false);
 
-            $twilio = new Client($twilioSid, $twilioAuthToken);
-            $call = $twilio->calls->create(
-                $number, // From
-                env('ADMIN_PHONE_NUMBER'), // To
-                [
-                    'url' => $twimlUrl,
-                    'method' => 'POST',
-                    'record' => true,
-                    'transcribe' => 'true',
-                    // 'timeout' => 20,
-                    'transcribeCallback' => route('transcription.callback'),
-                    'recordingStatusCallback' => route('recording.callback'),
-                    'recordingStatusCallbackMethod' => 'POST',
-                    'recordingChannels' => 'dual',
-                    'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
-                ]
-            );
+        // $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName) . '&mute=' . ($mute ? 'true' : 'false');
 
+        // try {
+        //     $twilioSid = env('TWILIO_ACCOUNT_SID');
+        //     $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
+        //     $number = env('TWILIO_PHONE_NUMBER');
 
-            Log::info("Outbound call initiated to {$number} with Call SID: " . $call);
-        } catch (\Twilio\Exceptions\TwilioException $e) {
-            Log::error("Failed to initiate outbound call to {$number}: " . $e->getMessage());
-        }
-        Log::debug("message ");
-        return response()->json(['message' => 'Admin added to conference']);
+        //     $twilio = new Client($twilioSid, $twilioAuthToken);
+        //     $call = $twilio->calls->create(
+        //         env('ADMIN_PHONE_NUMBER'), // To
+        //         $number, // From
+        //         [
+        //             'url' => $twimlUrl,
+        //             'method' => 'POST',
+        //             'record' => true,
+        //             'transcribe' => 'true',
+        //             // 'timeout' => 20,
+        //             'transcribeCallback' => route('transcription.callback'),
+        //             'recordingStatusCallback' => route('recording.callback'),
+        //             'recordingStatusCallbackMethod' => 'POST',
+        //             'recordingChannels' => 'dual',
+        //             'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
+        //         ]
+        //     );
 
-        // return response($response)->header('Content-Type', 'text/xml');
+        //     Log::info("Outbound call initiated to " . env('ADMIN_PHONE_NUMBER') . " with Call SID: " . $call->sid);
+        // } catch (\Twilio\Exceptions\TwilioException $e) {
+        //     Log::error("Failed to initiate outbound call to " . env('ADMIN_PHONE_NUMBER') . ": " . $e->getMessage());
+        // }
+
+        // Log::debug("Admin joinConference called");
+        // return response()->json(['message' => 'Admin added to conference']);
     }
+
 
     public function joinConference(Request $request)
     {
-        Log::info($request->all());
+        Log::info("conference data: " . json_encode($request->all()));
         $conferenceName = $request->query('conference_name');
 
         if (!$conferenceName) {
