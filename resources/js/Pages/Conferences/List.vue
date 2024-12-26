@@ -1,7 +1,8 @@
 <template>
+    <Head title="Active Conferences" />
     <AuthenticatedLayout>
         <div class="p-card">
-            <h2>Active Conferences</h2>
+            <h2>Active Conferences {{ this.$page.props.auth.user.name }}</h2>
 
             <DataTable :value="conferences" :paginator="true" :rows="5" :loading="loading">
                 <Column field="friendlyName" header="Conference Name"></Column>
@@ -20,7 +21,37 @@
             </DataTable>
 
             <!-- Twilio Voice Component -->
-            <TwilioVoiceComponent :conference="selectedConference" @conference-joined="handleConferenceJoined" />
+            <TwilioVoiceComponent v-if="selectedConference" :conference="selectedConference" ref="twilioVoiceComponent"
+                @call-connected="handleCallConnected" @call-disconnected="handleCallDisconnected" />
+
+            <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" :closable="false"
+                class="w-11/12 md:w-1/3 p-6">
+                <template #header>
+                    <div class="flex items-center justify-between bg-gray-100 cursor-move" style="user-select: none;">
+                        <span class="font-semibold text-gray-800">Call in Progress &nbsp; </span>
+                        <i class="pi pi-bars text-gray-600"></i>
+                    </div>
+                </template>
+                <div class="flex flex-col items-center space-y-4">
+                    <!-- Call Information -->
+                    <div class="flex items-center space-x-2">
+                        <i class="pi pi-phone text-3xl text-blue-500"></i>
+                        <p class="text-lg font-semibold">Calling: {{ activeCallNumber }}</p>
+                    </div>
+
+                    <!-- Call Duration (Visible After Call is Accepted) -->
+                    <!-- <div class="flex items-center space-x-2">
+                        <i class="pi pi-clock text-2xl text-gray-600"></i>
+                        <p class="text-md font-medium">Duration: {{ formattedCallDuration }}</p>
+                    </div> -->
+
+                    <!-- Hang Up Button -->
+                    <div class="flex space-x-4 mt-6">
+                        <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger p-button-rounded"
+                            @click="hangUp" />
+                    </div>
+                </div>
+            </Dialog>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -33,55 +64,84 @@ import TwilioVoiceComponent from './TwilioVoiceComponent.vue'; // Ensure correct
 
 export default {
     props: {
-        conferences: Array,
+        conferences: {
+            type: Array,
+            default: () => [],
+        },
     },
     components: {
         TwilioVoiceComponent,
     },
-    setup() {
-        // const conferences = ref([]);
-        const loading = ref(false);
-        const selectedConference = ref(null);
-
-        // const fetchActiveConferences = async () => {
-        //     loading.value = true;
-        //     try {
-        //         const response = await axios.get('/api/conferences/active');
-        //         conferences.value = response.data.conferences;
-        //     } catch (error) {
-        //         console.error('Error fetching active conferences:', error);
-        //         // Optionally, display an error message to the user
-        //     } finally {
-        //         loading.value = false;
-        //     }
-        // };
-
-        const joinConference = (conference) => {
-            selectedConference.value = conference;
-            console.log(conference);
-
-        };
-
-        const handleConferenceJoined = () => {
-            // Reset selectedConference after joining
-            selectedConference.value = null;
-            // Optionally, refresh the conference list
-            // fetchActiveConferences();
-        };
-
-        onMounted(() => {
-            // fetchActiveConferences();
-        });
-
+    data() {
         return {
-            // conferences,
-            loading,
-            selectedConference,
-            joinConference,
-            handleConferenceJoined,
+            loading: false,
+            selectedConference: null,
+            activeCallNumber: null,
+            showActiveCallDialog: false,
+            callDuration: 0,
+            // Add any other reactive properties here
         };
     },
+    methods: {
+        /**
+         * Joins a selected conference.
+         * @param {Object} conference - The conference to join.
+         */
+        joinConference(conference) {
+            this.selectedConference = conference;
+            console.log(conference);
+            // You can add additional logic here if needed
+        },
+        hangUp() {
+            this.$refs.twilioVoiceComponent.hangUp();
+            this.showActiveCallDialog = false;
+            this.activeCallNumber = "";
+        },
+        /**
+         * Handles the event when a call is connected.
+         * @param {String} toNumber - The number that was called.
+         */
+        handleCallConnected(toNumber) {
+            this.activeCallNumber = toNumber;
+            this.showActiveCallDialog = true;
+            this.callDuration = 0;
+            // Uncomment and implement the timer if needed
+            // this.startCallDurationTimer();
+        },
+        handleCallDisconnected() {
+            this.showActiveCallDialog = false;
+            this.activeCallNumber = "";
+        },
+        /**
+         * Handles the event when a conference is successfully joined.
+         */
+        handleConferenceJoined() {
+            // Reset the selected conference
+            this.selectedConference = null;
+            // Optionally, refresh the conference list
+            // this.fetchActiveConferences();
+        },
+
+        /**
+         * (Optional) Fetches the list of active conferences.
+         */
+        // fetchActiveConferences() {
+        //     // Implement your API call or logic to fetch conferences
+        // },
+
+        /**
+         * (Optional) Starts a timer to track call duration.
+         */
+        // startCallDurationTimer() {
+        //     // Implement your timer logic here
+        // },
+    },
+    mounted() {
+        // Fetch the active conferences when the component is mounted
+        // this.fetchActiveConferences();
+    },
 };
+
 </script>
 
 <style scoped>

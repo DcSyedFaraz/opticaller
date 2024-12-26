@@ -192,6 +192,7 @@ export default {
                 { id: 2, content: 'Option to update security settings, including account lockout policies.', title: 'Account lockout ', routeName: 'toggleStatus.get', buttonText: 'Proceed' },
                 { id: 3, content: 'Option to update security settings, including Field Visibility policies.', title: 'Manage Field Visibility', routeName: 'field-visibility.index', buttonText: 'Proceed' },
                 { id: 4, content: 'Option to join active conferences.', title: 'Active Conferences', routeName: 'addresses.conferences', buttonText: 'Proceed' },
+                { id: 4, content: 'Option to Transcription.', title: 'Transcription', routeName: 'addresses.transcription', buttonText: 'Proceed' },
             ],
             projects: [
                 { id: 1, content: 'Interface to add or modify Projects.', title: 'Project Management', routeName: 'projects.index', buttonText: 'Proceed' },

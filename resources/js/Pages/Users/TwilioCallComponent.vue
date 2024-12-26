@@ -23,6 +23,7 @@ export default {
             deviceInitialized: false,
             initializing: false,
             calling: false,
+            identity: null,
             logs: [],
         };
     },
@@ -44,6 +45,7 @@ export default {
     },
     mounted() {
         this.initializeDevice();
+        this.generateIdentity();
     },
     beforeDestroy() {
         if (this.device) {
@@ -67,15 +69,15 @@ export default {
         },
         log(message) {
             this.logs.push(message);
-            console.log(`[TwilioCallComponent]: ${message}`);
+            // console.log(`[TwilioCallComponent]: ${message}`);
         },
         async initializeDevice() {
             this.initializing = true;
             try {
                 await this.requestAudioPermissions();
-                const identity = this.generateIdentity();
-                const token = await this.fetchTwilioToken(identity);
-                this.setupDevice(token, identity);
+                // const identity = this.generateIdentity();
+                const token = await this.fetchTwilioToken(this.identity);
+                this.setupDevice(token, this.identity);
                 this.deviceInitialized = true;
                 this.log("Twilio Device initialized successfully.");
                 // Automatically make a call if phoneNumber is provided and not paused
@@ -100,7 +102,11 @@ export default {
             }
         },
         generateIdentity() {
-            return "user_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+            const userName = this.$page.props.auth.user.name || 'user';
+            // Replace spaces and non-alphanumeric characters with underscores
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+            const uniqueSuffix = Date.now() + '_' + Math.floor(Math.random() * 1000);
+            this.identity = `${sanitizedUserName}_${uniqueSuffix}`;
         },
         async fetchTwilioToken(identity) {
             try {
@@ -227,12 +233,39 @@ export default {
             if (this.activeConnection) {
                 this.log("Hanging up the call.");
                 console.log(this.activeConnection);
-
+                // this.updateConferenceStatus('completed');
                 this.activeConnection.disconnect();
             } else {
                 this.log("No active call to hang up.");
             }
         },
+        async updateConferenceStatus(status) {
+            try {
+                // Ensure you have the conference identifier (SID or Name)
+                const conferenceIdentifier = this.identity
+                    ? {
+                        // conferenceSid: this.selectedConference.sid,
+                        // or
+                        conferenceName: `client:${this.identity}`,
+                    }
+                    : {};
+
+                const response = await axios.post(route('conference.updateStatus'), {
+                    status: status,
+                    ...conferenceIdentifier,
+                });
+
+                if (response.status === 200) {
+                    this.log("Conference status updated successfully.");
+                } else {
+                    this.log("Failed to update conference status.");
+                }
+            } catch (error) {
+                console.error("Error updating conference status:", error);
+                this.log("Error updating conference status.");
+            }
+        },
+
     },
 };
 </script>

@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SubProjectFieldVisibilityController;
 use App\Http\Controllers\TimeTrackingController;
+use App\Http\Controllers\TranscriptionController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\CallController;
 use App\Models\GlobalLockedFields;
@@ -31,15 +32,20 @@ Route::get('/', function () {
 
 });
 // routes/web.php
+Route::get('/transcription/{recordingSid}', [TranscriptionController::class, 'getTranscription']);
+
+
 Route::any('/call-data', [CallController::class, 'call_data']);
 Route::any('/recording-callback', [CallController::class, 'handleRecordingCallback'])->name('recording.callback');
 Route::any('/transcription-callback', [CallController::class, 'handleTranscriptionCallback'])->name('transcription.callback');
 Route::any('/transcription-callbacks', [CallController::class, 'handleTranscriptionCallbacks'])->name('transcription.callbacks');
-Route::get('/api/conferences', [CallController::class, 'listActiveConferences'])->name('addresses.conferences');
 Route::any('/conference/join-conference', [CallController::class, 'joinConference'])->name('conference.joinConference');
 Route::any('/admin/join-conference', [CallController::class, 'joinAdminConference'])->name('admin.joinConference');
 Route::any('/dial/callback', [CallController::class, 'handleDialCallback'])->name('dial.callback');
+Route::any('/dial/callbackUser', [CallController::class, 'callbackUser'])->name('dial.callbackUser');
 Route::any('/dial/admincallback_data', [CallController::class, 'admincallback_data'])->name('dial.admincallback_data');
+Route::post('/conference/update-status', [CallController::class, 'updateStatus'])->name('conference.updateStatus');
+Route::post('/conference/statusCallback', [CallController::class, 'statusCallback'])->name('conference.statusCallback');
 
 
 
@@ -87,6 +93,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         'update',
         'destroy'
     ]);
+    Route::get('/active/conferences', [CallController::class, 'listActiveConferences'])->name('addresses.conferences');
+    Route::get('/active/transcription', [TranscriptionController::class, 'listActivetranscription'])->name('addresses.transcription');
+
     Route::post('/field-visibility/bulk-update', [SubProjectFieldVisibilityController::class, 'bulkUpdate'])->name('field-visibility.bulkUpdate');
 
 
