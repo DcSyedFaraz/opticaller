@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\CallEnded;
 use App\Events\CallInitiated;
 use App\Events\IncomingCall;
+use App\Models\Transcription;
 use Http;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -41,7 +42,24 @@ class CallController extends Controller
             $transcriptions = $twilio->recordings($recordingSid)
                 ->transcriptions
                 ->read();
-            Log::info('transcriptions Callback:', $transcriptions);
+
+            // Log the transcriptions
+            Log::info('Transcriptions:', ['transcriptions' => $transcriptions]);
+
+            // Process transcriptions as needed
+            foreach ($transcriptions as $transcription) {
+                // Example: Log each transcription's status and text
+                Log::info("Transcription SID: {$transcription->sid}");
+                Log::info("Transcription Status: {$transcription->status}");
+                Log::info("Transcription Text: {$transcription->transcriptionText}");
+                // Add any additional processing here
+            }
+
+            // Delete the recording after processing
+            $twilio->recordings($recordingSid)->delete();
+
+            Log::info("Recording with SID {$recordingSid} has been deleted successfully.");
+
             // Request transcription for the recording
             // $transcripts = $twilio->intelligence->v2->transcripts->read([]);
 
@@ -68,7 +86,7 @@ class CallController extends Controller
         // Optionally, save recording details to your database
         // Recording::create([...]);
 
-        return response()->json(['status' => 'Recording received']);
+        return response('OK', 200);
     }
 
     public function handleTranscriptionCallback(Request $request)
@@ -81,11 +99,11 @@ class CallController extends Controller
         $recordingSid = $request->input('RecordingSid');
 
         // Optionally, save transcription details to your database
-        // Transcription::create([
-        //     'transcription_sid' => $transcriptionSid,
-        //     'recording_sid' => $recordingSid,
-        //     'transcription_text' => $transcriptionText,
-        // ]);
+        Transcription::create([
+            'transcription_sid' => $transcriptionSid,
+            'recording_sid' => $recordingSid,
+            'transcription_text' => $transcriptionText,
+        ]);
 
         // You can also trigger other actions, such as notifying users or processing the text
 
@@ -196,6 +214,54 @@ class CallController extends Controller
         Log::info("admincallback_data " . json_encode($request->all()));
         return response()->json(['status' => 'Transcription received']);
     }
+    public function updateStatus(Request $request)
+    {
+        // Validate incoming request
+        $request->validate([
+            'status' => 'required|string|in:completed',
+            'conferenceSid' => 'required_without:conferenceName|string',
+            'conferenceName' => 'required_without:conferenceSid|string',
+        ]);
+
+        $status = $request->input('status');
+        $conferenceSid = $request->input('conferenceSid');
+        $conferenceName = $request->input('conferenceName');
+
+        // Initialize Twilio Client
+        $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        try {
+            // Determine the conference SID
+            if ($conferenceSid) {
+                // Use conference SID directly
+                $conference = $twilio->conferences($conferenceSid)->fetch();
+            } else {
+                // Fetch conference by name
+                $conferences = $twilio->conferences
+                    ->read(["friendlyName" => $conferenceName], 1);
+
+                if (empty($conferences)) {
+                    return response()->json(['error' => 'Conference not found.'], 404);
+                }
+
+                $conference = $conferences[0];
+            }
+            Log::alert("message: $conference");
+            // Update the conference status to 'completed'
+            $twilio->conferences($conference->sid)
+                ->update(['status' => $status]);
+
+            Log::info("Conference {$conference->sid} status updated to {$status}.");
+
+            return response()->json(['message' => 'Conference status updated successfully.'], 200);
+        } catch (\Twilio\Exceptions\RestException $e) {
+            Log::error("Twilio REST Exception: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to update conference status.'], 500);
+        } catch (\Exception $e) {
+            Log::error("General Exception: " . $e->getMessage());
+            return response()->json(['error' => 'An unexpected error occurred.'], 500);
+        }
+    }
     public function call_data(Request $request)
     {
         try {
@@ -208,27 +274,25 @@ class CallController extends Controller
 
             if ($to) {
 
-                $conferenceName = 'SupportConference_' . uniqid();
+                // $conferenceName = 'SupportConference_' . uniqid();
+                $conferenceName = $request->Caller;
+
                 $dial = $response->dial('', [
                     'callerId' => $number,
                     'transcribe' => "true",
-                    // 'record' => 'record-from-answer',
-                    // 'recordingStatusCallback' => route('recording.callback'),
-                    // 'recordingStatusCallbackMethod' => 'GET',
-                    // 'recordingChannels' => 'dual',
                     'transcribeCallback' => route('transcription.callback'),
-
+                    // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
+                    'statusCallbackMethod' => 'GET',
+                    'statusCallback' => route('dial.callbackUser') . '?conferenceName=' . urlencode($conferenceName),
                 ]);
 
                 // $dial->number($to);
                 $dial->conference($conferenceName, [
-                    'beep' => 'false',
+                    'beep' => false,
                     'startConferenceOnEnter' => true,
                     'endConferenceOnExit' => true,
                 ]);
 
-                // Initiate outbound call to add participant
-                // Log::error('$dial occurred in call_data: ' . $response);
                 $this->addParticipantToConference($conferenceName, $to);
             } else {
                 // Incoming call
@@ -282,6 +346,70 @@ class CallController extends Controller
             Log::error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
         }
     }
+
+    public function joinConference(Request $request)
+    {
+        Log::info("conference data: " . json_encode($request->all()));
+        $conferenceName = $request->query('conference_name');
+
+        if (!$conferenceName) {
+            return response('Conference name is missing.', 400);
+        }
+
+        $response = new VoiceResponse();
+
+        $dial = $response->dial('', [
+            'callerId' => env('TWILIO_PHONE_NUMBER'),
+            'record' => 'true',
+        ]);
+        $response->record([
+            'transcribe' => true,
+            'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
+            'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
+            'recordingStatusCallbackMethod' => 'POST'
+        ]);
+        $dial->conference($conferenceName, [
+            'beep' => false,
+            'startConferenceOnEnter' => true,
+            'endConferenceOnExit' => false,
+        ]);
+
+        return response($response)->header('Content-Type', 'text/xml');
+    }
+    public function statusCallback(Request $request)
+    {
+        // Retrieve necessary parameters from the callback
+        $conferenceSid = $request->input('ConferenceSid');
+        $participantSid = $request->input('ParticipantSid');
+        $event = $request->input('StatusCallbackEvent'); // 'start' or 'end'
+        Log::info('statusCallback: ' . $request->all());
+        // Only handle the 'start' event to mute participants upon joining
+        if ($event === 'start') {
+            $this->muteParticipant($conferenceSid, $participantSid);
+        }
+
+        return response('OK', 200);
+    }
+
+    /**
+     * Mute a participant in the conference
+     */
+    protected function muteParticipant($conferenceSid, $participantSid)
+    {
+        // Initialize Twilio REST Client
+        // $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        // try {
+        //     // Update the participant's muted status to true
+        //     $twilio->conferences($conferenceSid)
+        //         ->participants($participantSid)
+        //         ->update(['muted' => true]);
+
+        //     \Log::info("Participant {$participantSid} in Conference {$conferenceSid} has been muted.");
+        // } catch (\Exception $e) {
+        //     \Log::error("Failed to mute participant {$participantSid}: " . $e->getMessage());
+        // }
+    }
     public function joinAdminConference(Request $request)
     {
         Log::info("Full URL: " . $request->fullUrl());
@@ -297,93 +425,23 @@ class CallController extends Controller
 
         $dial = $response->dial('', [
             'callerId' => env('TWILIO_PHONE_NUMBER'),
-            'record' => 'do-not-record',
+            // 'record' => 'do-not-record',
+            // 'statusCallback' => route('conference.statusCallback'),
+            // 'statusCallbackEvent' => ['start', 'end'],
         ]);
-        $response->record([
-            'transcribe' => true,
-            'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
-            'action' => route('recording.callback'), // URL to handle recording status
-            'method' => 'POST'
-        ]);
+
         $dial->conference($conferenceName, [
             'beep' => false,
-            'startConferenceOnEnter' => true,
+            'muted' => true,
+            'startConferenceOnEnter' => false,
             'endConferenceOnExit' => false,
         ]);
 
         return response($response)->header('Content-Type', 'text/xml');
-        // $request->validate([
-        //     'name' => 'required|string',
-        //     'mute' => 'required|boolean',
-        // ]);
 
-        // $conferenceName = $request->input('name');
-        // $mute = $request->input('mute', false);
-
-        // $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName) . '&mute=' . ($mute ? 'true' : 'false');
-
-        // try {
-        //     $twilioSid = env('TWILIO_ACCOUNT_SID');
-        //     $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
-        //     $number = env('TWILIO_PHONE_NUMBER');
-
-        //     $twilio = new Client($twilioSid, $twilioAuthToken);
-        //     $call = $twilio->calls->create(
-        //         env('ADMIN_PHONE_NUMBER'), // To
-        //         $number, // From
-        //         [
-        //             'url' => $twimlUrl,
-        //             'method' => 'POST',
-        //             'record' => true,
-        //             'transcribe' => 'true',
-        //             // 'timeout' => 20,
-        //             'transcribeCallback' => route('transcription.callback'),
-        //             'recordingStatusCallback' => route('recording.callback'),
-        //             'recordingStatusCallbackMethod' => 'POST',
-        //             'recordingChannels' => 'dual',
-        //             'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
-        //         ]
-        //     );
-
-        //     Log::info("Outbound call initiated to " . env('ADMIN_PHONE_NUMBER') . " with Call SID: " . $call->sid);
-        // } catch (\Twilio\Exceptions\TwilioException $e) {
-        //     Log::error("Failed to initiate outbound call to " . env('ADMIN_PHONE_NUMBER') . ": " . $e->getMessage());
-        // }
-
-        // Log::debug("Admin joinConference called");
-        // return response()->json(['message' => 'Admin added to conference']);
     }
 
 
-    public function joinConference(Request $request)
-    {
-        Log::info("conference data: " . json_encode($request->all()));
-        $conferenceName = $request->query('conference_name');
-
-        if (!$conferenceName) {
-            return response('Conference name is missing.', 400);
-        }
-
-        $response = new VoiceResponse();
-
-        $dial = $response->dial('', [
-            'callerId' => env('TWILIO_PHONE_NUMBER'),
-            'record' => 'do-not-record',
-        ]);
-        $response->record([
-            'transcribe' => true,
-            'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
-            'action' => route('recording.callback'), // URL to handle recording status
-            'method' => 'POST'
-        ]);
-        $dial->conference($conferenceName, [
-            'beep' => false,
-            'startConferenceOnEnter' => true,
-            'endConferenceOnExit' => true,
-        ]);
-
-        return response($response)->header('Content-Type', 'text/xml');
-    }
     public function listActiveConferences()
     {
         $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
@@ -391,8 +449,8 @@ class CallController extends Controller
         // Fetch active conferences
         $conferences = $client->conferences->read([
             'status' => 'in-progress'
-        ], 5);
-
+        ], 50);
+        // log::info('conferences: ' . $conferences[0]);
         $conferenceData = array_map(function ($conference) {
             return [
                 'sid' => $conference->sid,
@@ -410,36 +468,79 @@ class CallController extends Controller
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
         $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
 
-        Log::info("Conference Name: {$conferenceName}");
+        Log::info("Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
 
         $response = new VoiceResponse();
 
-        if (in_array($dialCallStatus, ['no-answer', 'busy', 'failed', 'canceled'])) {
+        if (in_array($dialCallStatus, ['no-answer', 'busy', 'failed', 'canceled', 'completed'])) {
             // End the conference by removing the agent from the conference
             $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
             $participants = $client->conferences->read([
                 'friendlyName' => $conferenceName
             ]);
+            // for
+            // Log::info('Complete Participants: ' . json_encode($participants));
 
-            Log::info('Complete Participants: ' . json_encode($participants[0]->toArray()));
+            if (!empty($participants) && isset($participants[0])) {
+                try {
+                    // Fetch the first participant's SID
+                    $conferenceSid = $participants[0]->sid; // Adjust to match your structure
 
-            try {
-                // Fetch all participants in the conference
-                $client->conferences($participants[0]->sid)
-                    // ->participants($participants[0]->sid)
-                    ->update(['status' => 'completed']);
-                Log::info("Agent removed from conference {$conferenceName} due to dial status {$dialCallStatus}.");
-                // foreach ($participants as $participant) {
-                //     if ($participant->to === env('TWILIO_PHONE_NUMBER')) {
-                //         // Remove the agent from the conference by updating their status to 'completed'
+                    // Update the conference status to 'completed'
+                    $client->conferences($conferenceSid)
+                        ->update(['status' => 'completed']);
 
-                //     }
-                // }
-
-            } catch (\Exception $e) {
-                Log::error("Error ending conference {$conferenceName}: " . $e->getMessage());
+                    Log::info("Conference {$conferenceSid} marked as completed due to dial status {$dialCallStatus}.");
+                } catch (\Exception $e) {
+                    Log::error("Failed to update conference status: " . $e->getMessage());
+                }
+            } else {
+                Log::warning("No participants found in the conference. Cannot complete conference {$conferenceName}.");
             }
+
+        }
+
+        // Optionally, you can redirect or provide further instructions
+        // For now, just respond with an empty response
+        return response($response)->header('Content-Type', 'text/xml');
+    }
+    public function callbackUser(Request $request)
+    {
+        $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
+        $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
+
+        Log::info("callbackUser Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
+
+        $response = new VoiceResponse();
+
+        if (in_array($dialCallStatus, ['no-answer', 'busy', 'failed', 'canceled', 'completed'])) {
+            // End the conference by removing the agent from the conference
+            $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+            $participants = $client->conferences->read([
+                'friendlyName' => $conferenceName
+            ]);
+            // for
+            // Log::info('Complete Participants: ' . json_encode($participants));
+
+            if (!empty($participants) && isset($participants[0])) {
+                try {
+                    // Fetch the first participant's SID
+                    $conferenceSid = $participants[0]->sid; // Adjust to match your structure
+
+                    // Update the conference status to 'completed'
+                    $client->conferences($conferenceSid)
+                        ->update(['status' => 'completed']);
+
+                    Log::info("Conference {$conferenceSid} marked as completed due to dial status {$dialCallStatus}.");
+                } catch (\Exception $e) {
+                    Log::error("Failed to update conference status: " . $e->getMessage());
+                }
+            } else {
+                Log::warning("No participants found in the conference. Cannot complete conference {$conferenceName}.");
+            }
+
         }
 
         // Optionally, you can redirect or provide further instructions

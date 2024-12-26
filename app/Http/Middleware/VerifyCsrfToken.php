@@ -15,5 +15,6 @@ class VerifyCsrfToken extends Middleware
         'call-data',
         'admin/join-conference',
         'dial/admincallback_data',
+        'conference/join-conference',
     ];
 }

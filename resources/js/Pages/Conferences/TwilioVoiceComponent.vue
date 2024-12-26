@@ -31,16 +31,23 @@ export default {
             connectionStatus: '',
             isDeviceReady: false,
             connection: null,
-            identity: "user_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+            // identity: "user_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
             // devices: null,
             // activeConnection: null,
         };
     },
     beforeCreate() {
         this.device = null;
-        this.activeConnection = null
+        this.connection = null
     },
     methods: {
+        generateIdentity() {
+            const userName = this.$page.props.auth.user.name || 'user';
+            // Replace spaces and non-alphanumeric characters with underscores
+            const sanitizedUserName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+            const uniqueSuffix = Date.now() + '_' + Math.floor(Math.random() * 1000);
+            return `user_${sanitizedUserName}_${uniqueSuffix}`;
+        },
         async requestAudioPermissions() {
             try {
                 console.log("Requesting audio device permissions...");
@@ -54,7 +61,8 @@ export default {
         async initializeDevice() {
             try {
                 await this.requestAudioPermissions();
-                const response = await axios.get(route('admin_token', { identity: this.identity }));
+                const identity = this.generateIdentity();
+                const response = await axios.get(route('admin_token', { identity: identity }));
                 const token = response.data.token;
                 console.log('Twilio Access Token:', token); // Debugging
 
@@ -95,14 +103,23 @@ export default {
             console.log('Connected to Twilio');
             this.connected = true;
             this.connectionStatus = 'Connected';
-            this.$emit('conference-joined');
         },
         onDeviceDisconnect() {
             console.log('Disconnected from Twilio');
             this.connected = false;
             this.connectionStatus = 'Disconnected';
         },
-       async connectToConference() {
+        hangUp() {
+            if (this.connection) {
+                // this.log("Hanging up the call.");
+                console.log(this.connection);
+
+                this.connection.disconnect();
+            } else {
+                this.log("No active call to hang up.");
+            }
+        },
+        async connectToConference() {
             if (!this.devices) {
                 console.error('Twilio Device not initialized');
                 this.connectionStatus = 'Device not initialized';
@@ -125,11 +142,11 @@ export default {
             };
 
             this.connection = await this.devices.connect({
-                    params: {
-                        To: this.conference.friendlyName,
-                        AgentId: 'agentId',
-                    },
-                });
+                params: {
+                    To: this.conference.friendlyName,
+                    AgentId: 'agentId',
+                },
+            });
             console.log('Twilio Connection:', this.connection); // Debugging
 
             if (this.connection && typeof this.connection.on === 'function') {
@@ -142,14 +159,18 @@ export default {
                 this.isConnecting = false;
             }
         },
-        onCallAccept() {
+        onCallAccept(conn) {
             console.log('Call accepted');
             this.connectionStatus = 'Call accepted';
+            this.$emit("call-connected", conn.parameters.To);
+
         },
         onCallDisconnect() {
             console.log('Call disconnected');
             this.connected = false;
             this.connectionStatus = 'Disconnected';
+            this.$emit("call-disconnected");
+
             this.isConnecting = false;
         },
         onConnectionError(error) {

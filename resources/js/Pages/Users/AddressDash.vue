@@ -893,7 +893,11 @@ export default {
             deep: true,
         },
     },
-    beforeDestroy() {
+    beforeUnmount() {
+        if (this.reversetimer) {
+            clearInterval(this.reversetimer);
+            console.log('Interval cleared on component unmount.');
+        }
         if (this.callDurationTimer) {
             clearInterval(this.callDurationTimer);
             this.callDurationTimer = null;
