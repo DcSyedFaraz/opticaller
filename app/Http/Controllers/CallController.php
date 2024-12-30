@@ -282,12 +282,12 @@ class CallController extends Controller
                     'transcribe' => "true",
                     'transcribeCallback' => route('transcription.callback'),
                     // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
-                    'statusCallbackMethod' => 'GET',
-                    'statusCallback' => route('dial.callbackUser') . '?conferenceName=' . urlencode($conferenceName),
                 ]);
 
                 // $dial->number($to);
                 $dial->conference($conferenceName, [
+                    'statusCallbackMethod' => 'GET',
+                    'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
                     'beep' => false,
                     'startConferenceOnEnter' => true,
                     'endConferenceOnExit' => true,
@@ -485,13 +485,33 @@ class CallController extends Controller
             if (!empty($participants) && isset($participants[0])) {
                 try {
                     // Fetch the first participant's SID
-                    $conferenceSid = $participants[0]->sid; // Adjust to match your structure
+                    $conferences = $client->conferences->read([
+                        'friendlyName' => $conferenceName,
+                        'status' => 'in-progress'
+                    ]);
 
-                    // Update the conference status to 'completed'
-                    $client->conferences($conferenceSid)
-                        ->update(['status' => 'completed']);
+                    if (!empty($conferences)) {
+                        $conference = $conferences[0];
+                        $conferenceSid = $conference->sid;
 
-                    Log::info("Conference {$conferenceSid} marked as completed due to dial status {$dialCallStatus}.");
+                        // Fetch all participants in the conference
+                        $participants = $client->conferences($conferenceSid)->participants->read();
+
+                        foreach ($participants as $participant) {
+                            $participantSid = $participant->sid;
+                            // Remove each participant by updating their status to 'completed'
+                            $client->conferences($conferenceSid)
+                                ->participants($participantSid)
+                                ->update(['status' => 'completed']);
+                            Log::info("Participant {$participantSid} removed from conference {$conferenceSid}.");
+                        }
+
+                        // Optionally, mark the conference as completed to ensure it's terminated
+                        $client->conferences($conferenceSid)->update(['status' => 'completed']);
+                        Log::info("Conference {$conferenceSid} marked as completed.");
+                    } else {
+                        Log::warning("No active conference found with name {$conferenceName}.");
+                    }
                 } catch (\Exception $e) {
                     Log::error("Failed to update conference status: " . $e->getMessage());
                 }
@@ -508,43 +528,52 @@ class CallController extends Controller
     public function callbackUser(Request $request)
     {
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
-        $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
+        $conferenceName = $request->input('From'); // Retrieved from query parameter
 
-        Log::info("callbackUser Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
+        Log::info("User Dial Callback - Conference Name: {$conferenceName}, Status: {$dialCallStatus}");
 
-        $response = new VoiceResponse();
+        // Define statuses that should trigger the conference termination
+        $endStatuses = ['no-answer', 'busy', 'failed', 'canceled', 'completed'];
 
-        if (in_array($dialCallStatus, ['no-answer', 'busy', 'failed', 'canceled', 'completed'])) {
-            // End the conference by removing the agent from the conference
+        if (in_array($dialCallStatus, $endStatuses)) {
             $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
-            $participants = $client->conferences->read([
-                'friendlyName' => $conferenceName
-            ]);
-            // for
-            // Log::info('Complete Participants: ' . json_encode($participants));
+            try {
+                // Fetch the conference by friendly name and in-progress status
+                $conferences = $client->conferences->read([
+                    'friendlyName' => $conferenceName,
+                    'status' => 'in-progress'
+                ]);
 
-            if (!empty($participants) && isset($participants[0])) {
-                try {
-                    // Fetch the first participant's SID
-                    $conferenceSid = $participants[0]->sid; // Adjust to match your structure
+                if (!empty($conferences)) {
+                    $conference = $conferences[0];
+                    $conferenceSid = $conference->sid;
 
-                    // Update the conference status to 'completed'
-                    $client->conferences($conferenceSid)
-                        ->update(['status' => 'completed']);
+                    // Fetch all participants in the conference
+                    $participants = $client->conferences($conferenceSid)->participants->read();
 
-                    Log::info("Conference {$conferenceSid} marked as completed due to dial status {$dialCallStatus}.");
-                } catch (\Exception $e) {
-                    Log::error("Failed to update conference status: " . $e->getMessage());
+                    foreach ($participants as $participant) {
+                        $participantSid = $participant->sid;
+                        // Remove each participant by updating their status to 'completed'
+                        $client->conferences($conferenceSid)
+                            ->participants($participantSid)
+                            ->update(['status' => 'completed']);
+                        Log::info("Participant {$participantSid} removed from conference {$conferenceSid}.");
+                    }
+
+                    // Optionally, mark the conference as completed to ensure it's terminated
+                    $client->conferences($conferenceSid)->update(['status' => 'completed']);
+                    Log::info("Conference {$conferenceSid} marked as completed.");
+                } else {
+                    Log::warning("No active conference found with name {$conferenceName}.");
                 }
-            } else {
-                Log::warning("No participants found in the conference. Cannot complete conference {$conferenceName}.");
+            } catch (\Exception $e) {
+                Log::error("Error handling dial callback: " . $e->getMessage());
             }
-
         }
 
-        // Optionally, you can redirect or provide further instructions
-        // For now, just respond with an empty response
+        // Respond with empty TwiML
+        $response = new VoiceResponse();
         return response($response)->header('Content-Type', 'text/xml');
     }
 
