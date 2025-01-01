@@ -371,7 +371,7 @@ class CallController extends Controller
         $dial->conference($conferenceName, [
             'beep' => false,
             'startConferenceOnEnter' => true,
-            'endConferenceOnExit' => false,
+            'endConferenceOnExit' => true,
         ]);
 
         return response($response)->header('Content-Type', 'text/xml');
