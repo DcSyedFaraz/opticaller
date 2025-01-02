@@ -323,25 +323,37 @@ class CallController extends Controller
             $number = env('TWILIO_PHONE_NUMBER');
 
             $twilio = new Client($twilioSid, $twilioAuthToken);
-            $call = $twilio->calls->create(
-                $participantNumber, // To
-                $number, // From
-                [
-                    'url' => $twimlUrl,
-                    'method' => 'POST',
-                    'record' => true,
-                    'transcribe' => 'true',
-                    // 'timeout' => 20,
-                    'transcribeCallback' => route('transcription.callback'),
-                    'recordingStatusCallback' => route('recording.callback'),
-                    'recordingStatusCallbackMethod' => 'POST',
-                    'recordingChannels' => 'dual',
-                    'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
-                ]
-            );
+            // $call = $twilio->calls->create(
+            //     $participantNumber, // To
+            //     $number, // From
+            //     [
+            //         'url' => $twimlUrl,
+            //         'method' => 'POST',
+            //         'record' => true,
+            //         'transcribe' => 'true',
+            //         // 'timeout' => 20,
+            //         'transcribeCallback' => route('transcription.callback'),
+            //         'recordingStatusCallback' => route('recording.callback'),
+            //         'recordingStatusCallbackMethod' => 'POST',
+            //         'recordingChannels' => 'dual',
+            //         'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
+            //     ]
+            // );
+            $participant = $twilio->conferences($conferenceName)
+                ->participants
+                ->create(
+                    env('TWILIO_PHONE_NUMBER'),
+                    $participantNumber,
+                    [
+                        // 'muted' => true,
+                        'beep' => false,
+                        'startConferenceOnEnter' => true,
+                        'endConferenceOnExit' => true,
+                    ]
+                );
 
 
-            Log::info("Outbound call initiated to {$participantNumber} with Call SID: " . $call);
+            Log::info("Outbound call initiated to {$participantNumber} with Call SID: " . $participant);
         } catch (\Twilio\Exceptions\TwilioException $e) {
             Log::error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
         }
@@ -370,7 +382,7 @@ class CallController extends Controller
         ]);
         $dial->conference($conferenceName, [
             'beep' => false,
-            'startConferenceOnEnter' => true,
+            'startConferenceOnEnter' => false,
             'endConferenceOnExit' => true,
         ]);
 
@@ -425,9 +437,6 @@ class CallController extends Controller
 
         $dial = $response->dial('', [
             'callerId' => env('TWILIO_PHONE_NUMBER'),
-            // 'record' => 'do-not-record',
-            // 'statusCallback' => route('conference.statusCallback'),
-            // 'statusCallbackEvent' => ['start', 'end'],
         ]);
 
         $dial->conference($conferenceName, [
