@@ -22,7 +22,7 @@ export default {
             required: true,
         },
     },
-    emits: ['conference-joined'],
+    emits: ['conference-joined','call-connected'],
     data() {
         return {
 
@@ -161,6 +161,8 @@ export default {
         },
         onCallAccept(conn) {
             console.log('Call accepted');
+            console.log(conn);
+
             this.connectionStatus = 'Call accepted';
             this.$emit("call-connected", conn.parameters.To);
 

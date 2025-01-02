@@ -64,6 +64,12 @@ return [
             'level' => 'debug',
             'days' => 180,
         ],
+        'call' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/call.log'),
+            'level' => 'debug',
+            'days' => 180,
+        ],
         'address_deletion' => [
             'driver' => 'daily',
             'path' => storage_path('logs/address_deletion.log'),
