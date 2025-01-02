@@ -1,8 +1,9 @@
 <template>
+
     <Head title="Active Conferences" />
     <AuthenticatedLayout>
         <div class="p-card">
-            <h2>Active Conferences {{ this.$page.props.auth.user.name }}</h2>
+            <h2>Active Conferences</h2>
 
             <DataTable :value="conferences" :paginator="true" :rows="5" :loading="loading">
                 <Column field="friendlyName" header="Conference Name"></Column>

@@ -26,7 +26,7 @@ class CallController extends Controller
     public function handleRecordingCallback(Request $request)
     {
         // Log recording details
-        Log::info('Recording Callback:', $request->all());
+        Log::channel('call')->info('Recording Callback:', $request->all());
 
         $recordingSid = $request->input('RecordingSid');
         $recordingUrl = $request->input('RecordingUrl'); // URL to access the recording (without file extension)
@@ -44,21 +44,21 @@ class CallController extends Controller
                 ->read();
 
             // Log the transcriptions
-            Log::info('Transcriptions:', ['transcriptions' => $transcriptions]);
+            Log::channel('call')->info('Transcriptions:', ['transcriptions' => $transcriptions]);
 
             // Process transcriptions as needed
             foreach ($transcriptions as $transcription) {
                 // Example: Log each transcription's status and text
-                Log::info("Transcription SID: {$transcription->sid}");
-                Log::info("Transcription Status: {$transcription->status}");
-                Log::info("Transcription Text: {$transcription->transcriptionText}");
+                Log::channel('call')->info("Transcription SID: {$transcription->sid}");
+                Log::channel('call')->info("Transcription Status: {$transcription->status}");
+                Log::channel('call')->info("Transcription Text: {$transcription->transcriptionText}");
                 // Add any additional processing here
             }
 
             // Delete the recording after processing
             $twilio->recordings($recordingSid)->delete();
 
-            Log::info("Recording with SID {$recordingSid} has been deleted successfully.");
+            Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
 
             // Request transcription for the recording
             // $transcripts = $twilio->intelligence->v2->transcripts->read([]);
@@ -73,14 +73,14 @@ class CallController extends Controller
 
             //     $transcriptText = $record->toArray();
 
-            //     Log::info('Transcription requested:', [
+            //     Log::channel('call')->info('Transcription requested:', [
             //         'TranscriptText' => $transcriptText
             //     ]);
             // }
         } catch (\Twilio\Exceptions\RestException $e) {
-            Log::error('Error requesting transcription:', ['message' => $e->getMessage()]);
+            Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
         } catch (\Exception $e) {
-            Log::error('General error:', ['message' => $e->getMessage()]);
+            Log::channel('call')->error('General error:', ['message' => $e->getMessage()]);
         }
 
         // Optionally, save recording details to your database
@@ -92,7 +92,7 @@ class CallController extends Controller
     public function handleTranscriptionCallback(Request $request)
     {
         // Log transcription details
-        Log::info('Transcription Callback:', $request->all());
+        Log::channel('call')->info('Transcription Callback:', $request->all());
 
         $transcriptionSid = $request->input('TranscriptionSid');
         $transcriptionText = $request->input('TranscriptionText');
@@ -112,7 +112,7 @@ class CallController extends Controller
     public function handleTranscriptionCallbacks(Request $request)
     {
         // Log transcription details
-        Log::info('Transcription Callbackssssss:', $request->all());
+        Log::channel('call')->info('Transcription Callbackssssss:', $request->all());
         $twilioSid = env('TWILIO_ACCOUNT_SID');
         $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
         $twilio = new Client($twilioSid, $twilioAuthToken);
@@ -122,7 +122,7 @@ class CallController extends Controller
 
         // $transcriptText = $$request->toArray();
 
-        Log::info('Transcription got:', [
+        Log::channel('call')->info('Transcription got:', [
             'TranscriptText' => $transcript->toArray()
         ]);
 
@@ -211,7 +211,7 @@ class CallController extends Controller
     public function admincallback_data(Request $request)
     {
 
-        Log::info("admincallback_data " . json_encode($request->all()));
+        Log::channel('call')->info("admincallback_data " . json_encode($request->all()));
         return response()->json(['status' => 'Transcription received']);
     }
     public function updateStatus(Request $request)
@@ -246,26 +246,26 @@ class CallController extends Controller
 
                 $conference = $conferences[0];
             }
-            Log::alert("message: $conference");
+            Log::channel('call')->alert("message: $conference");
             // Update the conference status to 'completed'
             $twilio->conferences($conference->sid)
                 ->update(['status' => $status]);
 
-            Log::info("Conference {$conference->sid} status updated to {$status}.");
+            Log::channel('call')->info("Conference {$conference->sid} status updated to {$status}.");
 
             return response()->json(['message' => 'Conference status updated successfully.'], 200);
         } catch (\Twilio\Exceptions\RestException $e) {
-            Log::error("Twilio REST Exception: " . $e->getMessage());
+            Log::channel('call')->error("Twilio REST Exception: " . $e->getMessage());
             return response()->json(['error' => 'Failed to update conference status.'], 500);
         } catch (\Exception $e) {
-            Log::error("General Exception: " . $e->getMessage());
+            Log::channel('call')->error("General Exception: " . $e->getMessage());
             return response()->json(['error' => 'An unexpected error occurred.'], 500);
         }
     }
     public function call_data(Request $request)
     {
         try {
-            Log::info($request->all());
+            Log::channel('call')->info($request->all());
 
             $response = new VoiceResponse();
 
@@ -303,7 +303,7 @@ class CallController extends Controller
             return response($response)->header('Content-Type', 'text/xml');
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Error occurred in call_data: ' . $e->getMessage());
+            Log::channel('call')->error('Error occurred in call_data: ' . $e->getMessage());
 
             // Optionally, return a failure TwiML response
             $response = new VoiceResponse();
@@ -353,15 +353,15 @@ class CallController extends Controller
                 );
 
 
-            Log::info("Outbound call initiated to {$participantNumber} with Call SID: " . $participant);
+            Log::channel('call')->info("Outbound call initiated to {$participantNumber} with Call SID: " . $participant);
         } catch (\Twilio\Exceptions\TwilioException $e) {
-            Log::error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
+            Log::channel('call')->error("Failed to initiate outbound call to {$participantNumber}: " . $e->getMessage());
         }
     }
 
     public function joinConference(Request $request)
     {
-        Log::info("conference data: " . json_encode($request->all()));
+        Log::channel('call')->info("conference data: " . json_encode($request->all()));
         $conferenceName = $request->query('conference_name');
 
         if (!$conferenceName) {
@@ -394,7 +394,7 @@ class CallController extends Controller
         $conferenceSid = $request->input('ConferenceSid');
         $participantSid = $request->input('ParticipantSid');
         $event = $request->input('StatusCallbackEvent'); // 'start' or 'end'
-        Log::info('statusCallback: ' . $request->all());
+        Log::channel('call')->info('statusCallback: ' . $request->all());
         // Only handle the 'start' event to mute participants upon joining
         if ($event === 'start') {
             $this->muteParticipant($conferenceSid, $participantSid);
@@ -417,17 +417,17 @@ class CallController extends Controller
         //         ->participants($participantSid)
         //         ->update(['muted' => true]);
 
-        //     \Log::info("Participant {$participantSid} in Conference {$conferenceSid} has been muted.");
+        //     \Log::channel('call')->info("Participant {$participantSid} in Conference {$conferenceSid} has been muted.");
         // } catch (\Exception $e) {
-        //     \Log::error("Failed to mute participant {$participantSid}: " . $e->getMessage());
+        //     \Log::channel('call')->error("Failed to mute participant {$participantSid}: " . $e->getMessage());
         // }
     }
     public function joinAdminConference(Request $request)
     {
-        Log::info("Full URL: " . $request->fullUrl());
-        Log::info("conference data: " . json_encode($request->all()));
+        Log::channel('call')->info("Full URL: " . $request->fullUrl());
+        Log::channel('call')->info("conference data: " . json_encode($request->all()));
         $conferenceName = $request->input('conference_name') ?? $request->input('To');
-        Log::info("cconferenceName: " . $conferenceName);
+        Log::channel('call')->info("cconferenceName: " . $conferenceName);
 
         if (!$conferenceName) {
             return response('Conference name is missing.', 400);
@@ -459,7 +459,7 @@ class CallController extends Controller
         $conferences = $client->conferences->read([
             'status' => 'in-progress'
         ], 50);
-        // log::info('conferences: ' . $conferences[0]);
+        // Log::channel('call')->info('conferences: ' . $conferences[0]);
         $conferenceData = array_map(function ($conference) {
             return [
                 'sid' => $conference->sid,
@@ -477,7 +477,7 @@ class CallController extends Controller
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
         $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
 
-        Log::info("Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
+        Log::channel('call')->info("Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
 
         $response = new VoiceResponse();
 
@@ -489,7 +489,7 @@ class CallController extends Controller
                 'friendlyName' => $conferenceName
             ]);
             // for
-            // Log::info('Complete Participants: ' . json_encode($participants));
+            // Log::channel('call')->info('Complete Participants: ' . json_encode($participants));
 
             if (!empty($participants) && isset($participants[0])) {
                 try {
@@ -512,20 +512,20 @@ class CallController extends Controller
                             $client->conferences($conferenceSid)
                                 ->participants($participantSid)
                                 ->update(['status' => 'completed']);
-                            Log::info("Participant {$participantSid} removed from conference {$conferenceSid}.");
+                            Log::channel('call')->info("Participant {$participantSid} removed from conference {$conferenceSid}.");
                         }
 
                         // Optionally, mark the conference as completed to ensure it's terminated
                         $client->conferences($conferenceSid)->update(['status' => 'completed']);
-                        Log::info("Conference {$conferenceSid} marked as completed.");
+                        Log::channel('call')->info("Conference {$conferenceSid} marked as completed.");
                     } else {
-                        Log::warning("No active conference found with name {$conferenceName}.");
+                        Log::channel('call')->warning("No active conference found with name {$conferenceName}.");
                     }
                 } catch (\Exception $e) {
-                    Log::error("Failed to update conference status: " . $e->getMessage());
+                    Log::channel('call')->error("Failed to update conference status: " . $e->getMessage());
                 }
             } else {
-                Log::warning("No participants found in the conference. Cannot complete conference {$conferenceName}.");
+                Log::channel('call')->warning("No participants found in the conference. Cannot complete conference {$conferenceName}.");
             }
 
         }
@@ -539,7 +539,7 @@ class CallController extends Controller
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
         $conferenceName = $request->input('From'); // Retrieved from query parameter
 
-        Log::info("User Dial Callback - Conference Name: {$conferenceName}, Status: {$dialCallStatus}");
+        Log::channel('call')->info("User Dial Callback - Conference Name: {$conferenceName}, Status: {$dialCallStatus}");
 
         // Define statuses that should trigger the conference termination
         $endStatuses = ['no-answer', 'busy', 'failed', 'canceled', 'completed'];
@@ -567,17 +567,17 @@ class CallController extends Controller
                         $client->conferences($conferenceSid)
                             ->participants($participantSid)
                             ->update(['status' => 'completed']);
-                        Log::info("Participant {$participantSid} removed from conference {$conferenceSid}.");
+                        Log::channel('call')->info("Participant {$participantSid} removed from conference {$conferenceSid}.");
                     }
 
                     // Optionally, mark the conference as completed to ensure it's terminated
                     $client->conferences($conferenceSid)->update(['status' => 'completed']);
-                    Log::info("Conference {$conferenceSid} marked as completed.");
+                    Log::channel('call')->info("Conference {$conferenceSid} marked as completed.");
                 } else {
-                    Log::warning("No active conference found with name {$conferenceName}.");
+                    Log::channel('call')->warning("No active conference found with name {$conferenceName}.");
                 }
             } catch (\Exception $e) {
-                Log::error("Error handling dial callback: " . $e->getMessage());
+                Log::channel('call')->error("Error handling dial callback: " . $e->getMessage());
             }
         }
 
