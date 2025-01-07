@@ -81,9 +81,9 @@ export default {
                 this.deviceInitialized = true;
                 this.log("Twilio Device initialized successfully.");
                 // Automatically make a call if phoneNumber is provided and not paused
-                if (this.phoneNumber && !this.isPaused) {
-                    this.makeCall(this.phoneNumber);
-                }
+                // if (this.phoneNumber && !this.isPaused) {
+                //     this.makeCall(this.phoneNumber);
+                // }
             } catch (error) {
                 this.log(`Initialization Error: ${error.message}`);
                 this.$emit("twilio-error", error.message);
