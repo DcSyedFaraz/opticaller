@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'logintime',
+        'auto_calling',
     ];
 
     /**
@@ -43,6 +44,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'auto_calling' => 'boolean',
     ];
     public function subProjects()
     {

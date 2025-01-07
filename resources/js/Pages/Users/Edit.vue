@@ -18,6 +18,11 @@
                         class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
                     <div v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</div>
                 </div>
+                <div class="mb-4 flex items-center">
+                    <Checkbox binary v-model="form.auto_calling" inputId="auto_calling" class="mr-2" />
+                    <label for="auto_calling" class="text-gray-700">Enable Auto Calling</label>
+                </div>
+                <div v-if="errors.auto_calling" class="text-red-500 text-sm mb-4">{{ errors.auto_calling }}</div>
                 <div class="mb-4">
                     <label for="password" class="block text-gray-700">Password</label>
                     <InputText type="password" v-model="form.password" id="password"
@@ -29,7 +34,7 @@
                     <InputText type="password" v-model="form.password_confirmation" id="password_confirmation"
                         class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
                     <div v-if="errors.password_confirmation" class="text-red-500 text-sm">{{
-                errors.password_confirmation }}</div>
+                        errors.password_confirmation }}</div>
                 </div>
                 <div class="mb-4">
                     <label for="roles" class="block text-gray-700">Roles</label>
@@ -37,7 +42,8 @@
                         class="mt-1 block w-full"></Select>
                     <div v-if="errors.roles" class="text-red-500 text-sm">{{ errors.roles }}</div>
                 </div>
-                <Button type="submit" class="!bg-[#383838] text-white !py-3 !px-[3rem] !rounded !border-[#383838]">Update</Button>
+                <Button type="submit"
+                    class="!bg-[#383838] text-white !py-3 !px-[3rem] !rounded !border-[#383838]">Update</Button>
             </form>
         </div>
     </AuthenticatedLayout>
@@ -50,6 +56,7 @@ export default {
             form: {
                 name: this.$page.props.user.name,
                 email: this.$page.props.user.email,
+                auto_calling: this.$page.props.user.auto_calling,
                 password: '',
                 password_confirmation: '',
                 roles: this.$page.props.userRoles

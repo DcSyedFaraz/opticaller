@@ -36,7 +36,7 @@ class UsersController extends Controller
         $user->is_active = !$user->is_active;
         $user->save();
 
-        return Redirect::back()->with('message', 'Userss status updated successfully!');
+        return Redirect::back()->with('message', 'User status updated successfully!');
     }
 
     public function dash()
@@ -101,12 +101,14 @@ class UsersController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'roles' => 'required'
+            'roles' => 'required',
+            'auto_calling' => 'required|boolean',
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'auto_calling' => $data['auto_calling'],
             'password' => bcrypt($data['password']),
         ]);
 
@@ -126,14 +128,16 @@ class UsersController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => "required|string|email|max:255|unique:users,email,{$user->id}",
             'password' => 'nullable|string|min:8|confirmed',
-            'roles' => 'required'
+            'roles' => 'required',
+            'auto_calling' => 'required',
         ]);
 
         $user->update([
             'name' => $data['name'],
             'email' => $data['email'],
+            'auto_calling' => $data['auto_calling'],
             'password' => $data['password'] ? bcrypt($data['password']) : $user->password,
         ]);
 

@@ -774,6 +774,7 @@ export default {
             },
             startTime: 0,
             loginTime: new Date(this.$page.props.auth.logintime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+            auto_calling: this.$page.props.auth.user.auto_calling,
             timeLogId: null,
             pauseLogId: null,
             isLoading: false,
@@ -915,6 +916,10 @@ export default {
             this.localAddress.feedback = '';
             this.localAddress.follow_up_date = null;
             this.previousProject = this.localAddress.subproject?.projects?.title;
+
+            if (this.auto_calling) {
+                this.triggerCallOnNewRecord();
+            }
         }
     },
     methods: {
@@ -1077,7 +1082,9 @@ export default {
                     clearInterval(this.timer);
                     clearInterval(this.reversetimer);
                     this.$nextTick(() => {
-                        this.triggerCallOnNewRecord();
+                        if (this.auto_calling) {
+                            this.triggerCallOnNewRecord();
+                        }
                     });
                     this.countdown = 0;
                     this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
@@ -1204,8 +1211,11 @@ export default {
                             detail: 'Reverse countdown has reached zero.',
                             life: 6000,
                         });
-                        this.saveEdits = true;
-                        this.submitFeedback();
+
+                        if (this.auto_calling) {
+                            this.saveEdits = true;
+                            this.submitFeedback();
+                        }
                     }
                 }
             }, 1000);
@@ -1265,7 +1275,10 @@ export default {
                 clearInterval(this.timer);
                 clearInterval(this.reversetimer);
                 this.localAddress = res.data.address;
-                this.triggerCallOnNewRecord();
+
+                if (this.auto_calling) {
+                    this.triggerCallOnNewRecord();
+                }
 
                 const newProjectTitle = this.localAddress.subproject?.projects?.title;
 
@@ -1313,45 +1326,10 @@ export default {
                 }
             }
         },
-        async submitCallbackRequest() {
-            const emailMap = {
-                vimtronix: 'info@vimtronix.com',
-                XSimpress: 'info@xsimpress.com',
-                box4pflege: 'info@box4pflege.de',
-            };
 
-            const emailAddress = emailMap[this.callbackForm.project];
-            const subject = 'Rückruf bitte';
-            const body = `
-          Project: ${this.callbackForm.project}
-          Salutation: ${this.callbackForm.salutation}
-          First Name: ${this.callbackForm.firstName}
-          Last Name: ${this.callbackForm.lastName}
-          Phone Number: ${this.callbackForm.phoneNumber}
-          Notes: ${this.callbackForm.notes}
-        `;
-
-            // Simulate sending an email
-            alert(`Email sent to: ${emailAddress}\nSubject: ${subject}\nBody: ${body}`);
-
-            // Reset form and close dialog
-            this.callbackForm = {
-                project: null,
-                salutation: '',
-                firstName: '',
-                lastName: '',
-                phoneNumber: '',
-                notes: '',
-            };
-            this.showCallbackForm = false;
-        },
     },
 };
 </script>
-
-<style scoped>
-/* Your existing styles */
-</style>
 
 <style>
 /* Adding a cursor style to indicate the header is draggable */
