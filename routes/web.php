@@ -46,6 +46,7 @@ Route::any('/dial/callbackUser', [CallController::class, 'callbackUser'])->name(
 Route::any('/dial/admincallback_data', [CallController::class, 'admincallback_data'])->name('dial.admincallback_data');
 Route::post('/conference/update-status', [CallController::class, 'updateStatus'])->name('conference.updateStatus');
 Route::post('/conference/statusCallback', [CallController::class, 'statusCallback'])->name('conference.statusCallback');
+Route::get('/api/token', [CallController::class, 'getToken'])->name('refresh_token');
 
 
 
@@ -107,7 +108,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     })->name('settings.index');
     Route::post('/global-locked-fields', [AddressController::class, 'updateLockedFields'])->name('global-locked-fields.update');
 
-    Route::get('/api/token', [CallController::class, 'getToken'])->name('refresh_token');
     Route::get('/api/ADMIN_APP_SID', [CallController::class, 'adminToken'])->name('admin_token');
 
 

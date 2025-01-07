@@ -38,7 +38,7 @@ export default {
     },
     beforeCreate() {
         this.device = null;
-        this.connection = null
+        this.connection = null;
     },
     methods: {
         generateIdentity() {
