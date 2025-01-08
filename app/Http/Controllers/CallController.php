@@ -503,20 +503,9 @@ class CallController extends Controller
                     ]);
 
                     if (!empty($conferences)) {
+                        Log::channel('call')->info("Conference ." . json_encode($conferences));
                         $conference = $conferences[0];
                         $conferenceSid = $conference->sid;
-
-                        // Fetch all participants in the conference
-                        $participants = $client->conferences($conferenceSid)->participants->read();
-
-                        foreach ($participants as $participant) {
-                            $participantSid = $participant->sid;
-                            // Remove each participant by updating their status to 'completed'
-                            $client->conferences($conferenceSid)
-                                ->participants($participantSid)
-                                ->update(['status' => 'completed']);
-                            Log::channel('call')->info("Participant {$participantSid} removed from conference {$conferenceSid}.");
-                        }
 
                         // Optionally, mark the conference as completed to ensure it's terminated
                         $client->conferences($conferenceSid)->update(['status' => 'completed']);
