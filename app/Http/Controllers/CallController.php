@@ -349,6 +349,9 @@ class CallController extends Controller
                         'beep' => false,
                         'startConferenceOnEnter' => true,
                         'endConferenceOnExit' => true,
+                        'timeout' => 20,
+                        'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName), // Optional: URL to receive status updates
+                        'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed']
                     ]
                 );
 
