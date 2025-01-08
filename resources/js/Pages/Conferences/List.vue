@@ -11,7 +11,7 @@
                 <Column header="Action" body="actionTemplate">
                     <template #body="{ data }">
                         <Button severity="success" label="Join" icon="pi pi-phone" class="p-button-primary"
-                            @click="joinConference(data)" />
+                            :disabled="!twilioDeviceReady" @click="joinConference(data)" />
                     </template>
                 </Column>
                 <template #empty>
@@ -22,8 +22,9 @@
             </DataTable>
 
             <!-- Twilio Voice Component -->
-            <TwilioVoiceComponent v-if="selectedConference" :conference="selectedConference" ref="twilioVoiceComponent"
-                @call-connected="handleCallConnected" @call-disconnected="handleCallDisconnected" />
+            <TwilioVoiceComponent :conference="selectedConference" ref="twilioVoiceComponent"
+                @call-connected="handleCallConnected" @call-disconnected="handleCallDisconnected"
+                @device-ready="handleDeviceReady" />
 
             <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" :closable="false"
                 class="w-11/12 md:w-1/3 p-6">
@@ -80,6 +81,7 @@ export default {
             activeCallNumber: null,
             showActiveCallDialog: false,
             callDuration: 0,
+            twilioDeviceReady: false,
             // Add any other reactive properties here
         };
     },
@@ -91,9 +93,19 @@ export default {
         joinConference(conference) {
             this.selectedConference = conference;
             console.log(conference);
-            // You can add additional logic here if needed
+            // Use nextTick to ensure the child component has received the updated prop
+            this.$nextTick(() => {
+                this.activeCallNumber = this.selectedConference.friendlyName;
+                if (this.$refs.twilioVoiceComponent) {
+                    this.twilioDeviceReady = false;
+                    this.$refs.twilioVoiceComponent.connectToConference();
+                } else {
+                    console.error("TwilioVoiceComponent is not available.");
+                }
+            });
         },
         hangUp() {
+            this.twilioDeviceReady = true;
             this.$refs.twilioVoiceComponent.hangUp();
             this.showActiveCallDialog = false;
             this.activeCallNumber = "";
@@ -122,20 +134,9 @@ export default {
             // Optionally, refresh the conference list
             // this.fetchActiveConferences();
         },
-
-        /**
-         * (Optional) Fetches the list of active conferences.
-         */
-        // fetchActiveConferences() {
-        //     // Implement your API call or logic to fetch conferences
-        // },
-
-        /**
-         * (Optional) Starts a timer to track call duration.
-         */
-        // startCallDurationTimer() {
-        //     // Implement your timer logic here
-        // },
+        handleDeviceReady() {
+            this.twilioDeviceReady = true;
+        },
     },
     mounted() {
         // Fetch the active conferences when the component is mounted

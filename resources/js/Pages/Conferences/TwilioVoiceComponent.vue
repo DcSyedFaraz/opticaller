@@ -1,12 +1,12 @@
 <template>
     <div class="twilio-voice">
-        <!-- <h3>Joining Conference: {{ conference.friendlyName }}</h3> -->
-        <Button @click="connect" :disabled="isConnecting || connected" class="p-button p-component">
+        <h3>Joining Conference: {{ conference?.friendlyName ?? 'No Conference Selected' }}</h3>
+        <!-- <Button @click="connect" :disabled="isConnecting || connected" class="p-button p-component">
             {{ isConnecting ? 'Connecting...' : 'Join Conference' }}
         </Button>
         <Button @click="disconnect" :disabled="!connected" class="p-button p-component">
             Disconnect
-        </Button>
+        </Button> -->
         <p v-if="connectionStatus">{{ connectionStatus }}</p>
     </div>
 </template>
@@ -19,10 +19,10 @@ export default {
     props: {
         conference: {
             type: Object,
-            required: true,
+            required: false,
         },
     },
-    emits: ['conference-joined','call-connected'],
+    emits: ['conference-joined', 'call-connected', 'device-ready', 'call-disconnected'],
     data() {
         return {
 
@@ -30,7 +30,7 @@ export default {
             connected: false,
             connectionStatus: '',
             isDeviceReady: false,
-            connection: null,
+            // connection: null,
             // identity: "user_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
             // devices: null,
             // activeConnection: null,
@@ -84,6 +84,7 @@ export default {
                 this.devices.on('disconnect', this.onDeviceDisconnect);
 
                 await this.devices.register();
+                this.$emit('device-ready');
                 console.log('Device registered successfully');
             } catch (error) {
                 // console.error('Failed to initialize Twilio Device:', error);
