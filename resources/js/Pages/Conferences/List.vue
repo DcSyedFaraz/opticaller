@@ -82,6 +82,7 @@ export default {
             showActiveCallDialog: false,
             callDuration: 0,
             twilioDeviceReady: false,
+            intervalId: null,
             // Add any other reactive properties here
         };
     },
@@ -139,8 +140,16 @@ export default {
         },
     },
     mounted() {
-        // Fetch the active conferences when the component is mounted
-        // this.fetchActiveConferences();
+        // Set up polling to refresh the conferences list every 5 seconds
+        this.intervalId = setInterval(() => {
+            this.$inertia.reload({ preserveState: true });
+        }, 10000);
+    },
+    beforeUnmount() {
+        // Clear the interval when the component is destroyed to prevent memory leaks
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
     },
 };
 
