@@ -350,7 +350,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 border my-3 rounded-md p-4 shadow shadow-secondary">
                     <div class="col-span-2">
                         <p class="text-[#424E79] font-sans text-[0.85rem]">Count down Time</p>
-                        <h1 class="text-[#424E79] font-sans font-extrabold text-2xl">
+                        <h1 :class="[
+                            'font-sans font-extrabold text-2xl',
+                            ReverseCountdown === 0 ? 'text-red-500' : 'text-[#424E79]'
+                        ]">
                             {{ formattedReverseCountdown }}
                         </h1>
                     </div>
@@ -1212,10 +1215,10 @@ export default {
                             life: 6000,
                         });
 
-                        if (this.auto_calling) {
-                            this.saveEdits = true;
-                            this.submitFeedback();
-                        }
+                        // if (this.auto_calling) {
+                        //     this.saveEdits = true;
+                        //     this.submitFeedback();
+                        // }
                     }
                 }
             }, 1000);
