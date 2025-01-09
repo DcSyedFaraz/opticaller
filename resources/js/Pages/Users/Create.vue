@@ -16,6 +16,10 @@
                     <InputText v-model="form.email" id="email"
                         class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
                 </div>
+                <div class="mb-4 flex items-center">
+                    <Checkbox binary v-model="form.auto_calling" inputId="auto_calling" class="mr-2" />
+                    <label for="auto_calling" class="text-gray-700">Enable Auto Calling</label>
+                </div>
                 <div class="mb-4">
                     <label for="password" class="block text-gray-700">Password</label>
                     <InputText v-model="form.password" id="password"
@@ -49,6 +53,7 @@ export default {
                 name: '',
                 email: '',
                 password: '',
+                auto_calling: '',
                 password_confirmation: '',
                 roles: []
             })
