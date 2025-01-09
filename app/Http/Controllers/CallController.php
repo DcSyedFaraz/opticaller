@@ -291,6 +291,9 @@ class CallController extends Controller
                     'beep' => false,
                     'startConferenceOnEnter' => true,
                     'endConferenceOnExit' => true,
+                    'waitUrl' => 'http://com.twilio.music.electronica.s3.amazonaws.com/Kaer_Trouz_-_Seawall_Stepper.mp3',
+                    'waitMethod' => 'GET',
+
                 ]);
 
                 $this->addParticipantToConference($conferenceName, $to);
