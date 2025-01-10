@@ -102,13 +102,13 @@ class UsersController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'roles' => 'required',
-            'auto_calling' => 'required|boolean',
+            'auto_calling' => 'nullable|boolean',
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'auto_calling' => $data['auto_calling'],
+            'auto_calling' => $data['auto_calling']?? false,
             'password' => bcrypt($data['password']),
         ]);
 
@@ -131,13 +131,13 @@ class UsersController extends Controller
             'email' => "required|string|email|max:255|unique:users,email,{$user->id}",
             'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'required',
-            'auto_calling' => 'required',
+            'auto_calling' => 'nullable|boolean',
         ]);
 
         $user->update([
             'name' => $data['name'],
             'email' => $data['email'],
-            'auto_calling' => $data['auto_calling'],
+            'auto_calling' => $data['auto_calling'] ?? false,
             'password' => $data['password'] ? bcrypt($data['password']) : $user->password,
         ]);
 
