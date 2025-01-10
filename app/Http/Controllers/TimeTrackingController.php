@@ -249,7 +249,7 @@ class TimeTrackingController extends Controller
                 }
 
                 $address->save();
-                // dd($request->address['project']['title']);
+                // dd($request->address['subproject']['projects']['title']);
                 // Log activity
                 $seconds = $validatedData['total_duration'];
                 $timeLog = new Activity();
@@ -261,7 +261,7 @@ class TimeTrackingController extends Controller
                 $timeLog->feedback = $address->feedback;
                 $timeLog->contact_id = $address->contact_id;
                 $timeLog->sub_project_id = $request->address['subproject']['title'];
-                $timeLog->project = $request->address['project']['title'];
+                $timeLog->project = $request->address['subproject']['projects']['title'];
                 $timeLog->save();
 
                 if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
