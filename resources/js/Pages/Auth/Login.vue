@@ -159,7 +159,7 @@ const submit = async () => {
                 <img src="images/login_image.png" alt="Image" class="w-full h-full object-cover rounded-r-xl " />
             </div>
         </div>
-        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 1.1</div>
+        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 3.0</div>
     </div>
 </template>
 
