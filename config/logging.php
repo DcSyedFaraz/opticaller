@@ -64,6 +64,12 @@ return [
             'level' => 'debug',
             'days' => 180,
         ],
+        'webhook' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/webhook.log'),
+            'level' => 'debug',
+            'days' => 180,
+        ],
         'call' => [
             'driver' => 'daily',
             'path' => storage_path('logs/call.log'),

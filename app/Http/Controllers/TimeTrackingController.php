@@ -177,13 +177,11 @@ class TimeTrackingController extends Controller
                 !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date']) &&
                 !in_array($feedbackvalue, $excludeFeedbacks)
             ) {
-                // Check if the application is not running in the 'local' environment
-                Log::info('Triggering webhook for contact ID: ' . $address->contact_id . 'Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+
+                Log::channel('webhook')->info('Triggering webhook for contact ID: ' . $address->contact_id . ' Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
                     ', feedback: ' . $validatedData['address']['feedback']);
 
-                // Option 1: Directly trigger (synchronous)
-                // Uncomment if you prefer synchronous execution
 
                 $response = Http::post($webhookUrl, [
                     'ID' => $address->contact_id,
@@ -191,23 +189,14 @@ class TimeTrackingController extends Controller
                 ]);
 
                 if ($response->successful()) {
-                    Log::info('Webhook successfully triggered for contact ID: ' . $address->contact_id);
+                    Log::channel('webhook')->info('Webhook successfully triggered for contact ID: ' . $address->contact_id);
                 } else {
-                    Log::error('Webhook failed for contact ID: ' . $address->contact_id . '. Response: ' . $response->body());
+                    Log::channel('webhook')->error('Webhook failed for contact ID: ' . $address->contact_id . '. Response: ' . $response->body());
                 }
-                // if (App::environment('local')) {
-                //     // Optional: Log webhook trigger
 
-
-                //     // Option 2: Dispatch a job for asynchronous processing (recommended)
-                //     // TriggerWebhook::dispatch($validatedData['address']['contact_id'], $webhookUrl);
-                // } else {
-                //     // Optional: Log why webhook is not triggered
-                //     Log::info('Webhook not triggered. Application is running in the local environment.');
-                // }
             } else {
                 // Optional: Log why webhook is not triggered
-                Log::info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                Log::channel('webhook')->info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
                     ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty'));
             }
