@@ -25,6 +25,7 @@ Route::post('/calls/initiate', [CallController::class, 'initiateCall']);
 Route::post('/calls/hangup', [CallController::class, 'hangUpCall']);
 Route::post('/webhooks/call', [CallController::class, 'handleWebhook']);
 
+Route::get('/get_data', [ApiController::class, 'apidata']);
 Route::get('/get_addresses', [ApiController::class, 'index']);
 Route::get('/get_projects', [ApiController::class, 'getProjectsAndSubprojects']);
 Route::post('/store_addresses', [ApiController::class, 'store']);

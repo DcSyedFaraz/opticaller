@@ -18,6 +18,12 @@ use Validator;
 
 class ApiController extends Controller
 {
+    public function apidata(Request $request)
+    {
+
+        Log::warning('data.', ['email' => $request->all()]);
+        return response()->json(['message' => 'done.'], 200);
+    }
     public function deleteAddress(Request $request)
     {
         $credentials = $request->validate([
