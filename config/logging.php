@@ -70,9 +70,9 @@ return [
             'level' => 'debug',
             'days' => 180,
         ],
-        'newww' => [
+        'fb_leads' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/newww.log'),
+            'path' => storage_path('logs/fb_leads.log'),
             'level' => 'debug',
             'days' => 180,
         ],

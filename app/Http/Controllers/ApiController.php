@@ -24,7 +24,7 @@ class ApiController extends Controller
         $addressData = $request->all();
 
         // Log incoming data to the custom 'leads' channel
-        Log::channel('newww')->info('Incoming request data:', $addressData);
+        Log::channel('fb_leads')->info('Incoming request data:', $addressData);
 
         // Retrieve the incoming email from request
         $email = $request->input('email');  // Assuming 'email' is in the 'email' field of the array
@@ -36,11 +36,11 @@ class ApiController extends Controller
 
         // If an address exists with the same email and sub_project_id = 1, log and prevent saving
         if ($existingAddress) {
-            Log::channel('newww')->warning('Duplicate address found, not saving:', [
+            Log::channel('fb_leads')->warning('Duplicate address found, not saving:', [
                 'email' => $email,
                 'sub_project_id' => 1,
             ]);
-            return response()->json(['message' => 'Address with this email already exists for sub_project_id 1.'], 400);
+            return response()->json(['message' => 'Address with this email already exists for sub_project_id 1.'], 200);
         }
 
         // Save the incoming data with sub_project_id = 1
@@ -53,11 +53,11 @@ class ApiController extends Controller
             ]);
 
             // Log success message with saved data
-            Log::channel('newww')->info('Data saved successfully:', $addressData);
+            Log::channel('fb_leads')->info('Data saved successfully:', $addressData);
             return response()->json(['message' => 'Data saved successfully.'], 200);
         } catch (Exception $e) {
             // Log any error that occurs while saving
-            Log::channel('newww')->error('Error saving data:', [
+            Log::channel('fb_leads')->error('Error saving data:', [
                 'error' => $e->getMessage(),
                 'data' => $addressData,
             ]);
