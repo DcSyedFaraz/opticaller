@@ -20,10 +20,52 @@ class ApiController extends Controller
 {
     public function apidata(Request $request)
     {
+        // Retrieve all incoming request data
+        $addressData = $request->all();
 
-        Log::warning('data.', ['email' => $request->all()]);
-        return response()->json(['message' => 'done.'], 200);
+        // Log incoming data to the custom 'leads' channel
+        Log::channel('newww')->info('Incoming request data:', $addressData);
+
+        // Retrieve the incoming email from request
+        $email = $request->input('email');  // Assuming 'email' is in the 'email' field of the array
+
+        // Check if an address with the same email and sub_project_id = 1 already exists
+        $existingAddress = Address::where('email_address_system', $email)
+            ->where('sub_project_id', 1)
+            ->first();
+
+        // If an address exists with the same email and sub_project_id = 1, log and prevent saving
+        if ($existingAddress) {
+            Log::channel('newww')->warning('Duplicate address found, not saving:', [
+                'email' => $email,
+                'sub_project_id' => 1,
+            ]);
+            return response()->json(['message' => 'Address with this email already exists for sub_project_id 1.'], 400);
+        }
+
+        // Save the incoming data with sub_project_id = 1
+        try {
+            Address::create([
+                'company_name' => $addressData['name'] ?? null,
+                'email_address_system' => $addressData['email'],
+                'phone_number' => $addressData['phone'] ?? null,
+                'sub_project_id' => 1,  // Ensuring sub_project_id is set to 1
+            ]);
+
+            // Log success message with saved data
+            Log::channel('newww')->info('Data saved successfully:', $addressData);
+            return response()->json(['message' => 'Data saved successfully.'], 200);
+        } catch (Exception $e) {
+            // Log any error that occurs while saving
+            Log::channel('newww')->error('Error saving data:', [
+                'error' => $e->getMessage(),
+                'data' => $addressData,
+            ]);
+            return response()->json(['message' => 'Error saving data.'], 500);
+        }
     }
+
+
     public function deleteAddress(Request $request)
     {
         $credentials = $request->validate([

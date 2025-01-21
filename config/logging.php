@@ -70,6 +70,12 @@ return [
             'level' => 'debug',
             'days' => 180,
         ],
+        'newww' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/newww.log'),
+            'level' => 'debug',
+            'days' => 180,
+        ],
         'call' => [
             'driver' => 'daily',
             'path' => storage_path('logs/call.log'),
