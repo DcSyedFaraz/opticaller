@@ -38,7 +38,7 @@ class ApiController extends Controller
         if ($existingAddress) {
             Log::channel('fb_leads')->warning('Duplicate address found, not saving:', [
                 'email' => $email,
-                'sub_project_id' => 1,
+                'sub_project_id' => 6,
             ]);
             return response()->json(['message' => 'Address with this email already exists for sub_project_id 1.'], 200);
         }
@@ -49,7 +49,7 @@ class ApiController extends Controller
                 'company_name' => $addressData['name'] ?? null,
                 'email_address_system' => $addressData['email'],
                 'phone_number' => $addressData['phone'] ?? null,
-                'sub_project_id' => 1,  // Ensuring sub_project_id is set to 1
+                'sub_project_id' => 6,  // Ensuring sub_project_id is set to 1
             ]);
 
             // Log success message with saved data
