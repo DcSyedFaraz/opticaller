@@ -53,6 +53,7 @@ class AuthenticatedSessionController extends Controller
 
         return match ($user[0]) {
             'admin' => redirect()->route('dashboard'),
+            'milung' => redirect()->route('dashboard'),
             default => redirect()->route('dash'),
         };
         // return redirect()->intended(RouteServiceProvider::HOME);

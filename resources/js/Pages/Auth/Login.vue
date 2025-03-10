@@ -156,10 +156,10 @@ const submit = async () => {
                 </template>
             </Card>
             <div class="flex-1 bg-cover bg-center xl:block hidden xl:h-[65vh]">
-                <img src="images/login_image.png" alt="Image" class="w-full h-full object-cover rounded-r-xl " />
+                <img src="images/login_image.webp" alt="Image" class="w-full h-full object-cover rounded-r-xl " />
             </div>
         </div>
-        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 3.0</div>
+        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 3.1</div>
     </div>
 </template>
 
