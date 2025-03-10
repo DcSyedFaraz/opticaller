@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
     {
         Role::create(['name' => 'admin']);
         Role::create(['name' => 'user']);
+        Role::create(['name' => 'milung']);
 
 
         $admin = User::factory()->create([

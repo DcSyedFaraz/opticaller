@@ -15,6 +15,7 @@ use App\Models\GlobalLockedFields;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,15 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return redirect()->route('login');
 
+});
+Route::get('/create-milung-role', function () {
+    // Check if the role already exists
+    if (!Role::where('name', 'milung')->exists()) {
+        // Create the 'milung' role
+        Role::create(['name' => 'milung']);
+        return 'Role "milung" created successfully!';
+    }
+    return 'Role "milung" already exists.';
 });
 // routes/web.php
 Route::get('/transcription/{recordingSid}', [TranscriptionController::class, 'getTranscription']);
@@ -62,6 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/callback', [AddressController::class, 'callbackMail'])->name('callback.post');
 });
 
+Route::middleware(['auth', 'verified', 'role:admin|milung'])->group(function () {
+    Route::resource('statistics', StatisticsController::class);
+});
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::resource('addresses', AddressController::class);
@@ -81,7 +94,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/subprojects/assign', [ProjectController::class, 'assign'])->name('projects.assign');
     Route::post('/subprojects/assign/{subProject}', [ProjectController::class, 'assignUsers'])->name('subProjects.assignUsers');
     Route::resource('users', UsersController::class);
-    Route::resource('statistics', StatisticsController::class);
     Route::resource('feedbacks', FeedbackController::class);
     Route::post('/feedbacks/reorder', [FeedbackController::class, 'reorder'])->name('feedbacks.reorder');
 
