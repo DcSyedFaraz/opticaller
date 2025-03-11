@@ -134,6 +134,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);
     Route::post('/break-end/{id}', [TimeTrackingController::class, 'break_end'])->name('break.end');
     Route::post('/stop-tracking', [TimeTrackingController::class, 'stopTracking'])->name('stop.tracking');
+    Route::post('/handleInvalidNumber', [TimeTrackingController::class, 'handleInvalidNumber'])->name('invalid.number');
 
 
 });

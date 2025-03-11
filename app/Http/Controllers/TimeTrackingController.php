@@ -55,6 +55,77 @@ class TimeTrackingController extends Controller
 
         // return response()->json($timeLog);
     }
+    public function handleInvalidNumber(Request $request)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Validate input data
+            $validatedData = $request->validate([
+                'total_duration' => 'required|integer',
+                'call_duration' => 'nullable|integer',
+                'personal_notes' => 'nullable|string',
+                'interest_notes' => 'nullable|string',
+                'address' => 'required|array',
+            ]);
+
+            // Prepare the activity log entry
+            $seconds = $validatedData['total_duration'];
+            $timeLog = new Activity();
+            $timeLog->activity_type = 'call';
+            $timeLog->user_id = auth()->id();
+            $timeLog->address_id = $validatedData['address']['id'];
+            $timeLog->total_duration = $seconds;
+            $timeLog->call_duration = $request->call_duration ?? 0;
+            $timeLog->feedback = 'Invalid number'; // Update feedback to 'Invalid number'
+            $timeLog->contact_id = $request->address['contact_id'];
+            $timeLog->sub_project_id = $request->address['subproject']['title'];
+            $timeLog->project = $request->address['subproject']['projects']['title'];
+            $timeLog->save();
+
+            // Optionally, save notes if they exist
+            if (!empty($validatedData['personal_notes']) || !empty($validatedData['interest_notes'])) {
+                $timeLog->notes()->create([
+                    'personal_notes' => $validatedData['personal_notes'] ?? null,
+                    'interest_notes' => $validatedData['interest_notes'] ?? null,
+                ]);
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+            // Prepare the data to send to Make.com webhook
+            $dataToSend = [
+                'activity_type' => 'call',
+                'user_id' => auth()->id(),
+                'address_id' => $validatedData['address']['id'],
+                'total_duration' => $seconds,
+                'call_duration' => $request->call_duration ?? 0,
+                'feedback' => 'Invalid number', // Updated feedback
+                'contact_id' => $request->address['contact_id'],
+                'sub_project_id' => $request->address['subproject']['title'],
+                'project' => $request->address['subproject']['projects']['title'],
+            ];
+
+            // $makeWebhookUrl = 'https://hook.make.com/your-webhook-url'; // Replace with your actual Make.com webhook URL
+            // $response = Http::post($makeWebhookUrl, $dataToSend);
+
+            // if ($response->successful()) {
+            //     $addressService = new AddressService();
+            //     $address = $addressService->getDueAddress();
+            //     $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
+
+            //     return response()->json(['address' => $address, 'lockfields' => $globalLockedFields, 'limit' => $this->limitexceed]);
+            // } else {
+            //     throw new \Exception("Failed to send data to Make.com.");
+            // }
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Handle the error
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
     public function stopTracking(Request $request)
     {
