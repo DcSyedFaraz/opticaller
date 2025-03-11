@@ -221,7 +221,7 @@
                                 </div>
                                 <div class="flex justify-center flex-wrap my-1">
                                     <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
-                                        class="bg-primary justify-center text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
+                                        class="bg-primary justify-center text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
                                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -234,7 +234,7 @@
                                         <span class="mx-2 my-1">Not Reached</span>
                                     </button>
                                     <button @click="showFollowModal = true" :disabled="isButtonDisabled"
-                                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
+                                        class="bg-[#383838] justify-center hover:bg-[#161616] disabled:bg-[#464545] disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <svg width="33" height="33" viewBox="0 0 33 33" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path d="M1.60718 1.66168V18.2422H25.4797V1.66168" stroke="white"
@@ -251,27 +251,27 @@
                                         <span class="mx-2 my-1">Follow-Ups</span>
                                     </button>
                                     <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
-                                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[3rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
+                                        class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-save !text-2xl"></i>
                                         <span class="mx-2 my-1 text-center">Save & Next</span>
                                     </button>
+
+                                    <!-- Modified Invalid Number Button -->
+                                    <button @click="saveEdits = true; handleInvalidNumber()"
+                                        :disabled="isButtonDisabled"
+                                        class="bg-red-500 justify-center hover:bg-red-400 disabled:bg-red-500 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
+                                        <i class="pi pi-times !text-2xl"></i>
+                                        <!-- Changed icon to indicate invalid number -->
+                                        <span class="mx-2 my-1 text-center">Invalid Number</span>
+                                    </button>
+
                                 </div>
                             </template>
                         </Card>
                     </div>
 
                 </div>
-                <!-- Notes and Buttons remain unchanged as they have flexible widths -->
-                <!-- <div class="border m-4 my-1 lg:mx-7 rounded-lg shadow shadow-blue-200">
 
-                    <div class="grid">
-                        <Card class="shadow-md">
-                            <template #content>
-                            </template>
-                        </Card>
-                    </div>
-                </div> -->
-                <!-- Call History remains unchanged with the addition of responsive adjustments -->
                 <div class="call-history lg:col-span-1 hidden">
                     <Card class="shadow-md">
                         <template #title>
@@ -431,15 +431,7 @@
                                     {{ item.sub_project_id }}
                                 </p>
                             </div>
-                            <!-- <div v-if="item.project" class="mb-4">
-                                <div class="flex items-center mb-1">
-                                    <span class="text-md font-[1000]">Project:</span>
-                                </div>
-                                <p
-                                    class="text-sm text-gray-700 font-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px]">
-                                    {{ item.project }}
-                                </p>
-                            </div> -->
+
                             <div v-if="item.notes?.personal_notes" class="mb-4">
                                 <div class="flex items-center mb-1">
                                     <span class="text-md font-[1000]">Personal Notes:</span>
@@ -460,15 +452,6 @@
                                 </p>
                             </div>
 
-                            <!-- <span
-                                class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
-                                Call Duration:
-                                <span class="font-bold">
-                                    {{
-                                        item.call_duration < 60 ? item.call_duration + ' Seconds' :
-                                            Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
-                                            + ' Seconds' }} </span>
-                                </span> -->
                             <span
                                 class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
                                 Page Duration:
@@ -547,7 +530,7 @@
                                 optionLabel="label" optionValue="value" placeholder="Select minute"
                                 class="w-full !border-secondary" />
                             <small class="text-red-600" v-if="errors.follow_up_minute">{{ errors.follow_up_minute
-                                }}</small>
+                            }}</small>
                         </div>
                     </div>
 
@@ -616,15 +599,7 @@
                                         Math.floor(item.total_duration / 60) + ' Minutes ' + (item.total_duration % 60)
                                         + ' Seconds' }} </span>
                             </span>
-                            <!-- <span
-                                class="inline-flex items-center rounded-md bg-[#A6A2A0] my-1 px-2 py-1 text-[10px] font-medium text-white ring-1 ring-inset ring-[#A6A2A0]">
-                                Call Duration:
-                                <span class="font-bold">
-                                    {{
-                                        item.call_duration < 60 ? item.call_duration + ' Seconds' :
-                                            Math.floor(item.call_duration / 60) + ' Minutes ' + (item.call_duration % 60)
-                                            + ' Seconds' }} </span>
-                                </span> -->
+
                     </div>
                 </div>
             </Dialog>
@@ -660,16 +635,6 @@
                 </div>
             </Dialog>
 
-            <!-- Active Call Dialog -->
-            <!-- <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" draggable resizable
-                :closable="false" class="w-11/12 md:w-1/3">
-                <div class="flex flex-col items-center">
-                    <p class="text-lg">Calling: {{ activeCallNumber }}</p>
-                    <div class="flex space-x-4 mt-4">
-                        <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger" @click="hangUp" />
-                    </div>
-                </div>
-            </Dialog> -->
             <Dialog header="Call in Progress" v-model:visible="showActiveCallDialog" :closable="false"
                 class="w-11/12 md:w-1/3 p-2">
                 <template #header>
@@ -1246,7 +1211,7 @@ export default {
                 console.error('Error toggling pause:', error);
             }
         },
-        async submitFeedback() {
+        async handleButtonClick(routeName) {
             this.isButtonDisabled = true;
             setTimeout(() => {
                 this.isButtonDisabled = false;
@@ -1254,12 +1219,13 @@ export default {
 
             this.isLoading = true;
             this.showFollowModal = false;
+
             try {
                 if (this.isPaused) {
-                    await this.togglePause(); // Resume the tracking if it's paused
+                    await this.togglePause(); // Resume tracking if paused
                 }
 
-                const res = await axios.post(route('stop.tracking'), {
+                const response = await axios.post(route(routeName), {
                     ...this.logdata,
                     address: this.localAddress,
                     call_duration: this.callDuration,
@@ -1267,66 +1233,91 @@ export default {
                     notreached: this.notreached,
                     save_edits: this.saveEdits,
                 });
-                this.notreached = false;
-                this.saveEdits = false;
-                if (res.data.limit) {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: '🚫 We tried to reach this address 10 times without success. Please contact the admin for further assistance.', life: 6000 });
-                } else {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Data saved successfully.', life: 4000 });
-                }
-                console.log(res.data);
-                clearInterval(this.timer);
-                clearInterval(this.reversetimer);
-                this.localAddress = res.data.address;
 
-                if (this.auto_calling) {
-                    this.triggerCallOnNewRecord();
-                }
-
-                const newProjectTitle = this.localAddress.subproject?.projects?.title;
-
-                console.log(newProjectTitle, this.previousProject);
-
-                if (this.previousProject && newProjectTitle !== this.previousProject) {
-                    this.projectChanged = true;
-                }
-                this.previousProject = newProjectTitle;
-                this.locallockfields = res.data.lockfields;
-                if (this.localAddress && this.localAddress.id) {
-                    this.callHistory = res.data.address.cal_logs;
-                    this.timer = null;
-                    this.logdata.call_attempts = null;
-                    this.logdata.personal_notes = '';
-                    this.localAddress.feedback = '';
-                    this.logdata.interest_notes = '';
-                    await this.startTracking();
-                }
-                this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
-                this.notreached = false;
-                this.isLoading = false;
-                this.localAddress.follow_up_date = null;
+                this.handleResponse(response);
             } catch (error) {
-                this.notreached = false;
-                this.saveEdits = false;
+                this.handleError(error);
+            } finally {
                 this.isLoading = false;
-                this.localAddress.follow_up_date = null;
-                console.log(error);
+            }
+        },
 
-                if (error.response.data.error) {
-                    this.$toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 4000 });
-                }
-                if (error.response?.status === 422) {
-                    const errors = error.response.data.errors;
-                    console.log(errors);
-                    for (const field in errors) {
-                        this.errors[field] = errors[field][0];
-                        this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[field][0], life: 4000 });
-                    }
-                } else {
-                    const errors = error.response.data.details;
-                    console.error('Error submitting feedback:', error);
-                    this.$toast.add({ severity: 'error', summary: 'Error', detail: errors, life: 4000 });
-                }
+        async submitFeedback() {
+            await this.handleButtonClick('stop.tracking');
+        },
+
+        async handleInvalidNumber() {
+            await this.handleButtonClick('invalid.number');
+        },
+
+        handleResponse(response) {
+            this.notreached = false;
+            this.saveEdits = false;
+
+            if (response.data.limit) {
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: '🚫 We tried to reach this address 10 times without success. Please contact the admin for further assistance.',
+                    life: 6000,
+                });
+            } else {
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Data saved successfully.',
+                    life: 4000,
+                });
+            }
+
+            console.log(response.data);
+            clearInterval(this.timer);
+            clearInterval(this.reversetimer);
+            this.localAddress = response.data.address;
+
+            if (this.auto_calling) {
+                this.triggerCallOnNewRecord();
+            }
+
+            const newProjectTitle = this.localAddress.subproject?.projects?.title;
+
+            if (this.previousProject && newProjectTitle !== this.previousProject) {
+                this.projectChanged = true;
+            }
+            this.previousProject = newProjectTitle;
+            this.locallockfields = response.data.lockfields;
+
+            if (this.localAddress && this.localAddress.id) {
+                this.callHistory = response.data.address.cal_logs;
+                this.timer = null;
+                this.logdata.call_attempts = null;
+                this.logdata.personal_notes = '';
+                this.localAddress.feedback = '';
+                this.logdata.interest_notes = '';
+                this.startTracking();
+            }
+
+            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+            this.localAddress.follow_up_date = null;
+        },
+
+        handleError(error) {
+            this.notreached = false;
+            this.saveEdits = false;
+            this.localAddress.follow_up_date = null;
+            console.error(error);
+
+            const errorMessage = error.response?.data?.error || error.response?.data?.details;
+            if (errorMessage) {
+                this.$toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 4000 });
+            }
+
+            if (error.response?.status === 422) {
+                const errors = error.response.data.errors;
+                Object.keys(errors).forEach((field) => {
+                    this.errors[field] = errors[field][0];
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: errors[field][0], life: 4000 });
+                });
             }
         },
 
