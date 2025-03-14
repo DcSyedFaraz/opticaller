@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AccountCreated;
 use App\Models\Activity;
 use App\Models\Address;
 use App\Models\GlobalLockedFields;
@@ -9,11 +10,14 @@ use App\Models\SubProject;
 use App\Models\User;
 use App\Services\AddressService;
 use Carbon\Carbon;
+use Hash;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Mail;
 use Redirect;
 use Session;
 use Spatie\Permission\Models\Role;
+use Str;
 
 class UsersController extends Controller
 {
@@ -27,6 +31,48 @@ class UsersController extends Controller
         return Inertia::render('Settings/UserStatusToggle', [
             'users' => $users
         ]);
+    }
+    public function change_password_page()
+    {
+        if (Session::get('otp_login_email')) {
+            // Retrieve the user using the email stored in the session
+            $user = User::where('email', Session::get('otp_login_email'))->first();
+
+            if ($user) {
+
+                return Inertia::render('ChangePassword', [
+                    'message' => 'Please change your password.'
+                ]);
+            }
+        }
+        return redirect()->route('login')->with('message', 'Login to your account.');
+    }
+    public function change_password(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Check if the user is logging in with OTP (session check)
+        if ($request->session()->get('otp_login_email')) {
+            // Retrieve the user using the email stored in the session
+            $user = User::where('email', $request->session()->get('otp_login_email'))->first();
+
+            if ($user) {
+                // Update the user's password
+                $user->password = Hash::make($request->password);
+                $user->otp = null; // Remove the OTP after successful password change
+                $user->save();
+
+                // Forget the OTP login email from the session
+                $request->session()->forget('otp_login_email');
+                // Return a success response
+                return response()->json(['message', 'Password updated successfully']);
+            }
+
+            // Return error if the user is not found
+        }
+        return response()->json(['message', 'User not found'], 404);
     }
 
     public function toggleStatus(Request $request)
@@ -97,25 +143,41 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
+        // Validate the input data
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|confirmed',
             'roles' => 'required',
             'auto_calling' => 'nullable|boolean',
         ]);
 
-        $user = User::create([
+        // Generate OTP if no password is provided
+        $otp = Str::random(8);
+        // dd($data['password'] ? null : $otp);
+        // Create the user and set the necessary fields
+        $userData = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'auto_calling' => $data['auto_calling']?? false,
-            'password' => bcrypt($data['password']),
-        ]);
+            'auto_calling' => $data['auto_calling'] ?? false,
+            'password' => $data['password'] ? bcrypt($data['password']) : bcrypt($otp),
+            'otp' => $data['password'] ? null : $otp,
+        ];
 
+        $user = User::create($userData);
+
+        // Assign the roles to the user
         $user->syncRoles($data['roles']);
 
+        // Send OTP email if password is not provided
+        if ($data['password'] === null) {
+            Mail::to($user->email)->send(new AccountCreated($user, $otp));
+        }
+
+        // Redirect back with a success message
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
+
 
     public function edit(User $user)
     {

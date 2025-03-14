@@ -35,6 +35,19 @@ onUpdated(() => {
         usePage().props.flash.message = null;
     }
 });
+onMounted(() => {
+    console.log(usePage().props);
+
+    if (usePage().props.flash.message) { // Use status.value to access reactive property
+        toast.add({
+            severity: 'error',
+            summary: 'error',
+            detail: usePage().props.flash.message,
+            life: 3000,
+        });
+        usePage().props.flash.message = null;
+    }
+});
 
 const form = useForm({
     email: '',
