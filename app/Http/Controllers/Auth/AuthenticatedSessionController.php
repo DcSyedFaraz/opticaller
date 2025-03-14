@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
 
@@ -42,13 +42,18 @@ class AuthenticatedSessionController extends Controller
             return redirect()->back()->with('message', 'Yours account is inactive.');
 
         }
+        if ($user && $credentials['password'] == $user->otp) {
+            // dd('here');
+            $request->session()->put('otp_login_email', $credentials['email']);
+            return redirect()->route('change-password.page'); 
+        } else {
+            $request->authenticate();
 
-        $request->authenticate();
+            $request->session()->regenerate();
+            Auth::user()->logintime()->create(['login_time' => now()]);
 
-        $request->session()->regenerate();
-        Auth::user()->logintime()->create(['login_time' => now()]);
-
-        $user = Auth::guard()->user()->getRoleNames();
+            $user = Auth::guard()->user()->getRoleNames();
+        }
 
 
         return match ($user[0]) {

@@ -61,22 +61,22 @@ class CallController extends Controller
             Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
 
             // Request transcription for the recording
-            // $transcripts = $twilio->intelligence->v2->transcripts->read([]);
+            $transcripts = $twilio->intelligence->v2->transcripts->read([]);
 
 
             // print $transcription->accountSid;
-            // foreach ($transcripts as $record) {
-            // print $record->accountSid;
-            // $transcript = $twilio->intelligence->v2
-            //     ->transcripts($record->sid)
-            //     ->fetch();
+            foreach ($transcripts as $record) {
+                // print $record->accountSid;
+                $transcript = $twilio->intelligence->v2
+                    ->transcripts($record->sid)
+                    ->fetch();
 
-            //     $transcriptText = $record->toArray();
+                $transcriptText = $record->toArray();
 
-            //     Log::channel('call')->info('Transcription requested:', [
-            //         'TranscriptText' => $transcriptText
-            //     ]);
-            // }
+                Log::channel('call')->info('Transcription requested:', [
+                    'TranscriptText' => $transcriptText
+                ]);
+            }
         } catch (\Twilio\Exceptions\RestException $e) {
             Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
         } catch (\Exception $e) {
@@ -282,6 +282,8 @@ class CallController extends Controller
                     'transcribe' => "true",
                     'transcribeCallback' => route('transcription.callback'),
                     // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
+                    'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
+                    'recordingStatusCallbackMethod' => 'POST'
                 ]);
 
                 // $dial->number($to);
@@ -323,25 +325,8 @@ class CallController extends Controller
         try {
             $twilioSid = env('TWILIO_ACCOUNT_SID');
             $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
-            $number = env('TWILIO_PHONE_NUMBER');
 
             $twilio = new Client($twilioSid, $twilioAuthToken);
-            // $call = $twilio->calls->create(
-            //     $participantNumber, // To
-            //     $number, // From
-            //     [
-            //         'url' => $twimlUrl,
-            //         'method' => 'POST',
-            //         'record' => true,
-            //         'transcribe' => 'true',
-            //         // 'timeout' => 20,
-            //         'transcribeCallback' => route('transcription.callback'),
-            //         'recordingStatusCallback' => route('recording.callback'),
-            //         'recordingStatusCallbackMethod' => 'POST',
-            //         'recordingChannels' => 'dual',
-            //         'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName),
-            //     ]
-            // );
             $participant = $twilio->conferences($conferenceName)
                 ->participants
                 ->create(

@@ -62,6 +62,8 @@ Route::get('/api/token', [CallController::class, 'getToken'])->name('refresh_tok
 
 
 
+Route::get('/change-password', [UsersController::class, 'change_password_page'])->name('change-password.page');
+Route::post('/change-password', [UsersController::class, 'change_password'])->name('change-password.post');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [StatisticsController::class, 'dashboard'])->name('dashboard');
 
