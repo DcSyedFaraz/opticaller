@@ -63,4 +63,9 @@ class TranscriptionController extends Controller
             'transcriptions' => $transcriptions,
         ]);
     }
+    public function destroy(Transcription $transcription)
+    {
+        $transcription->delete();
+        return redirect()->back()->with('message', 'Transcription deleted successfully.');
+    }
 }

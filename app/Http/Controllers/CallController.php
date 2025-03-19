@@ -40,47 +40,27 @@ class CallController extends Controller
         $twilio = new Client($twilioSid, $twilioAuthToken);
 
         try {
-
-            // Delete the recording after processing
-            // $twilio->recordings($recordingSid)->delete();
-
-
-
-            Log::channel('call')->info('Recording Callback:', $request->all());
-
             // Extract recording details
             $recordingSid = $request->input('RecordingSid');
             $recordingUrl = $request->input('RecordingUrl');
             $callSid = $request->input('CallSid');
+            $callerIdentity = $request->input('callerIdentity');
 
             // Initialize Twilio client
             $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
             try {
-                // Create a transcript using Twilio Intelligence
-                // $transcript = $twilio->intelligence->v2->transcripts->create(
-                //     "GAc6ca0b4c1682139e7a25ebe8e13587d9", // ServiceSid
-                //     [
-                //         "media_properties" => [
-                //             "source_sid" => $recordingSid,
-                //         ],
-                //         "callback" => [
-                //             "url" => route('transcription.callbacks'), // Your callback URL
-                //             "method" => "POST" // HTTP method for the callback
-                //         ]
-                //     ]
-                // );
-
-                // $transcriptSid = $transcript->sid;
 
                 // // Save a pending record in the database
-                DB::table('newtranscripts')->insert([
+                Transcription::insert([
                     'recording_sid' => $recordingSid,
+                    'callerIdentity' => $callerIdentity,
                     'call_sid' => $callSid,
                     'status' => 'pending',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
 
                 // Delete the recording (assuming Twilio fetches audio immediately)
                 $twilio->recordings($recordingSid)->delete();
@@ -109,7 +89,7 @@ class CallController extends Controller
 
             // Extract transcript details from the callback
             $transcriptSid = $request->input('transcript_sid');
-            Log::channel('call')->info('Transcription SID: ' . $transcriptSid);
+            Log::channel('call')->info("Transcription SID: $transcriptSid");
 
 
             try {
@@ -120,12 +100,13 @@ class CallController extends Controller
                     ->transcripts($transcriptSid)
                     ->fetch();
                 Log::channel('call')->info('Transcript:', $transcript->toArray());
-                Log::channel('call')->info('Transcript channel:', [
-                    'channel' => $transcript->channel
-                ]);
+
+                $sourceId = data_get($transcript->toArray(), 'channel.media_properties.source_sid');
+                Log::channel('call')->info('Transcript source_sid: ' . $sourceId);
+
                 // Fetch all sentences for the transcript
                 $sentences = $twilio->intelligence->v2->transcripts($transcriptSid)->sentences->read();
-                Log::channel('call')->info('Sentences:', $sentences);
+                // Log::channel('call')->info('Sentences:', $sentences);
                 // Construct the full transcription text
                 $fullText = '';
                 foreach ($sentences as $sentence) {
@@ -137,16 +118,16 @@ class CallController extends Controller
                 }
                 Log::channel('call')->info('Full Text: ' . $fullText);
                 // Save to database
-                DB::table('newtranscripts')
-                    ->updateOrInsert(
-                        ['transcript_sid' => $transcriptSid], // Matching condition
-                        [
-                            'transcription_text' => $fullText,
-                            'status' => 'completed',
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]
-                    );
+                Transcription::updateOrInsert(
+                    ['recording_sid' => $sourceId], // Matching condition
+                    [
+                        'transcription_sid' => $transcriptSid,
+                        'transcription_text' => $fullText,
+                        'status' => 'completed',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
 
 
                 Log::channel('call')->info("Transcript {$transcriptSid} completed and saved.");
@@ -171,7 +152,7 @@ class CallController extends Controller
 
         // Check if the transcript exists in the database
         // $transcriptRecord = DB::table('newtranscripts')
-        //     ->where('transcript_sid', $transcriptSid)
+        //     ->where('transcription_sid', $transcriptSid)
         //     ->firstOrCreate();
 
         // if (!$transcriptRecord) {
@@ -202,8 +183,7 @@ class CallController extends Controller
                 }
 
                 // Save to database
-                DB::table('newtranscripts')
-                    ->where('transcript_sid', $transcriptSid)
+                Transcription::where('transcription_sid', $transcriptSid)
                     ->updateOrInsert([
                         'transcription_text' => $fullText,
                         'status' => 'completed',
@@ -213,8 +193,7 @@ class CallController extends Controller
                 Log::channel('call')->info("Transcript {$transcriptSid} completed and saved.");
             } elseif ($status === 'failed') {
                 // Handle transcription failure
-                DB::table('newtranscripts')
-                    ->where('transcript_sid', $transcriptSid)
+                Transcription::where('transcription_sid', $transcriptSid)
                     ->update([
                         'status' => 'failed',
                         'updated_at' => now()
@@ -379,14 +358,14 @@ class CallController extends Controller
 
                 // $conferenceName = 'SupportConference_' . uniqid();
                 $conferenceName = $request->Caller;
-
+                $statusCallbackUrl = route('recording.callback') . '?callerIdentity=' . urlencode($conferenceName);
                 $dial = $response->dial('', [
                     'callerId' => $number,
                     'transcribe' => "true",
                     // 'transcribeCallback' => route('transcription.callback'),
                     // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
                     'record' => 'record-from-ringing-dual',
-                    'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
+                    'recordingStatusCallback' => $statusCallbackUrl,
                     'recordingStatusCallbackMethod' => 'GET'
                 ]);
 
@@ -572,7 +551,7 @@ class CallController extends Controller
         $dialCallStatus = $request->input('CallStatus'); // e.g., 'completed', 'no-answer', 'busy', etc.
         $conferenceName = $request->input('conferenceName'); // Retrieved from query parameter
 
-        Log::channel('call')->info("Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
+        // Log::channel('call')->info("Dial CallBack Conference Name: {$conferenceName}, {$dialCallStatus}");
 
         $response = new VoiceResponse();
 
@@ -628,42 +607,42 @@ class CallController extends Controller
         // Define statuses that should trigger the conference termination
         $endStatuses = ['no-answer', 'busy', 'failed', 'canceled', 'completed'];
 
-        if (in_array($dialCallStatus, $endStatuses)) {
-            $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+        // if (in_array($dialCallStatus, $endStatuses)) {
+        //     $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
-            try {
-                // Fetch the conference by friendly name and in-progress status
-                $conferences = $client->conferences->read([
-                    'friendlyName' => $conferenceName,
-                    'status' => 'in-progress'
-                ]);
+        //     try {
+        //         // Fetch the conference by friendly name and in-progress status
+        //         $conferences = $client->conferences->read([
+        //             'friendlyName' => $conferenceName,
+        //             'status' => 'in-progress'
+        //         ]);
 
-                if (!empty($conferences)) {
-                    $conference = $conferences[0];
-                    $conferenceSid = $conference->sid;
+        //         if (!empty($conferences)) {
+        //             $conference = $conferences[0];
+        //             $conferenceSid = $conference->sid;
 
-                    // Fetch all participants in the conference
-                    $participants = $client->conferences($conferenceSid)->participants->read();
+        //             // Fetch all participants in the conference
+        //             $participants = $client->conferences($conferenceSid)->participants->read();
 
-                    foreach ($participants as $participant) {
-                        $participantSid = $participant->sid;
-                        // Remove each participant by updating their status to 'completed'
-                        $client->conferences($conferenceSid)
-                            ->participants($participantSid)
-                            ->update(['status' => 'completed']);
-                        Log::channel('call')->info("Participant {$participantSid} removed from conference {$conferenceSid}.");
-                    }
+        //             foreach ($participants as $participant) {
+        //                 $participantSid = $participant->sid;
+        //                 // Remove each participant by updating their status to 'completed'
+        //                 $client->conferences($conferenceSid)
+        //                     ->participants($participantSid)
+        //                     ->update(['status' => 'completed']);
+        //                 Log::channel('call')->info("Participant {$participantSid} removed from conference {$conferenceSid}.");
+        //             }
 
-                    // Optionally, mark the conference as completed to ensure it's terminated
-                    $client->conferences($conferenceSid)->update(['status' => 'completed']);
-                    Log::channel('call')->info("Conference {$conferenceSid} marked as completed.");
-                } else {
-                    Log::channel('call')->warning("No active conference found with name {$conferenceName}.");
-                }
-            } catch (\Exception $e) {
-                Log::channel('call')->error("Error handling dial callback: " . $e->getMessage());
-            }
-        }
+        //             // Optionally, mark the conference as completed to ensure it's terminated
+        //             $client->conferences($conferenceSid)->update(['status' => 'completed']);
+        //             Log::channel('call')->info("Conference {$conferenceSid} marked as completed.");
+        //         } else {
+        //             // Log::channel('call')->warning("No active conference found with name {$conferenceName}.");
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::channel('call')->error("Error handling dial callback: " . $e->getMessage());
+        //     }
+        // }
 
         // Respond with empty TwiML
         $response = new VoiceResponse();

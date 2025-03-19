@@ -110,6 +110,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     ]);
     Route::get('/active/conferences', [CallController::class, 'listActiveConferences'])->name('addresses.conferences');
     Route::get('/active/transcription', [TranscriptionController::class, 'listActivetranscription'])->name('addresses.transcription');
+    Route::delete('/active/transcription/{transcription}', [TranscriptionController::class, 'destroy'])->name('transcriptions.destroy');
 
     Route::post('/field-visibility/bulk-update', [SubProjectFieldVisibilityController::class, 'bulkUpdate'])->name('field-visibility.bulkUpdate');
 
