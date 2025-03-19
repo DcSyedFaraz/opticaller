@@ -6,6 +6,7 @@ use App\Events\CallEnded;
 use App\Events\CallInitiated;
 use App\Events\IncomingCall;
 use App\Models\Transcription;
+use DB;
 use Http;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,94 +40,196 @@ class CallController extends Controller
         $twilio = new Client($twilioSid, $twilioAuthToken);
 
         try {
-            $transcriptions = $twilio->recordings($recordingSid)
-                ->transcriptions
-                ->read();
-
-            // Log the transcriptions
-            Log::channel('call')->info('Transcriptions:', ['transcriptions' => $transcriptions]);
-
-            // Process transcriptions as needed
-            foreach ($transcriptions as $transcription) {
-                // Example: Log each transcription's status and text
-                Log::channel('call')->info("Transcription SID: {$transcription->sid}");
-                Log::channel('call')->info("Transcription Status: {$transcription->status}");
-                Log::channel('call')->info("Transcription Text: {$transcription->transcriptionText}");
-                // Add any additional processing here
-            }
 
             // Delete the recording after processing
-            $twilio->recordings($recordingSid)->delete();
-
-            Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
-
-            // Request transcription for the recording
-            $transcripts = $twilio->intelligence->v2->transcripts->read([]);
+            // $twilio->recordings($recordingSid)->delete();
 
 
-            // print $transcription->accountSid;
-            foreach ($transcripts as $record) {
-                // print $record->accountSid;
-                $transcript = $twilio->intelligence->v2
-                    ->transcripts($record->sid)
-                    ->fetch();
 
-                $transcriptText = $record->toArray();
+            Log::channel('call')->info('Recording Callback:', $request->all());
 
-                Log::channel('call')->info('Transcription requested:', [
-                    'TranscriptText' => $transcriptText
+            // Extract recording details
+            $recordingSid = $request->input('RecordingSid');
+            $recordingUrl = $request->input('RecordingUrl');
+            $callSid = $request->input('CallSid');
+
+            // Initialize Twilio client
+            $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+            try {
+                // Create a transcript using Twilio Intelligence
+                // $transcript = $twilio->intelligence->v2->transcripts->create(
+                //     "GAc6ca0b4c1682139e7a25ebe8e13587d9", // ServiceSid
+                //     [
+                //         "media_properties" => [
+                //             "source_sid" => $recordingSid,
+                //         ],
+                //         "callback" => [
+                //             "url" => route('transcription.callbacks'), // Your callback URL
+                //             "method" => "POST" // HTTP method for the callback
+                //         ]
+                //     ]
+                // );
+
+                // $transcriptSid = $transcript->sid;
+
+                // // Save a pending record in the database
+                DB::table('newtranscripts')->insert([
+                    'recording_sid' => $recordingSid,
+                    'call_sid' => $callSid,
+                    'status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now()
                 ]);
+
+                // Delete the recording (assuming Twilio fetches audio immediately)
+                $twilio->recordings($recordingSid)->delete();
+                Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
+
+            } catch (\Twilio\Exceptions\RestException $e) {
+                Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
             }
-        } catch (\Twilio\Exceptions\RestException $e) {
-            Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
         } catch (\Exception $e) {
             Log::channel('call')->error('General error:', ['message' => $e->getMessage()]);
         }
+
 
         // Optionally, save recording details to your database
         // Recording::create([...]);
 
         return response('OK', 200);
+
     }
 
     public function handleTranscriptionCallback(Request $request)
     {
         // Log transcription details
-        Log::channel('call')->info('Transcription Callback:', $request->all());
+        Log::channel('call')->info('Transcription Callback:', $request->all()); {
+            // Log the incoming callback for debugging
 
-        $transcriptionSid = $request->input('TranscriptionSid');
-        $transcriptionText = $request->input('TranscriptionText');
-        $recordingSid = $request->input('RecordingSid');
+            // Extract transcript details from the callback
+            $transcriptSid = $request->input('transcript_sid');
+            Log::channel('call')->info('Transcription SID: ' . $transcriptSid);
 
-        // Optionally, save transcription details to your database
-        Transcription::create([
-            'transcription_sid' => $transcriptionSid,
-            'recording_sid' => $recordingSid,
-            'transcription_text' => $transcriptionText,
-        ]);
 
-        // You can also trigger other actions, such as notifying users or processing the text
+            try {
+                // Initialize Twilio client
+                $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
-        return response()->json(['status' => 'Transcription received']);
+                $transcript = $twilio->intelligence->v2
+                    ->transcripts($transcriptSid)
+                    ->fetch();
+                Log::channel('call')->info('Transcript:', $transcript->toArray());
+                Log::channel('call')->info('Transcript channel:', [
+                    'channel' => $transcript->channel
+                ]);
+                // Fetch all sentences for the transcript
+                $sentences = $twilio->intelligence->v2->transcripts($transcriptSid)->sentences->read();
+                Log::channel('call')->info('Sentences:', $sentences);
+                // Construct the full transcription text
+                $fullText = '';
+                foreach ($sentences as $sentence) {
+                    $speaker = $sentence->mediaChannel == 1 ? 'Agent' : 'Caller';
+                    // $channel = $sentence->mediaChannel ?? 'Unknown';
+                    $text = $sentence->transcript ?? '';
+                    // $fullText .= "[Channel {$channel}]: {$text}\n";
+                    $fullText .= "[{$speaker}]: {$text}\n";
+                }
+                Log::channel('call')->info('Full Text: ' . $fullText);
+                // Save to database
+                DB::table('newtranscripts')
+                    ->updateOrInsert(
+                        ['transcript_sid' => $transcriptSid], // Matching condition
+                        [
+                            'transcription_text' => $fullText,
+                            'status' => 'completed',
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
+                    );
+
+
+                Log::channel('call')->info("Transcript {$transcriptSid} completed and saved.");
+
+            } catch (\Exception $e) {
+                Log::channel('call')->error("Error processing transcript {$transcriptSid}: {$e->getMessage()}");
+                // Optionally mark as 'error' or implement retry logic
+                return response()->json(['status' => 'error'], 500);
+            }
+
+            return response()->json(['status' => 'ok']);
+        }
     }
     public function handleTranscriptionCallbacks(Request $request)
     {
-        // Log transcription details
-        Log::channel('call')->info('Transcription Callbackssssss:', $request->all());
-        $twilioSid = env('TWILIO_ACCOUNT_SID');
-        $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
-        $twilio = new Client($twilioSid, $twilioAuthToken);
-        $transcript = $twilio->intelligence->v2
-            ->transcripts($request->TranscriptionSid)
-            ->fetch();
+        // Log the incoming callback for debugging
+        Log::channel('call')->info('Transcript Callback:', $request->all());
 
-        // $transcriptText = $$request->toArray();
+        // Extract transcript details from the callback
+        $transcriptSid = $request->input('Sid');
+        $status = $request->input('Status');
 
-        Log::channel('call')->info('Transcription got:', [
-            'TranscriptText' => $transcript->toArray()
-        ]);
+        // Check if the transcript exists in the database
+        // $transcriptRecord = DB::table('newtranscripts')
+        //     ->where('transcript_sid', $transcriptSid)
+        //     ->firstOrCreate();
 
-        return response()->json(['status' => 'Transcription received']);
+        // if (!$transcriptRecord) {
+        //     Log::channel('call')->warning("Transcript {$transcriptSid} not found in database.");
+        //     return response()->json(['status' => 'error'], 404);
+        // }
+
+        // // Skip if already processed
+        // if ($transcriptRecord->status !== 'pending') {
+        //     Log::channel('call')->info("Transcript {$transcriptSid} already processed with status: {$transcriptRecord->status}");
+        //     return response()->json(['status' => 'already_processed']);
+        // }
+
+        try {
+            if ($status === 'completed') {
+                // Initialize Twilio client
+                $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+
+                // Fetch all sentences for the transcript
+                $sentences = $twilio->intelligence->v2->transcripts($transcriptSid)->sentences->read();
+
+                // Construct the full transcription text
+                $fullText = '';
+                foreach ($sentences as $sentence) {
+                    $channel = $sentence->mediaChannel ?? 'Unknown';
+                    $text = $sentence->transcript ?? '';
+                    $fullText .= "[Channel {$channel}]: {$text}\n";
+                }
+
+                // Save to database
+                DB::table('newtranscripts')
+                    ->where('transcript_sid', $transcriptSid)
+                    ->updateOrInsert([
+                        'transcription_text' => $fullText,
+                        'status' => 'completed',
+                        'updated_at' => now()
+                    ]);
+
+                Log::channel('call')->info("Transcript {$transcriptSid} completed and saved.");
+            } elseif ($status === 'failed') {
+                // Handle transcription failure
+                DB::table('newtranscripts')
+                    ->where('transcript_sid', $transcriptSid)
+                    ->update([
+                        'status' => 'failed',
+                        'updated_at' => now()
+                    ]);
+                Log::channel('call')->error("Transcript {$transcriptSid} failed.");
+            } else {
+                Log::channel('call')->info("Transcript {$transcriptSid} received status: {$status}. No action taken.");
+            }
+        } catch (\Exception $e) {
+            Log::channel('call')->error("Error processing transcript {$transcriptSid}: {$e->getMessage()}");
+            // Optionally mark as 'error' or implement retry logic
+            return response()->json(['status' => 'error'], 500);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
     public function getToken(Request $request)
     {
@@ -280,10 +383,11 @@ class CallController extends Controller
                 $dial = $response->dial('', [
                     'callerId' => $number,
                     'transcribe' => "true",
-                    'transcribeCallback' => route('transcription.callback'),
+                    // 'transcribeCallback' => route('transcription.callback'),
                     // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
+                    'record' => 'record-from-ringing-dual',
                     'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
-                    'recordingStatusCallbackMethod' => 'POST'
+                    'recordingStatusCallbackMethod' => 'GET'
                 ]);
 
                 // $dial->number($to);
@@ -367,8 +471,8 @@ class CallController extends Controller
         ]);
         $response->record([
             'transcribe' => true,
-            'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
-            'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
+            // 'transcribeCallback' => route('transcription.callback'), // URL to handle transcription
+            // 'recordingStatusCallback' => route('recording.callback'), // URL to handle recording status
             'recordingStatusCallbackMethod' => 'POST'
         ]);
         $dial->conference($conferenceName, [
