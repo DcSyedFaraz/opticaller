@@ -1431,7 +1431,4 @@ main {
     @apply !py-0
 }
 
-.p-dialog-header {
-    @apply !p-0
-}
 </style>

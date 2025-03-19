@@ -10,9 +10,8 @@
             <DataTable :value="transcriptions.data" :paginator="false" responsiveLayout="scroll"
                 class="p-datatable-striped" :sortField="currentSortField" :sortOrder="currentSortOrder" @sort="onSort">
                 <Column field="id" header="ID" sortable></Column>
-                <Column field="transcription_sid" header="Transcription SID" sortable></Column>
+                <Column field="callerIdentity" header="Caller"></Column>
                 <Column field="recording_sid" header="Recording SID" sortable></Column>
-                <Column field="transcription_text" header="Transcription Text"></Column>
                 <Column field="created_at" header="Created At" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created_at) }}
@@ -23,6 +22,21 @@
                         {{ formatDate(data.updated_at) }}
                     </template>
                 </Column>
+                <!-- New Actions Column -->
+                <Column header="Actions" class="action-column">
+                    <template #body="{ data }">
+                        <Button icon="pi pi-eye" class="p-button-rounded p-button-success p-mr-2" title="Show Details"
+                            @click="showDetails(data)" />
+                        <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" title="Delete Transcription"
+                            @click="confirmDelete(data)" />
+                    </template>
+                </Column>
+                <template #empty>
+                    <div class="empty-state">
+                        <i class="pi pi-info-circle" style="font-size: 2rem; color: #6c757d;"></i>
+                        <p>No transcriptions available.</p>
+                    </div>
+                </template>
             </DataTable>
 
             <!-- Paginator Component -->
@@ -32,6 +46,15 @@
                     :page="transcriptions.current_page" @page="onPageChange"
                     template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink" />
             </div>
+            <!-- Modal for Showing Transcription Details -->
+            <Dialog v-model:visible="showModal" header="Transcription Details" :modal="true" :style="{ width: '50vw' }">
+                <pre
+                    v-if="selectedTranscription?.transcription_text">{{ selectedTranscription.transcription_text }}</pre>
+                <p v-else>No transcription text available.</p>
+                <template #footer>
+                    <Button label="Close" @click="showModal = false" />
+                </template>
+            </Dialog>
         </div>
     </AuthenticatedLayout>
 </template>
@@ -51,6 +74,8 @@ export default {
         return {
             currentSortField: 'created_at',
             currentSortOrder: -1,
+            showModal: false, // Controls the visibility of the details modal
+            selectedTranscription: null,
         };
     },
     mounted() {
@@ -104,10 +129,84 @@ export default {
                 preserveScroll: true,
             });
         },
+        showDetails(data) {
+            this.selectedTranscription = data;
+            this.showModal = true;
+        },
+        confirmDelete(data) {
+            this.$confirm.require({
+                message: `Are you sure you want to delete transcription ${data.transcription_sid}?`,
+                header: 'Confirm Deletion',
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-danger',
+                rejectClass: 'p-button-secondary p-button-text',
+                accept: () => {
+                    this.deleteTranscription(data);
+                },
+                reject: () => {
+                    // Optional: Handle rejection (e.g., log or notify)
+                    console.log('Deletion cancelled');
+                },
+            });
+        },
+        // Delete a transcription with confirmation
+        deleteTranscription(data) {
+            this.$inertia.delete(route('transcriptions.destroy', data.id), {
+                onSuccess: () => {
+                    this.$inertia.reload(); // Refresh the page after successful deletion
+                },
+                onError: (errors) => {
+                    alert('Failed to delete transcription: ' + (errors.message || 'Unknown error'));
+                },
+            });
+        },
     },
 };
 </script>
-
 <style scoped>
-/* Optional: Customize styles if needed */
+.action-column {
+    text-align: center;
+    width: 120px;
+}
+
+.p-button {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.p-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.p-mr-2 {
+    margin-right: 8px;
+}
+
+pre {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background-color: #f8f8f8;
+    padding: 1rem;
+    border-radius: 4px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Style the empty state */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    /* Gray color for a subtle look */
+}
+
+.empty-state i {
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    margin: 0;
+}
 </style>
