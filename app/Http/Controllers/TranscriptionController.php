@@ -55,7 +55,7 @@ class TranscriptionController extends Controller
         $sortField = $request->input('sortField', 'created_at');
         $sortOrder = $request->input('sortOrder', 'desc');
 
-        $transcriptions = Transcription::orderBy($sortField, $sortOrder)
+        $transcriptions = Transcription::where('status', 'completed')->orderBy($sortField, $sortOrder)
             ->paginate($perPage, ['*'], 'page', $page)
             ->appends($request->only(['per_page', 'sortField', 'sortOrder']));
 
