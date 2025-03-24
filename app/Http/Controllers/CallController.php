@@ -45,22 +45,43 @@ class CallController extends Controller
             $recordingUrl = $request->input('RecordingUrl');
             $callSid = $request->input('CallSid');
             $callerIdentity = $request->input('callerIdentity');
+            $addressID = $request->input('addressID');
+            $toNumber = $request->input('toNumber');
 
             // Initialize Twilio client
             $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
             try {
+                $serviceSid = env('TWILIO_VOICE_INTELLIGENCE_SERVICE_SID');
 
-                // // Save a pending record in the database
+                // $transcription = $twilio
+                //     ->recordings($recordingSid)
+                //     ->transcriptions
+                //     ->create([
+                //         'transcriptionServiceSid' => $serviceSid,
+                //     ]);
+
+                // Save a pending record in the database
                 Transcription::insert([
                     'recording_sid' => $recordingSid,
                     'callerIdentity' => $callerIdentity,
+                    'address_id' => $addressID,
+                    'to_number' => $toNumber,
                     'call_sid' => $callSid,
                     'status' => 'pending',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
-
+                // Transcription::updateOrInsert(
+                //     ['call_sid' => $callSid], // Matching condition
+                //     [
+                //         'recording_sid' => $recordingSid,
+                //         'callerIdentity' => $callerIdentity,
+                //         'status' => 'pending',
+                //         'created_at' => now(),
+                //         'updated_at' => now()
+                //     ]
+                // );
 
                 // Delete the recording (assuming Twilio fetches audio immediately)
                 $twilio->recordings($recordingSid)->delete();
@@ -358,15 +379,16 @@ class CallController extends Controller
 
                 // $conferenceName = 'SupportConference_' . uniqid();
                 $conferenceName = $request->Caller;
+                $addressID = $request->addressID;
                 $statusCallbackUrl = route('recording.callback') . '?callerIdentity=' . urlencode($conferenceName);
                 $dial = $response->dial('', [
                     'callerId' => $number,
                     'transcribe' => "true",
                     // 'transcribeCallback' => route('transcription.callback'),
                     // 'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
-                    'record' => 'record-from-ringing-dual',
-                    'recordingStatusCallback' => $statusCallbackUrl,
-                    'recordingStatusCallbackMethod' => 'GET'
+                    // 'record' => 'record-from-ringing-dual',
+                    // 'recordingStatusCallback' => $statusCallbackUrl,
+                    // 'recordingStatusCallbackMethod' => 'GET'
                 ]);
 
                 // $dial->number($to);
@@ -381,7 +403,7 @@ class CallController extends Controller
 
                 ]);
 
-                $this->addParticipantToConference($conferenceName, $to);
+                $this->addParticipantToConference($conferenceName, $to, $addressID);
             } else {
                 // Incoming call
                 $response->say('Thank you for calling!');
@@ -401,7 +423,7 @@ class CallController extends Controller
             return response($response)->header('Content-Type', 'text/xml');
         }
     }
-    protected function addParticipantToConference($conferenceName, $participantNumber)
+    protected function addParticipantToConference($conferenceName, $participantNumber, $addressID)
     {
         $twimlUrl = route('conference.joinConference') . '?conference_name=' . urlencode($conferenceName);
 
@@ -422,10 +444,27 @@ class CallController extends Controller
                         'endConferenceOnExit' => true,
                         'timeout' => 20,
                         'statusCallback' => route('dial.callback') . '?conferenceName=' . urlencode($conferenceName), // Optional: URL to receive status updates
-                        'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed']
+                        'statusCallbackEvent' => ['initiated', 'ringing', 'answered', 'completed'],
+                        'record' => 'true', // Start recording after answer
+                        'recordingStatusCallback' => route('recording.callback') . '?callerIdentity=' . urlencode($conferenceName) . '&addressID=' . urlencode($addressID) . '&toNumber=' . urlencode($participantNumber),
+                        'recordingStatusCallbackMethod' => 'GET'
                     ]
                 );
+            // $callSid = $participant->callSid;
 
+            // $call = $twilio->calls($callSid)->fetch();
+
+            // // Update the call to start recording
+            // $call->update([
+            //     'record' => 'record-from-answer-dual', // Start recording after answer
+            //     'recordingStatusCallback' => route('recording.callback') . '?callerIdentity=' . urlencode($conferenceName),
+            //     'recordingStatusCallbackMethod' => 'GET'
+            // ]);
+
+            // Transcription::create([
+            //     'call_sid' => $callSid,
+            //     'to_number' => $participantNumber,
+            // ]);
 
             Log::channel('call')->info("Outbound call initiated to {$participantNumber} with Call SID: " . $participant);
         } catch (\Twilio\Exceptions\TwilioException $e) {

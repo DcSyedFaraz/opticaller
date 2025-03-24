@@ -30,7 +30,7 @@ class TranscriptionController extends Controller
                 print $record->transcript . PHP_EOL;
             }
 
-            return response()->json($transcription[0]->toArray());
+            // return response()->json($transcription[0]->toArray());
             // Retrieve the transcription text
             $transcriptDetails = $twilio->intelligence->v2->transcripts('GT12a782ff731a0862a74aa06f27455d08')
                 ->fetch();

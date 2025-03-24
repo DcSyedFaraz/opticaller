@@ -13,6 +13,10 @@ export default {
             type: String,
             default: "",
         },
+        addressID: {
+            type: Number,
+            default: 0,
+        },
         isPaused: {
             type: Boolean,
             default: false,
@@ -192,10 +196,11 @@ export default {
 
             try {
                 this.log(`Initiating call to: ${toNumber}`);
+                console.log(this.addressID, 'addressID');
                 this.activeConnection = await this.device.connect({
                     params: {
                         To: toNumber,
-                        AgentId: 'agentId',
+                        addressID: this.addressID,
                     },
                 });
 
@@ -246,7 +251,7 @@ export default {
                     ? {
                         // conferenceSid: this.selectedConference.sid,
                         // or
-                        conferenceName: `client:${this.identity}`,
+                        conferenceName: `${this.identity}`,
                     }
                     : {};
 
