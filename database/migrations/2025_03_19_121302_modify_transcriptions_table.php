@@ -20,6 +20,8 @@ return new class extends Migration {
             $table->string('call_sid')->nullable()->after('recording_sid');
             // status is required so we set a default (adjust as needed)
             $table->string('status')->default('pending')->after('call_sid');
+            $table->integer('address_id')->nullable()->after('status');
+            $table->string('to_number')->nullable()->after('address_id');
         });
     }
 
@@ -30,6 +32,8 @@ return new class extends Migration {
             $table->dropColumn('callerIdentity');
             $table->dropColumn('call_sid');
             $table->dropColumn('status');
+            $table->dropColumn('address_id');
+            $table->dropColumn('to_number');
         });
     }
 };

@@ -617,7 +617,7 @@
             </Dialog>
 
             <!-- Twilio Call Component -->
-            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" ref="twilioCallComponent" :isPaused="isPaused"
+            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" :addressID="this.localAddress.id" ref="twilioCallComponent" :isPaused="isPaused"
                 @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
                 @call-accepted="startCallDurationTimer" @call-disconnected="handleCallDisconnected"
                 @twilio-error="handleTwilioError" />
