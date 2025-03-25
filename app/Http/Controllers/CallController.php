@@ -54,12 +54,15 @@ class CallController extends Controller
             try {
                 $serviceSid = env('TWILIO_VOICE_INTELLIGENCE_SERVICE_SID');
 
-                // $transcription = $twilio
-                //     ->recordings($recordingSid)
-                //     ->transcriptions
-                //     ->create([
-                //         'transcriptionServiceSid' => $serviceSid,
-                //     ]);
+            $transcript = $twilio->intelligence->v2->transcripts->create(
+                $serviceSid, // ServiceSid
+                [
+                    "media_properties" => [
+                        "source_sid" => $recordingSid,
+                    ],
+                ]
+            );
+            Log::channel('call')->info('Manual Transcript : ' . $transcript->sid . ' sid ' . $serviceSid);
 
                 // Save a pending record in the database
                 Transcription::insert([
@@ -83,7 +86,6 @@ class CallController extends Controller
                 //     ]
                 // );
 
-                // Delete the recording (assuming Twilio fetches audio immediately)
                 $twilio->recordings($recordingSid)->delete();
                 Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
 
@@ -145,7 +147,6 @@ class CallController extends Controller
                         'transcription_sid' => $transcriptSid,
                         'transcription_text' => $fullText,
                         'status' => 'completed',
-                        'created_at' => now(),
                         'updated_at' => now()
                     ]
                 );

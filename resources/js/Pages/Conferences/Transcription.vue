@@ -11,7 +11,7 @@
                 class="p-datatable-striped" :sortField="currentSortField" :sortOrder="currentSortOrder" @sort="onSort">
                 <Column field="id" header="ID" sortable></Column>
                 <Column field="callerIdentity" header="Caller"></Column>
-                <Column field="recording_sid" header="Recording SID" sortable></Column>
+                <Column field="address_id" header="Address ID" sortable></Column>
                 <Column field="created_at" header="Created At" sortable>
                     <template #body="{ data }">
                         {{ formatDate(data.created_at) }}
