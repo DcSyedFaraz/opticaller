@@ -65,6 +65,10 @@ class Address extends Model
     {
         return $this->hasMany(AddressStatus::class);
     }
+    public function transcriptions()
+    {
+        return $this->hasMany(Transcription::class,'address_id','id');
+    }
 
     /**
      * Get the latest status record for the address.

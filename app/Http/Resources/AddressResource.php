@@ -38,6 +38,7 @@ class AddressResource extends JsonResource
             'company_id' => $this->company_id,
             'deal_id' => $this->deal_id,
             'sub_project_title' => optional($this->subproject)->title,
+            'transcriptions' => $this->transcriptions,
             'project_id' => optional($this->project)->id,
             'project_title' => optional($this->project)->title,
             'activities' => $this->calLogs->map(function ($activity) {
