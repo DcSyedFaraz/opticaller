@@ -62,7 +62,7 @@ class CallController extends Controller
                     ],
                 ]
             );
-            Log::channel('call')->info('Manual Transcript : ' . $transcript->sid . ' sid ' . $serviceSid);
+            Log::channel('call')->info("Manual Transcript : {$transcript->sid} sid $serviceSid");
 
                 // Save a pending record in the database
                 Transcription::insert([
@@ -86,8 +86,8 @@ class CallController extends Controller
                 //     ]
                 // );
 
-                $twilio->recordings($recordingSid)->delete();
-                Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
+                // $twilio->recordings($recordingSid)->delete();
+                // Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
 
             } catch (\Twilio\Exceptions\RestException $e) {
                 Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
