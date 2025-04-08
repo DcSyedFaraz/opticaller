@@ -52,42 +52,32 @@ class CallController extends Controller
             $twilio = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
 
             try {
-                $serviceSid = env('TWILIO_VOICE_INTELLIGENCE_SERVICE_SID');
+                // $serviceSid = env('TWILIO_VOICE_INTELLIGENCE_SERVICE_SID');
 
-            $transcript = $twilio->intelligence->v2->transcripts->create(
-                $serviceSid, // ServiceSid
-                [
-                    "media_properties" => [
-                        "source_sid" => $recordingSid,
-                    ],
-                ]
-            );
-            Log::channel('call')->info("Manual Transcript : {$transcript->sid} sid $serviceSid");
-
-                // Save a pending record in the database
-                Transcription::insert([
-                    'recording_sid' => $recordingSid,
-                    'callerIdentity' => $callerIdentity,
-                    'address_id' => $addressID,
-                    'to_number' => $toNumber,
-                    'call_sid' => $callSid,
-                    'status' => 'pending',
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-                // Transcription::updateOrInsert(
-                //     ['call_sid' => $callSid], // Matching condition
+                // $transcript = $twilio->intelligence->v2->transcripts->create(
+                //     $serviceSid, // ServiceSid
                 //     [
-                //         'recording_sid' => $recordingSid,
-                //         'callerIdentity' => $callerIdentity,
-                //         'status' => 'pending',
-                //         'created_at' => now(),
-                //         'updated_at' => now()
+                //         "media_properties" => [
+                //             "source_sid" => $recordingSid,
+                //         ],
                 //     ]
                 // );
+                // Log::channel('call')->info("Manual Transcript : {$transcript->sid} sid $serviceSid");
 
-                // $twilio->recordings($recordingSid)->delete();
-                // Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
+                // // Save a pending record in the database
+                // Transcription::insert([
+                //     'recording_sid' => $recordingSid,
+                //     'callerIdentity' => $callerIdentity,
+                //     'address_id' => $addressID,
+                //     'to_number' => $toNumber,
+                //     'call_sid' => $callSid,
+                //     'status' => 'pending',
+                //     'created_at' => now(),
+                //     'updated_at' => now()
+                // ]);
+
+                $twilio->recordings($recordingSid)->delete();
+                Log::channel('call')->info("Recording with SID {$recordingSid} has been deleted successfully.");
 
             } catch (\Twilio\Exceptions\RestException $e) {
                 Log::channel('call')->error('Error requesting transcription:', ['message' => $e->getMessage()]);
