@@ -77,5 +77,14 @@ class User extends Authenticatable
         return $this->hasMany(Activity::class, 'user_id');
     }
 
-
+    public function lastCall()
+    {
+        return $this->hasOne(Activity::class, 'user_id')
+            ->where('activity_type', 'call')->orderByDesc('id');
+    }
+    public function callActivities()
+    {
+        return $this->hasMany(Activity::class, 'user_id')
+            ->where('activity_type', 'call');
+    }
 }
