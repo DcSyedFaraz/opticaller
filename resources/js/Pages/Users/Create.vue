@@ -18,14 +18,23 @@
                 </div>
                 <div class="mb-4 flex items-center">
                     <Checkbox binary v-model="form.auto_calling" inputId="auto_calling" class="mr-2" />
-                    <label for="auto_calling" class="text-gray-700">Enable Auto Calling</label>
+                    <label for="auto_calling" class="text-gray-700 my-auto">Enable Auto Calling</label>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 flex items-center">
+
+                    <Checkbox binary v-model="form.invite_user" inputId="invite_user" class="mr-2" />
+                    <label for="invite_user" class="text-gray-700 my-auto">
+                        Send invitation email instead of setting a password
+                    </label>
+
+                </div>
+
+                <div class="mb-4" v-if="!form.invite_user">
                     <label for="password" class="block text-gray-700">Password</label>
                     <InputText v-model="form.password" id="password"
                         class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
                 </div>
-                <div class="mb-4">
+                <div class="mb-4" v-if="!form.invite_user">
                     <label for="password_confirmation" class="block text-gray-700">Confirm Password</label>
                     <InputText v-model="form.password_confirmation" id="password_confirmation"
                         class="mt-1 block w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300" />
@@ -54,6 +63,7 @@ export default {
                 email: '',
                 password: '',
                 auto_calling: '',
+                invite_user: false,
                 password_confirmation: '',
                 roles: []
             })
@@ -61,9 +71,16 @@ export default {
     },
     methods: {
         submit() {
+            if (this.form.invite_user) {
+                this.form.password = ''
+                this.form.password_confirmation = ''
+            }
             this.form.post(route('users.store'), {
                 onSuccess: () => {
-                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'User created successfully', life: 3000 });
+                    const detail = this.form.invite_user
+                        ? 'User invited successfully'
+                        : 'User created successfully'
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail, life: 3000 })
                 },
                 onError: (errors) => {
                     console.log(errors);

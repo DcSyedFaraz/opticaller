@@ -177,7 +177,24 @@ class StatisticsController extends Controller
     }
     public function dashboard(Request $request)
     {
-        $user = auth()->user(); // Get the authenticated user
+        $user = auth()->user(); // Get the authenticated
+        $usersWithCalls = null;
+
+        if ($user->hasRole('admin')) {
+            $usersWithCalls = User::role('user')
+                ->whereHas('callActivities')
+                ->with('lastCall')
+                ->whereHas('lastCall')
+                ->orderBy(
+                    DB::table('activities')
+                        ->select('updated_at')
+                        ->whereColumn('user_id', 'users.id')
+                        ->orderBy('updated_at', 'desc')
+                        ->limit(1),
+                    'desc'
+                )
+                ->get();
+        }
 
         // Retrieve date range from request or set default
         $startDate = $request->input('startDate')
@@ -290,6 +307,7 @@ class StatisticsController extends Controller
             'callVolumeGraphData' => $callVolumeGraphData,
             'successRate' => $successRate,
             'processingTimeGraphData' => $processingTimeGraphData,
+            'usersWithCalls' => $usersWithCalls,
 
         ];
 

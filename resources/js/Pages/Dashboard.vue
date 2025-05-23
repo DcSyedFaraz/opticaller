@@ -3,6 +3,9 @@
     <Head title="Dashboard" />
     <AuthenticatedLayout>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-3">
+            <!-- Last Call -->
+            <!-- {{data.usersWithCalls}} -->
+
             <!-- Today's Call-Out Count -->
             <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between">
                 <div class="grid grid-cols-4">
@@ -95,10 +98,10 @@
                     <div class="col-span-2">
                         <p class="font-sans font-semibold text-sm">Login Time</p>
                         <h1 class="font-sans font-extrabold text-2xl">{{ new
-                                Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
-                                    hour: '2-digit', minute:
-                                        '2-digit', hour12: true
-                                }) }}</h1>
+                            Date($page.props.auth.logintime).toLocaleTimeString('en-US', {
+                                hour: '2-digit', minute:
+                                    '2-digit', hour12: true
+                            }) }}</h1>
                     </div>
                     <div class="col-span-1 text-end">
                         <span class="pi pi-clock  !text-[3rem] text-[#77A697] ml-2" data-pc-section="icon"></span>
@@ -119,10 +122,87 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-3 ">
+            <div v-if="data.usersWithCalls" class="bg-white p-4 rounded-lg shadow-md xl:col-span-2 col-span-1">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Recent User Activity</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-600">{{ data.usersWithCalls?.length || 0 }} Users</span>
+                    </div>
+                </div>
+
+                <!-- User List with Custom Scroll -->
+                <div class="max-h-80 overflow-y-auto custom-scrollbar space-y-3"
+                    style="max-height:170px; overflow-y:auto;">
+                    <div v-for="(user, index) in data.usersWithCalls" :key="user.id || index"
+                        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                        <!-- User Info -->
+                        <div class="flex items-center space-x-3">
+                            <!-- Avatar -->
+                            <div :class="[
+                                'w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm',
+                                getAvatarColor(index)
+                            ]">
+                                {{ getUserInitials(user.name) }}
+                            </div>
+
+                            <!-- User Details -->
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-900">{{ user.name }}</span>
+                                <!-- <span class="text-xs text-gray-500">{{ user.department || 'Call Center' }}</span> -->
+                            </div>
+                        </div>
+                        <!-- Call Info -->
+                        <div class="flex flex-col items-end">
+                            <div class="flex items-center space-x-2">
+                                <!-- Call Status Indicator -->
+                                <div :class="[
+                                    'w-2 h-2 rounded-full',
+                                    getCallStatus(user.last_call.updated_at) === 'recent' ? 'bg-green-500' :
+                                        getCallStatus(user.last_call.updated_at) === 'moderate' ? 'bg-yellow-500' : 'bg-red-500'
+                                ]"></div>
+
+                                <!-- Last Call Time -->
+                                <span class="text-sm font-medium text-gray-700">
+                                    {{ formatLastCallTime(user.last_call.updated_at) }}
+                                </span>
+                            </div>
+
+                            <!-- Call Count Badge -->
+                            <div v-if="user.callCount" class="mt-1">
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ user.callCount }} calls today
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="!data.usersWithCalls || data.usersWithCalls.length === 0" class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500">No user activity found</p>
+                    </div>
+                </div>
+
+                <!-- View All Button -->
+                <!-- <div class="mt-4 pt-3 border-t border-gray-200">
+                    <button
+                        class="w-full text-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+                        View All User Activity →
+                    </button>
+                </div> -->
+            </div>
             <!-- Notifications -->
-            <div class="bg-white p-4 rounded-lg shadow-md xl:flex justify-between hidden md:col-span-2">
+            <div v-else class="bg-white p-4 rounded-lg shadow-md xl:flex justify-between hidden md:col-span-2">
                 <div class="flex flex-col justify-between w-full">
-                    <div >
+                    <div>
                         <h3 class="text-sm font-semibold mb-4">Notifications</h3>
                         <p class="text-gray-600 mb-6">
                             Alerts for follow-up, assign projects or system updates. Only show if notifications are
@@ -130,7 +210,6 @@
                         </p>
                     </div>
                     <div class="my-auto">
-                        <!-- Moved the Read button here -->
                         <button
                             class="bg-[#C88352] hover:bg-orange-600 text-white text-xl px-[5rem] h-[49px] py-2 rounded">Read</button>
                     </div>
@@ -151,7 +230,6 @@
                         <Button icon="pi pi-trash" class="" />
                     </div>
                     <div class="my-auto flex justify-center">
-                        <!-- Moved the SVG here -->
                         <svg width="105" height="111" viewBox="0 0 105 111" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -166,8 +244,10 @@
             </div>
 
 
+
             <!-- Today's Success Call-Out Rate -->
-            <div class="bg-white p-2 rounded-lg shadow flex xl:col-span-1 col-span-2 items-center justify-center w-full xl:h-full h-[14rem]">
+            <div
+                class="bg-white p-2 rounded-lg shadow flex xl:col-span-1 col-span-2 items-center justify-center w-full xl:h-full h-[14rem]">
                 <div class="flex flex-col items-center w-full h-full">
                     <h4 class="text-gray-600 mb-2 font-semibold text-center">Today`s Success Call-Out Rate</h4>
                     <div class="circular-progress-bar relative flex items-center justify-center w-full h-full">
@@ -205,7 +285,7 @@
                             <h2 class=" text-sm font-extrabold">Average weekly address processing time</h2>
                             <div class="grid items-center mt-2">
                                 <span class="text-4xl font-semibold text-gray-800">{{
-                                formatTime(data.averageProcessingTime) }}</span>
+                                    formatTime(data.averageProcessingTime) }}</span>
                             </div>
                         </div>
                         <div>
@@ -226,21 +306,6 @@
                         fill="white" />
                 </svg>
             </span> Start Call</Link>
-
-            <!-- <Link :href="route('dash')" class="bg-[#383838] text-white flex px-[4rem] py-3 text-xl mx-2 rounded mb-2">
-            <span class="mr-1">
-                <svg width="32" height="33" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4.03394 3.6617V20.2422H27.9064V3.6617" stroke="white" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M19.949 24.8817L15.9702 28.8604L11.9915 24.8817" stroke="white" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M15.9702 20.2398V28.8604" stroke="white" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    <path d="M18.6152 7.62619L21.9384 10.9561L18.6152 14.3315" stroke="white" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M10.0027 10.9567H21.9383" stroke="white" stroke-width="2" stroke-linecap="round" />
-                </svg>
-            </span> Follow-Ups</Link> -->
 
             <Link :href="route('statistics.index')"
                 class="bg-secondary text-white flex px-[5rem] py-3 text-xl mx-2 rounded mb-2">
@@ -312,28 +377,6 @@ export default {
             },
             secchartOptions: {
                 plugins: {
-                    // tooltip: {
-                    //     callbacks: {
-                    //         label: function (tooltipItem, data) {
-                    //             let seconds = tooltipItem.yLabel;
-                    //             seconds = parseInt(seconds, 10);
-                    //             if (isNaN(seconds) || seconds === null || seconds === undefined) {
-                    //                 return seconds; // Return default value if seconds is invalid
-                    //             }
-                    //             let hours = Math.floor(seconds / 3600);
-                    //             let minutes = Math.floor((seconds % 3600) / 60);
-                    //             seconds = seconds % 60;
-
-                    //             // Format to two digits for each unit
-                    //             let formattedTime =
-                    //                 ('0' + hours).slice(-2) + ':' +
-                    //                 ('0' + minutes).slice(-2) + ':' +
-                    //                 ('0' + seconds).slice(-2);
-
-                    //             return seconds;
-                    //         },
-                    //     },
-                    // },
                     legend: {
                         display: false,
                     },
@@ -392,6 +435,55 @@ export default {
         }
     },
     methods: {
+        getUserInitials(name) {
+            if (!name) return '?';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        },
+
+        getAvatarColor(index) {
+            const colors = [
+                'bg-gradient-to-br from-green-500 to-green-600',
+                'bg-gradient-to-br from-blue-500 to-blue-600',
+                'bg-gradient-to-br from-purple-500 to-purple-600',
+                'bg-gradient-to-br from-pink-500 to-pink-600',
+                'bg-gradient-to-br from-orange-500 to-orange-600',
+                'bg-gradient-to-br from-teal-500 to-teal-600',
+                'bg-gradient-to-br from-indigo-500 to-indigo-600',
+                'bg-gradient-to-br from-red-500 to-red-600'
+            ];
+            console.log(index % colors.length);
+
+            return colors[index % colors.length];
+        },
+
+        getCallStatus(lastCallTime) {
+            if (!lastCallTime) return 'old';
+
+            const now = new Date();
+            const callTime = new Date(lastCallTime);
+            const diffMinutes = (now - callTime) / (1000 * 60);
+
+            if (diffMinutes <= 30) return 'recent';
+            if (diffMinutes <= 120) return 'moderate';
+            return 'old';
+        },
+
+        formatLastCallTime(lastCallTime) {
+            if (!lastCallTime) return 'No calls';
+
+            const now = new Date();
+            const callTime = new Date(lastCallTime);
+            const diffMinutes = Math.floor((now - callTime) / (1000 * 60));
+
+            if (diffMinutes < 1) return 'Just now';
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        },
         padZero(value) {
             return (value < 10 ? '0' : '') + value;
         },
@@ -518,5 +610,14 @@ export default {
     #app>div>main>div.grid.grid-cols-1.xl\:grid-cols-5.gap-6.p-6>div.bg-white.p-2.rounded-lg.shadow.flex.items-center.justify-center.w-full.xl\:h-full.h-\[14rem\] {
         grid-column: span 2 / span 2;
     }
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #A7704A transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
 }
 </style>
