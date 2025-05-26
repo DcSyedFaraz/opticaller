@@ -4,7 +4,7 @@
     <AuthenticatedLayout>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-3">
             <!-- Last Call -->
-            <!-- {{data.usersWithCalls}} -->
+            <!-- {{usersWithCalls}} -->
 
             <!-- Today's Call-Out Count -->
             <div class="bg-white p-4 rounded-lg shadow-md flex flex-col justify-between">
@@ -122,19 +122,19 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 p-3 ">
-            <div v-if="data.usersWithCalls" class="bg-white p-4 rounded-lg shadow-md xl:col-span-2 col-span-1">
+            <div v-if="usersWithCalls" class="bg-white p-4 rounded-lg shadow-md xl:col-span-2 col-span-1">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800">Recent User Activity</h3>
                     <div class="flex items-center space-x-2">
                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-sm text-gray-600">{{ data.usersWithCalls?.length || 0 }} Users</span>
+                        <span class="text-sm text-gray-600">{{ usersWithCalls?.length || 0 }} Users</span>
                     </div>
                 </div>
 
                 <!-- User List with Custom Scroll -->
                 <div class="max-h-80 overflow-y-auto custom-scrollbar space-y-3"
                     style="max-height:170px; overflow-y:auto;">
-                    <div v-for="(user, index) in data.usersWithCalls" :key="user.id || index"
+                    <div v-for="(user, index) in usersWithCalls" :key="user.id || index"
                         class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                         <!-- User Info -->
                         <div class="flex items-center space-x-3">
@@ -179,7 +179,7 @@
                     </div>
 
                     <!-- Empty State -->
-                    <div v-if="!data.usersWithCalls || data.usersWithCalls.length === 0" class="text-center py-8">
+                    <div v-if="!usersWithCalls || usersWithCalls.length === 0" class="text-center py-8">
                         <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -327,7 +327,8 @@
 
 export default {
     props: {
-        data: Object, // Ensure to receive the data from backend
+        data: Object,
+        usersWithCalls: Object,
     },
     data() {
         return {
@@ -511,9 +512,16 @@ export default {
         this.$refs.progressCircleFill.style.strokeDasharray = `${circumference}`;
         this.$refs.progressCircleFill.style.strokeDashoffset = `${offset}`;
 
+        this._usersWithCallsInterval = setInterval(() => {
+            this.$inertia.reload({ only: ['usersWithCalls'] });
+        }, 60 * 1000);
 
         console.log(this.data);
     },
+    beforeDestroy() {
+        clearInterval(this._usersWithCallsInterval);
+    },
+
 };
 </script>
 <style scoped>

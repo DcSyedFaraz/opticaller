@@ -183,7 +183,8 @@ class StatisticsController extends Controller
         if ($user->hasRole('admin')) {
             $usersWithCalls = User::role('user')
                 ->whereHas('callActivities')
-                ->with('lastCall')
+                ->with(['lastCall:id,user_id,updated_at'])
+                ->select('id', 'name')
                 ->whereHas('lastCall')
                 ->orderBy(
                     DB::table('activities')
@@ -307,12 +308,12 @@ class StatisticsController extends Controller
             'callVolumeGraphData' => $callVolumeGraphData,
             'successRate' => $successRate,
             'processingTimeGraphData' => $processingTimeGraphData,
-            'usersWithCalls' => $usersWithCalls,
 
         ];
 
         return Inertia::render('Dashboard', [
             'data' => $data,
+            'usersWithCalls' => $usersWithCalls,
         ]);
     }
 
