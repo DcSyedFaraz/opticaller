@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\GlobalLockedFields;
 use App\Models\SubProject;
 use App\Models\User;
+use Arr;
 use DB;
 use Http;
 use Illuminate\Http\Request;
@@ -40,23 +41,58 @@ class AddressController extends Controller
     {
         $query = Address::query();
 
-        // Search functionality
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('addresses.company_name', 'like', "%{$search}%")
-                ->orWhere('addresses.contact_id', 'like', "%{$search}%")
-                ->orWhere('addresses.feedback', 'like', "%{$search}%")
-                ->orWhere('addresses.email_address_system', 'like', "%{$search}%")
-                ->orWhere('addresses.deal_id', 'like', "%{$search}%");
+        /* ---------------------------------
+         | 1.  Row filters sent as JSON
+         |---------------------------------*/
+        $filters = json_decode($request->input('filters', '{}'), true);
+
+        // Global filter
+        if (!empty($filters['global']['value'])) {
+            $g = $filters['global']['value'];
+            $query->where(function ($q) use ($g) {
+                $q->where('addresses.company_name', 'like', "%{$g}%")
+                    ->orWhere('addresses.contact_id', 'like', "%{$g}%")
+                    ->orWhere('addresses.feedback', 'like', "%{$g}%")
+                    ->orWhere('addresses.email_address_system', 'like', "%{$g}%")
+                    ->orWhere('addresses.deal_id', 'like', "%{$g}%");
+            });
         }
 
-        // Sorting functionality with validation
+        // Per-column filters
+        $columnMap = [
+            'company_name' => 'addresses.company_name',
+            'subproject.title' => 'subprojects.title',
+            'email_address_system' => 'addresses.email_address_system',
+            'feedback' => 'addresses.feedback',
+            'follow_up_date' => 'addresses.follow_up_date',
+            'deal_id' => 'addresses.deal_id',
+            'contact_id' => 'addresses.contact_id',
+            'closure_user_name' => 'users.name'
+        ];
+
+        foreach ($filters ?? [] as $field => $filter) {
+            $value = $filter['value'] ?? null;
+            if ($field === 'global' || $value === null || $value === '') {
+                continue;
+            }
+
+            // join for subproject / user name filters
+            if ($field === 'subproject.title') {
+                $query->whereHas('subproject', fn($q) => $q->where('title', 'like', "%{$value}%"));
+            } elseif ($field === 'closure_user_name') {
+                $query->whereHas('lastuser.users', fn($q) => $q->where('name', 'like', "%{$value}%"));
+            } else {
+                $query->where($columnMap[$field], 'like', "%{$value}%");
+            }
+        }
+
+        /* ---------------------------------
+         | 2.  Sorting
+         |---------------------------------*/
         $sortField = $request->input('sortField', 'id');
         $sortOrder = $request->input('sortOrder', 'desc');
-        // $query->orderBy($sortField, $sortOrder);
+
         if ($sortField === 'closure_user_name') {
-            // dd($sortField, $sortOrder);
-            // Join the users table to sort by users.name
             $query->leftJoin('activities', function ($join) {
                 $join->on('addresses.id', '=', 'activities.address_id')
                     ->where('activities.activity_type', 'call');
@@ -64,18 +100,20 @@ class AddressController extends Controller
                 ->leftJoin('users', 'activities.user_id', '=', 'users.id')
                 ->select('addresses.*', 'users.name as closure_user_name')
                 ->orderBy('users.name', $sortOrder);
-
         } else {
-            // Default sorting
             $query->orderBy($sortField, $sortOrder);
         }
 
-        // Pagination
-        $addresses = $query->with('subproject', 'lastuser.users')->paginate(10);
-
+        /* ---------------------------------
+         | 3.  Pagination & eager loads
+         |---------------------------------*/
+        $addresses = $query->with('subproject', 'lastuser.users')
+            ->paginate(10)
+            ->appends($request->except('page')); // keep query-string tidy
+// dd($addresses);
         return inertia('Addresses/Index', [
             'addresses' => $addresses,
-            'filters' => $request->all('search', 'sortField', 'sortOrder', 'page')
+            'filters' => $request->all('sortField', 'sortOrder', 'page')
         ]);
     }
 
