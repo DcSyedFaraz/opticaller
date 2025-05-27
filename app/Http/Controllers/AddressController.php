@@ -188,6 +188,7 @@ class AddressController extends Controller
             return redirect()->back()->withErrors(['error' => 'Address update failed: ' . $e->getMessage()]);
         }
     }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([

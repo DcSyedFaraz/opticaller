@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AddressImportController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'verified', 'role:admin|milung'])->group(function () 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::resource('addresses', AddressController::class);
+    Route::post('/addresses/import', [AddressImportController::class, 'import'])->name('addresses.import');
 
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::put('/activities/{activity}', [ActivityController::class, 'update'])->name('activities.update');
