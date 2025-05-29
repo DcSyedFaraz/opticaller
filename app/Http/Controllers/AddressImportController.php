@@ -14,8 +14,9 @@ class AddressImportController extends Controller
 {
     private const COLUMN_MAPPING = [
         'company_name' => ['company_name', 'company', 'companyname', 'company name'],
-        'subproject_title' => ['subproject_title', 'subproject', 'sub_project', 'sub project', 'project'],
+        'street' => ['street', 'street_address', 'address_line1', 'address', 'street name'],
         'email_address_system' => ['email_address_system', 'email', 'email_address', 'email address', 'system_email'],
+        'phone_number' => ['phone_number', 'phone', 'mobile', 'contact_number', 'contact number'],
         'feedback' => ['feedback', 'last_feedback', 'comment', 'notes'],
         'follow_up_date' => ['follow_up_date', 'followup_date', 'follow up date', 'date', 'followup'],
         'deal_id' => ['deal_id', 'deal', 'deal_number', 'deal number'],
@@ -75,15 +76,15 @@ class AddressImportController extends Controller
 
         // preload existing emails and company+subproject combos
         $existingEmails = Address::pluck('email_address_system')->flip()->all();
-        $existingPairs = Address::join('sub_projects', 'addresses.subproject_id', '=', 'sub_projects.id')
-            ->get(['company_name', 'sub_projects.title'])
-            ->mapWithKeys(fn($r) => ["{$r->company_name}|{$r->title}" => true])
+        $existingPhones = Address::pluck('phone_number')->flip()->all();
+        $existingCompanyStreet = Address::get(['company_name', 'street'])
+            ->mapWithKeys(fn($r) => ["{$r->company_name}|{$r->street}" => true])
             ->all();
 
         // preload subproject titles → IDs
         $subprojects = SubProject::pluck('id', 'title')->all();
 
-        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingEmails, $existingPairs, $subprojects) {
+        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingEmails, $existingCompanyStreet, $subprojects) {
             foreach (array_chunk($data, 100) as $batchIndex => $batch) {
                 $toInsert = [];
 
@@ -104,7 +105,13 @@ class AddressImportController extends Controller
                     }
 
                     if ($options['validateData']) {
-                        $dup = $this->checkDuplicates($norm, $existingEmails, $existingPairs, $rowNumber);
+                        $dup = $this->checkDuplicates(
+                            $norm,
+                            $existingEmails,
+                            $existingPhones,
+                            $existingCompanyStreet,
+                            $rowNumber
+                        );
                         if (!$dup['valid']) {
                             $errors = array_merge($errors, $dup['errors']);
                             $skipped++;
@@ -202,22 +209,24 @@ class AddressImportController extends Controller
     private function checkDuplicates(
         array $row,
         array &$emails,
+        array &$phones,
         array &$pairs,
         int $num
     ): array {
         $errs = [];
 
-        if (
-            !empty($row['email_address_system'])
-            && isset($emails[$row['email_address_system']])
-        ) {
+        if (!empty($row['email_address_system']) && isset($emails[$row['email_address_system']])) {
             $errs[] = "Row {$num}: Email '{$row['email_address_system']}' already exists";
         }
 
-        if (!empty($row['company_name']) && !empty($row['subproject_title'])) {
-            $key = "{$row['company_name']}|{$row['subproject_title']}";
+        if (!empty($row['phone_number']) && isset($phones[$row['phone_number']])) {
+            $errs[] = "Row {$num}: Phone number '{$row['phone_number']}' already exists";
+        }
+
+        if (!empty($row['company_name']) && !empty($row['street'])) {
+            $key = "{$row['company_name']}|{$row['street']}";
             if (isset($pairs[$key])) {
-                $errs[] = "Row {$num}: Company '{$row['company_name']}' already exists for subproject '{$row['subproject_title']}'";
+                $errs[] = "Row {$num}: Combination of company '{$row['company_name']}' and street '{$row['street']}' already exists";
             }
         }
 
