@@ -108,93 +108,237 @@
         <Dialog v-model:visible="showImportDialog" modal header="Import Excel File" :style="{ width: '55rem' }"
             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
             <div class="flex flex-col gap-6">
-                <!-- Drag & Drop Upload Section -->
-                <div class="border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200"
-                    :class="dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'"
-                    @dragenter="onDragEnter" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop">
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="w-20 h-20 rounded-full flex items-center justify-center transition-colors"
-                            :class="dragActive ? 'bg-blue-200' : 'bg-blue-100'">
-                            <i class="text-3xl transition-colors"
-                                :class="dragActive ? 'pi pi-download text-blue-700' : 'pi pi-cloud-upload text-blue-600'"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">
-                                {{ dragActive ? 'Drop your file here' : 'Drag & Drop Excel file' }}
-                            </h3>
-                            <p class="text-sm text-gray-600 mb-6">
-                                or click to browse and select file
-                            </p>
-                            <div class="flex flex-col items-center gap-2">
-                                <Button icon="pi pi-folder-open" label="Browse Files"
-                                    class="p-button-outlined p-button-lg hover:!text-white" @click="triggerFileInput" />
-                                <input ref="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden"
-                                    @change="onFileInputChange" />
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Supports: .xlsx, .xls, .csv • Max size: 10MB
+                <!-- Import Results Section -->
+                <div v-if="importResults && !importing">
+                    <Card class="shadow-lg border-0">
+                        <template #content>
+                            <!-- Success Header -->
+                            <div class="text-center mb-6">
+                                <div
+                                    class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="pi pi-check-circle text-4xl text-green-600"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                    {{ importResults.success ? 'Import Completed!' : 'Import Finished with Issues' }}
+                                </h3>
+                                <p class="text-gray-600">
+                                    {{ importResults.success ? 'Your data has been successfully imported.' : 'The import process completed but encountered some issues.' }}
                                 </p>
                             </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- File Info Section -->
-                <div v-if="selectedFile"
-                    class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i class="pi pi-file-excel text-green-600 text-xl"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-semibold text-green-800 text-lg">{{ selectedFile.name }}</p>
-                            <div class="flex items-center gap-4 mt-1">
-                                <p class="text-sm text-green-600">{{ formatFileSize(selectedFile.size) }}</p>
-                                <div class="flex items-center gap-1 text-green-600">
-                                    <i class="pi pi-check-circle text-xs"></i>
-                                    <span class="text-xs">Ready to import</span>
+                            <!-- Statistics Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <!-- Total Processed -->
+                                <div
+                                    class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-blue-600 mb-1">Total Processed</p>
+                                            <p class="text-2xl font-bold text-blue-900">{{ importResults.total || 0 }}
+                                            </p>
+                                        </div>
+                                        <div class="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center">
+                                            <i class="pi pi-file text-blue-700 text-xl"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <Button icon="pi pi-times" class="p-button-text p-button-rounded p-button-danger"
-                            @click="clearFile" v-tooltip.top="'Remove file'" />
-                    </div>
-                </div>
 
-                <!-- Preview Section -->
-                <div v-if="previewData.length > 0 && !importing">
-                    <Card class="shadow-sm">
-                        <template #title>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <i class="pi pi-eye text-blue-600"></i>
-                                    <span>Data Preview</span>
+                                <!-- Successfully Imported -->
+                                <div
+                                    class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-green-600 mb-1">Successfully Imported</p>
+                                            <p class="text-2xl font-bold text-green-900">{{ importResults.imported || 0
+                                            }}</p>
+                                        </div>
+                                        <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
+                                            <i class="pi pi-check text-green-700 text-xl"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <Tag :value="`${previewData.length} rows found`" severity="success" />
-                            </div>
-                        </template>
-                        <template #content>
-                            <div class="border rounded-lg overflow-hidden bg-white">
-                                <DataTable :value="previewData.slice(0, 5)" scrollable scrollHeight="250px"
-                                    class="text-sm" stripedRows>
-                                    <Column v-for="(column, index) in previewColumns" :key="index" :field="column.field"
-                                        :header="column.header" style="min-width: 150px">
-                                        <template #body="{ data }">
-                                            <span class="text-gray-700">{{ data[column.field] || '-' }}</span>
-                                        </template>
-                                    </Column>
-                                </DataTable>
-                                <div v-if="previewData.length > 5" class="text-center p-3 bg-blue-50 border-t">
-                                    <div class="flex items-center justify-center gap-2 text-blue-700">
-                                        <i class="pi pi-info-circle"></i>
-                                        <span class="text-sm font-medium">
-                                            Showing first 5 rows • {{ previewData.length - 5 }} more rows will be
-                                            imported
-                                        </span>
+
+                                <!-- Skipped/Errors -->
+                                <div
+                                    class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-orange-600 mb-1">
+                                                {{ (importResults.skipped || 0) > 0 ? 'Skipped' : 'Errors' }}
+                                            </p>
+                                            <p class="text-2xl font-bold text-orange-900">
+                                                {{ (importResults.skipped || 0) + (importResults.errors?.length || 0) }}
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="w-12 h-12 bg-orange-200 rounded-lg flex items-center justify-center">
+                                            <i class="pi pi-exclamation-triangle text-orange-700 text-xl"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700">Import Progress</span>
+                                    <span class="text-sm text-gray-500">
+                                        {{ Math.round(((importResults.imported || 0) / (importResults.total || 1)) *
+                                            100) }}%
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500"
+                                        :style="{ width: Math.round(((importResults.imported || 0) / (importResults.total || 1)) * 100) + '%' }">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Error Details (if any) -->
+                            <div v-if="importResults.errors && importResults.errors.length > 0" class="mb-4">
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="pi pi-times-circle text-red-500 text-lg"></i>
+                                        </div>
+                                        <div class="ml-3 w-full">
+                                            <h4 class="text-sm font-medium text-red-800 mb-2">
+                                                Issues Encountered ({{ importResults.errors.length }})
+                                            </h4>
+                                            <div class="max-h-32 overflow-y-auto">
+                                                <ul class="text-sm text-red-700 space-y-1">
+                                                    <li v-for="(error, index) in importResults.errors.slice(0, 5)"
+                                                        :key="index" class="flex items-start">
+                                                        <span
+                                                            class="inline-block w-2 h-2 bg-red-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                                        <span>{{ error.message || error }}</span>
+                                                    </li>
+                                                    <li v-if="importResults.errors.length > 5"
+                                                        class="text-red-600 font-medium">
+                                                        ... and {{ importResults.errors.length - 5 }} more issues
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Success Message -->
+                            <div v-if="importResults.success && (!importResults.errors || importResults.errors.length === 0)"
+                                class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="flex items-center">
+                                    <i class="pi pi-check-circle text-green-500 text-lg mr-3"></i>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-green-800">Perfect Import!</h4>
+                                        <p class="text-sm text-green-700">All records were successfully imported without
+                                            any issues.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex justify-center gap-3 mt-6">
+                                <Button label="View Imported Data" icon="pi pi-eye"
+                                    class="p-button-outlined p-button-success" @click="viewImportedData" />
+                                <Button label="Import Another File" icon="pi pi-upload"
+                                    class="p-button-outlined p-button-info" @click="startNewImport" />
+                            </div>
                         </template>
                     </Card>
+                </div>
+
+                <!-- Original Import Interface (when no results) -->
+                <div v-else-if="!importing">
+                    <!-- Drag & Drop Upload Section -->
+                    <div class="border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200"
+                        :class="dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'"
+                        @dragenter="onDragEnter" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-20 h-20 rounded-full flex items-center justify-center transition-colors"
+                                :class="dragActive ? 'bg-blue-200' : 'bg-blue-100'">
+                                <i class="text-3xl transition-colors"
+                                    :class="dragActive ? 'pi pi-download text-blue-700' : 'pi pi-cloud-upload text-blue-600'"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                                    {{ dragActive ? 'Drop your file here' : 'Drag & Drop Excel file' }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-6">
+                                    or click to browse and select file
+                                </p>
+                                <div class="flex flex-col items-center gap-2">
+                                    <Button icon="pi pi-folder-open" label="Browse Files"
+                                        class="p-button-outlined p-button-lg hover:!text-white"
+                                        @click="triggerFileInput" />
+                                    <input ref="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden"
+                                        @change="onFileInputChange" />
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        Supports: .xlsx, .xls, .csv • Max size: 10MB
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Info Section -->
+                    <div v-if="selectedFile"
+                        class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="pi pi-file-excel text-green-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-green-800 text-lg">{{ selectedFile.name }}</p>
+                                <div class="flex items-center gap-4 mt-1">
+                                    <p class="text-sm text-green-600">{{ formatFileSize(selectedFile.size) }}</p>
+                                    <div class="flex items-center gap-1 text-green-600">
+                                        <i class="pi pi-check-circle text-xs"></i>
+                                        <span class="text-xs">Ready to import</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <Button icon="pi pi-times" class="p-button-text p-button-rounded p-button-danger"
+                                @click="clearFile" v-tooltip.top="'Remove file'" />
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div v-if="previewData.length > 0">
+                        <Card class="shadow-sm">
+                            <template #title>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="pi pi-eye text-blue-600"></i>
+                                        <span>Data Preview</span>
+                                    </div>
+                                    <Tag :value="`${previewData.length} rows found`" severity="success" />
+                                </div>
+                            </template>
+                            <template #content>
+                                <div class="border rounded-lg overflow-hidden bg-white">
+                                    <DataTable :value="previewData.slice(0, 5)" scrollable scrollHeight="250px"
+                                        class="text-sm" stripedRows>
+                                        <Column v-for="(column, index) in previewColumns" :key="index"
+                                            :field="column.field" :header="column.header" style="min-width: 150px">
+                                            <template #body="{ data }">
+                                                <span class="text-gray-700">{{ data[column.field] || '-' }}</span>
+                                            </template>
+                                        </Column>
+                                    </DataTable>
+                                    <div v-if="previewData.length > 5" class="text-center p-3 bg-blue-50 border-t">
+                                        <div class="flex items-center justify-center gap-2 text-blue-700">
+                                            <i class="pi pi-info-circle"></i>
+                                            <span class="text-sm font-medium">
+                                                Showing first 5 rows • {{ previewData.length - 5 }} more rows will be
+                                                imported
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </Card>
+                    </div>
                 </div>
 
                 <!-- Progress Section -->
@@ -228,9 +372,11 @@
                         <span>Supports: Excel (.xlsx, .xls) and CSV files</span>
                     </div>
                     <div class="flex gap-2">
-                        <Button label="Cancel" icon="pi pi-times" class="p-button-text hover:!text-white"
-                            @click="closeImportDialog" :disabled="importing" />
-                        <Button :label="importing ? 'Importing...' : 'Import Data'"
+                        <Button v-if="!importResults" label="Cancel" icon="pi pi-times"
+                            class="p-button-text hover:!text-white" @click="closeImportDialog" :disabled="importing" />
+                        <Button v-if="importResults" label="Close" icon="pi pi-times"
+                            class="p-button-text hover:!text-white" @click="closeImportDialog" />
+                        <Button v-if="!importResults" :label="importing ? 'Importing...' : 'Import Data'"
                             :icon="importing ? 'pi pi-spin pi-spinner' : 'pi pi-check'" class="p-button-success"
                             @click="importData" :disabled="!selectedFile || importing" />
                     </div>
@@ -290,7 +436,8 @@ export default {
             importing: false,
             importProgress: 0,
             importStatus: '',
-            dragActive: false
+            dragActive: false,
+            importResults: null // New property to store import results
         };
     },
     methods: {
@@ -490,6 +637,7 @@ export default {
             this.importing = true;
             this.importProgress = 0;
             this.importStatus = 'Preparing import...';
+            this.importResults = null; // Clear previous results
 
             try {
                 const formData = new FormData();
@@ -498,9 +646,7 @@ export default {
 
                 // Simulate progress updates
                 const progressInterval = setInterval(() => {
-                    // console.log('Simulating progress update...', this.importProgress);
                     if (this.importProgress < 90) {
-
                         this.importProgress += Math.random() * 15;
                         const currentRow = Math.floor(this.importProgress / 100 * this.previewData.length);
                         this.importStatus = `Processing row ${currentRow} of ${this.previewData.length}...`;
@@ -508,31 +654,30 @@ export default {
                 }, 800);
 
                 // Make the actual import request
-                // const response = await fetch(route('addresses.import'), {
-                //     method: 'POST',
-                //     body: formData,
-                // });
                 this.$inertia.post(route('addresses.import'), formData, {
                     preserveScroll: true,
-                    onProgress: (event) => {
-                        console.log('Progress:', event);
-                        //     console.log('Progress:', event.loaded, '/', event.total);
-                        // if (event.lengthComputable) {
-
-                        //     this.importProgress = Math.min(100, (event.loaded / event.total) * 100);
-                        // }
-                    },
-                    onSuccess: () => {
+                    onSuccess: (page) => {
                         this.importProgress = 100;
                         this.importStatus = 'Import completed successfully!';
+
+                        // Extract import results from the response
+                        const flashData = page.props.flash;
+                        this.importResults = {
+                            success: flashData.success || false,
+                            message: flashData.message || 'Import completed',
+                            imported: flashData.imported || 0,
+                            skipped: flashData.skipped || 0,
+                            errors: flashData.importErrors || [],
+                            total: flashData.total || 0
+                        };
+
+                        // Show success toast
                         this.$toast.add({
-                            severity: 'success',
-                            summary: 'Import Completed',
-                            detail: `Successfully imported ${this.previewData.length} addresses`,
+                            severity: this.importResults.success ? 'success' : 'warn',
+                            summary: this.importResults.success ? 'Import Completed' : 'Import Completed with Issues',
+                            detail: `Successfully imported ${this.importResults.imported} out of ${this.importResults.total} records`,
                             life: 6000
                         });
-
-
                     },
                     onError: (error) => {
                         console.error('Import error:', error);
@@ -550,33 +695,9 @@ export default {
                     onFinish: () => {
                         clearInterval(progressInterval);
                         this.importing = false;
-                        this.closeImportDialog();
-                        this.fetchData();
+                        this.fetchData(); // Refresh the table
                     }
                 });
-
-
-                // if (response.ok) {
-                // const result = await response.json();
-                // this.importProgress = 100;
-                // this.importStatus = 'Import completed successfully!';
-
-                // setTimeout(() => {
-                //     this.$toast.add({
-                //         severity: 'success',
-                //         summary: 'Import Completed',
-                //         detail: `Successfully imported ${this.previewData.length} addresses`,
-                //         life: 6000
-                //     });
-
-                //     this.closeImportDialog();
-                //     this.fetchData(); // Refresh the table
-                // }, 1500);
-
-                // } else {
-                //     const errorData = await response.json();
-                //     throw new Error(errorData.message || 'Import failed');
-                // }
 
             } catch (error) {
                 clearInterval(progressInterval);
@@ -603,6 +724,28 @@ export default {
             this.importProgress = 0;
             this.importStatus = '';
             this.dragActive = false;
+            this.importResults = null; // Clear results
+            if (this.$refs.fileInput) {
+                this.$refs.fileInput.value = '';
+            }
+        },
+
+        // New methods for import results actions
+        viewImportedData() {
+            this.closeImportDialog();
+            // Optionally apply filters to show recently imported data
+            this.fetchData();
+        },
+
+        startNewImport() {
+            // Reset to initial import state
+            this.selectedFile = null;
+            this.previewData = [];
+            this.previewColumns = [];
+            this.importResults = null;
+            this.importing = false;
+            this.importProgress = 0;
+            this.importStatus = '';
             if (this.$refs.fileInput) {
                 this.$refs.fileInput.value = '';
             }

@@ -41,7 +41,11 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $role,
             ],
             'flash' => [
-                'message' => session('message')
+                'message' => $request->session()->get('message'),
+                'imported' => $request->session()->get('imported'),
+                'skipped' => $request->session()->get('skipped'),
+                'importErrors' => $request->session()->get('importErrors'),
+                'total' => $request->session()->get('total'),
             ],
         ];
     }
