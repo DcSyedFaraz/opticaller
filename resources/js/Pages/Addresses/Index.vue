@@ -119,11 +119,11 @@
                                     <i class="pi pi-check-circle text-4xl text-green-600"></i>
                                 </div>
                                 <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                                    {{ importResults.success ? 'Import Completed!' : 'Import Finished with Issues' }}
-                                </h3>
-                                <p class="text-gray-600">
-                                    {{ importResults.success ? 'Your data has been successfully imported.' : 'The import process completed but encountered some issues.' }}
-                                </p>
+                                    {{ importResults.skipped == 0 ? 'Import Completed!' : 'Import Finished with Issues'
+                                    }} </h3>
+                                        <p class="text-gray-600">
+                                            {{ importResults.skipped == 0 ? 'Your data has been successfully imported.'
+                                                : 'The import process completed but encountered some issues.' }} </p>
                             </div>
 
                             <!-- Statistics Cards -->
@@ -150,7 +150,7 @@
                                         <div>
                                             <p class="text-sm font-medium text-green-600 mb-1">Successfully Imported</p>
                                             <p class="text-2xl font-bold text-green-900">{{ importResults.imported || 0
-                                            }}</p>
+                                                }}</p>
                                         </div>
                                         <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
                                             <i class="pi pi-check text-green-700 text-xl"></i>
@@ -670,11 +670,12 @@ export default {
                             errors: flashData.importErrors || [],
                             total: flashData.total || 0
                         };
+                        console.log('Import Results:', this.importResults, this.importResults.skipped == 0);
 
                         // Show success toast
                         this.$toast.add({
-                            severity: this.importResults.success ? 'success' : 'warn',
-                            summary: this.importResults.success ? 'Import Completed' : 'Import Completed with Issues',
+                            severity: this.importResults.skipped == 0 ? 'success' : 'warn',
+                            summary: this.importResults.skipped == 0 ? 'Import Completed' : 'Import Completed with Issues',
                             detail: `Successfully imported ${this.importResults.imported} out of ${this.importResults.total} records`,
                             life: 6000
                         });

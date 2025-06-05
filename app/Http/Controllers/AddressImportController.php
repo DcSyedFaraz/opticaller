@@ -135,7 +135,7 @@ class AddressImportController extends Controller
                     if (!$validation['valid']) {
                         $errors = array_merge($errors, $validation['errors']);
                         $skipped++;
-                        continue;
+                        continue; // Skip to next row
                     }
 
                     if ($options['validateData']) {
@@ -153,7 +153,7 @@ class AddressImportController extends Controller
                         if (!$duplicateCheck['valid']) {
                             $errors = array_merge($errors, $duplicateCheck['errors']);
                             $skipped++;
-                            continue;
+                            continue; // Skip to next row
                         }
                     }
                     // Prepare the insert data array
