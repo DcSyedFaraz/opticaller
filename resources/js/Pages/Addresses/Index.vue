@@ -6,6 +6,8 @@
         <div class="flex justify-between mb-4">
             <h1 class="text-2xl font-bold">Address List</h1>
             <div class="flex gap-2">
+                <Button icon="pi pi-download" label="Download Template" class="p-button-outlined p-button-info"
+                    @click="downloadTemplate" />
                 <Button icon="pi pi-upload" label="Import Excel" class="p-button-outlined p-button-success"
                     @click="showImportDialog = true" />
                 <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast" as="button">
@@ -121,9 +123,9 @@
                                 <h3 class="text-2xl font-bold text-gray-900 mb-2">
                                     {{ importResults.skipped == 0 ? 'Import Completed!' : 'Import Finished with Issues'
                                     }} </h3>
-                                        <p class="text-gray-600">
-                                            {{ importResults.skipped == 0 ? 'Your data has been successfully imported.'
-                                                : 'The import process completed but encountered some issues.' }} </p>
+                                <p class="text-gray-600">
+                                    {{ importResults.skipped == 0 ? 'Your data has been successfully imported.'
+                                        : 'The import process completed but encountered some issues.' }} </p>
                             </div>
 
                             <!-- Statistics Cards -->
@@ -150,7 +152,7 @@
                                         <div>
                                             <p class="text-sm font-medium text-green-600 mb-1">Successfully Imported</p>
                                             <p class="text-2xl font-bold text-green-900">{{ importResults.imported || 0
-                                                }}</p>
+                                            }}</p>
                                         </div>
                                         <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
                                             <i class="pi pi-check text-green-700 text-xl"></i>
@@ -441,6 +443,13 @@ export default {
         };
     },
     methods: {
+        downloadTemplate() {
+            // Option A: Redirect to a backend route that returns the file
+            console.log('Downloading template...');
+            window.location.href = route('addresses.template.download');
+
+            // this.$inertia.get(route('addresses.template.download'));
+        },
         /** central loader – called for page / sort / filter changes */
         fetchData(extra = {}) {
             const payload = {

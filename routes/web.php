@@ -29,10 +29,8 @@ use Spatie\Permission\Models\Role;
 |
 */
 
-Route::get('/', function () {
-    return redirect()->route('login');
+Route::get('/', fn() => redirect()->route('login'));
 
-});
 Route::get('/create-milung-role', function () {
     // Check if the role already exists
     if (!Role::where('name', 'milung')->exists()) {
@@ -81,6 +79,7 @@ Route::middleware(['auth', 'verified', 'role:admin|milung'])->group(function () 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::resource('addresses', AddressController::class);
+    Route::get('/addresses/download/template', [AddressImportController::class, 'downloadTemplate'])->name('addresses.template.download');
     Route::post('/addresses/import', [AddressImportController::class, 'import'])->name('addresses.import');
 
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
