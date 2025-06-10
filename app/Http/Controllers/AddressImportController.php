@@ -399,6 +399,7 @@ class AddressImportController extends Controller
      */
     public function downloadTemplate(): StreamedResponse
     {
+        // dd('This method is deprecated. Please use the new template download functionality.');
         $headers = [
             'name',
             'street',
@@ -411,12 +412,9 @@ class AddressImportController extends Controller
             'vim_info',
             'query',
             'category',
-            'forbidden_promotion',
             'feedback',
-            'follow_up_date',
-            'deal_id',
-            'contact_id',
-            'subproject_title'
+            'sub_project',
+            'forbidden_promotion',
         ];
 
         $sample = [
@@ -432,12 +430,9 @@ class AddressImportController extends Controller
                 '',
                 'Senioren Tagespflege, 51570, Windeck, Nordrhein-Westfalen, DE',
                 'Club',
-                '0',
                 'Initial contact made',
-                '2024-12-01',
-                '12345',
-                '67890',
-                'Project Alpha',
+                '1',
+                '0',
             ],
         ];
 

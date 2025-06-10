@@ -38,6 +38,7 @@ class AddressService
             // Try to fetch a due address with locking
             $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
                 ->whereIn('sub_project_id', $subProjectIds)
+                ->where('forbidden_promotion', false)
                 ->where(function ($query) {
                     $query->whereNull('addresses.seen')
                         ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
@@ -72,6 +73,7 @@ class AddressService
                 ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
                 ->orderBy('sub_projects.priority', 'desc')
                 ->whereIn('sub_project_id', $subProjectIds)
+                ->where('forbidden_promotion', false)
                 ->where(function ($query) {
                     $query->whereNull('addresses.seen')
                         ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
