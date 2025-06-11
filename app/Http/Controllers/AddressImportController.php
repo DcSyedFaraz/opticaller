@@ -361,9 +361,9 @@ class AddressImportController extends Controller
         return [
             // Existing table columns:
             'company_name' => $row['company_name'] ?? null,
-            'salutation' => null, // no import mapping
-            'first_name' => null, // no import mapping
-            'last_name' => null, // no import mapping
+            'salutation' => null,
+            'first_name' => null,
+            'last_name' => null,
             'street_address' => $row['street_address'] ?? null,
             'postal_code' => $row['postal_code'] ?? null,
             'city' => $row['city'] ?? null,
@@ -374,19 +374,17 @@ class AddressImportController extends Controller
             'email_address_new' => $row['email_address_new'] ?? null,
             'feedback' => $row['feedback'] ?? null,
             'follow_up_date' => $this->parseDate($row['follow_up_date'] ?? null),
-            'linkedin' => null, // no import mapping
-            'logo' => null, // no import mapping
+            'linkedin' => null,
+            'logo' => null,
             'notes' => $row['notes'] ?? null,
             'contact_id' => is_numeric($row['contact_id'] ?? null) ? (int) $row['contact_id'] : null,
             'sub_project_id' => $subId,
-            'seen' => 0,    // default
             'created_at' => now(),
             'updated_at' => now(),
-            'deleted_at' => null, // not imported
-            'hubspot_tag' => null, // no import mapping
+            'hubspot_tag' => null,
             'deal_id' => is_numeric($row['deal_id'] ?? null) ? (int) $row['deal_id'] : null,
-            'company_id' => null, // no import mapping
-            'titel' => null, // no import mapping
+            'company_id' => null,
+            'titel' => null,
             // New category fields:
             'main_category_query' => $row['main_category_query'] ?? null,
             'sub_category_category' => $row['sub_category_category'] ?? null,
