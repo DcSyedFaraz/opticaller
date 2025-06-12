@@ -617,10 +617,10 @@
             </Dialog>
 
             <!-- Twilio Call Component -->
-            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" :addressID="this.localAddress.id" ref="twilioCallComponent" :isPaused="isPaused"
-                @incoming-call="handleIncomingCall" @call-connected="handleCallConnected"
-                @call-accepted="startCallDurationTimer" @call-disconnected="handleCallDisconnected"
-                @twilio-error="handleTwilioError" />
+            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" :addressID="this.localAddress.id"
+                ref="twilioCallComponent" :isPaused="isPaused" @incoming-call="handleIncomingCall"
+                @call-connected="handleCallConnected" @call-accepted="startCallDurationTimer"
+                @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
 
             <!-- Incoming Call Dialog -->
             <Dialog header="Incoming Call" v-model:visible="showIncomingCallDialog" :closable="false" draggable
@@ -1424,11 +1424,12 @@ label {
 }
 
 main {
-    @apply !py-2
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
 }
 
 .p-card-body {
-    @apply !py-0
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
 }
-
 </style>
