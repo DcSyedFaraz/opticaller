@@ -176,7 +176,8 @@ class AddressController extends Controller
             'linkedin' => 'nullable|string|max:255',
             'logo' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
-            'contact_id' => "nullable|string|unique:addresses,contact_id,$id",
+            'contact_id' => "nullable|string",
+            // 'contact_id' => "nullable|string|unique:addresses,contact_id,$id",
         ]);
 
         DB::beginTransaction();
