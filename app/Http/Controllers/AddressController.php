@@ -42,6 +42,12 @@ class AddressController extends Controller
         $query = Address::query();
 
         /* ---------------------------------
+        | 1.  Forbidden Promotion Filter
+        |---------------------------------*/
+        $showForbiddenPromotion = $request->boolean('showForbiddenPromotion', false);
+        $query->where('forbidden_promotion', $showForbiddenPromotion);
+
+        /* ---------------------------------
          | 1.  Row filters sent as JSON
          |---------------------------------*/
         $filters = json_decode($request->input('filters', '{}'), true);
@@ -110,9 +116,10 @@ class AddressController extends Controller
         $addresses = $query->with('subproject', 'lastuser.users')
             ->paginate(10)
             ->appends($request->except('page')); // keep query-string tidy
-// dd($addresses);
+        // dd($addresses);
         return inertia('Addresses/Index', [
             'addresses' => $addresses,
+            'showForbiddenPromotion' => $showForbiddenPromotion,
             'filters' => $request->all('sortField', 'sortOrder', 'page')
         ]);
     }
@@ -146,10 +153,12 @@ class AddressController extends Controller
 
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         // Validation rules
         $validatedData = $request->validate([
             'company_name' => 'required|string|max:255',
             'salutation' => 'nullable|string|max:255',
+            'forbidden_promotion' => 'nullable',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'street_address' => 'nullable|string|max:255',
@@ -167,7 +176,7 @@ class AddressController extends Controller
             'linkedin' => 'nullable|string|max:255',
             'logo' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
-            'contact_id' => 'nullable|string|unique:addresses,contact_id,' . $id,
+            'contact_id' => "nullable|string|unique:addresses,contact_id,$id",
         ]);
 
         DB::beginTransaction();

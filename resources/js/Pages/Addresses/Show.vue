@@ -121,8 +121,14 @@
                 <div class="mb-4">
                     <InputLabel for="titel">Title</InputLabel>
                     <Select id="titel" v-model="address.titel" placeholder="select titel" :options="titelOptions"
-                    optionLabel="label" optionValue="value" class="w-full " />
+                        optionLabel="label" optionValue="value" class="w-full " />
                     <Message v-if="errors.titel" severity="error" class="mt-2">{{ errors.titel }}</Message>
+                </div>
+                <div class="mb-4">
+                    <InputLabel for="forbidden_promotion">Forbidden Promotion </InputLabel>
+                    <ToggleSwitch v-model="address.forbidden_promotion" class="w-full" />
+                    <Message v-if="errors.forbidden_promotion" severity="error" class="mt-2">{{
+                        errors.forbidden_promotion }}</Message>
                 </div>
 
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex justify-end">

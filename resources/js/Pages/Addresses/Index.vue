@@ -6,6 +6,10 @@
         <div class="flex justify-between mb-4">
             <h1 class="text-2xl font-bold">Address List</h1>
             <div class="flex gap-2">
+                <Button :icon="showForbiddenPromotion ? 'pi pi-eye-slash' : 'pi pi-eye'"
+                    :label="showForbiddenPromotion ? 'Show Regular' : 'Show Forbidden'"
+                    :class="showForbiddenPromotion ? 'p-button-danger' : 'p-button-warning'"
+                    @click="toggleForbiddenPromotion" />
                 <Button icon="pi pi-download" label="Download Template" class="p-button-outlined p-button-info"
                     @click="downloadTemplate" />
                 <Button icon="pi pi-upload" label="Import Excel" class="p-button-outlined p-button-success"
@@ -400,6 +404,7 @@ export default {
     },
     data() {
         return {
+            showForbiddenPromotion: false,
             globalFilterFields: [
                 'company_name',
                 'subproject.title',
@@ -443,6 +448,11 @@ export default {
         };
     },
     methods: {
+        toggleForbiddenPromotion() {
+            this.showForbiddenPromotion = !this.showForbiddenPromotion;
+            this.query.page = 1; // reset to first page
+            this.fetchData();
+        },
         downloadTemplate() {
             // Option A: Redirect to a backend route that returns the file
             console.log('Downloading template...');
@@ -455,6 +465,7 @@ export default {
             const payload = {
                 ...this.query,
                 ...extra,
+                showForbiddenPromotion: this.showForbiddenPromotion,
                 filters: JSON.stringify(this.tableFilters) // send full filter object
             };
             this.$inertia.get(route('addresses.index'), payload, { preserveState: true, replace: true });
