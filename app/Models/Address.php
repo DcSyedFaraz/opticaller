@@ -13,6 +13,7 @@ class Address extends Model
     protected $casts = [
         'seen' => 'datetime',
         'follow_up_date' => 'datetime',
+        'forbidden_promotion' => 'boolean',
     ];
     // protected $casts = [
     //     'locked_fields' => 'array',
