@@ -222,6 +222,7 @@ class AddressController extends Controller
             'logo' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:255',
             'contact_id' => 'nullable|string|unique:addresses,contact_id',
+            'forbidden_promotion' => 'nullable',
         ]);
 
         DB::beginTransaction();
