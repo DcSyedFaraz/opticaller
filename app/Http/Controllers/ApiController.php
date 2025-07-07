@@ -9,6 +9,7 @@ use App\Models\AddressStatus;
 use App\Models\Project;
 use App\Models\SubProject;
 use App\Models\User;
+use App\Services\AddressDataValidator;
 use DB;
 use Exception;
 use Hash;
@@ -351,7 +352,6 @@ class ApiController extends Controller
         DB::beginTransaction();
 
         try {
-            // Validate incoming request
             $validatedData = Validator::make($request->all(), [
                 'addresses' => 'required|array',
                 'addresses.*.company_name' => 'required|string|max:255',
@@ -377,51 +377,80 @@ class ApiController extends Controller
                 'addresses.*.deal_id' => 'nullable|string',
                 'addresses.*.company_id' => 'nullable|string',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
-                // 'addresses.*.priority' => 'nullable|integer',
             ]);
+
             if ($validatedData->fails()) {
                 return response()->json(['error' => $validatedData->messages()], 422);
             }
-            $data = $request->all();
-            // Loop through each address and save it
-            foreach ($data['addresses'] as $addressData) {
-                Address::create([
-                    'company_name' => $addressData['company_name'],
-                    'salutation' => $addressData['salutation'] ?? null,
-                    'first_name' => $addressData['first_name'] ?? null,
-                    'last_name' => $addressData['last_name'] ?? null,
-                    'street_address' => $addressData['street_address'] ?? null,
-                    'postal_code' => $addressData['postal_code'] ?? null,
-                    'city' => $addressData['city'] ?? null,
-                    'country' => $addressData['country'] ?? null,
-                    'website' => $addressData['website'] ?? null,
-                    'phone_number' => $addressData['phone_number'] ?? null,
-                    'email_address_system' => $addressData['email_address_system'],
-                    'email_address_new' => $addressData['email_address_new'] ?? null,
-                    'feedback' => $addressData['feedback'] ?? null,
-                    'follow_up_date' => $addressData['follow_up_date'] ?? null,
-                    'contact_id' => $addressData['contact_id'] ?? null,
-                    'sub_project_id' => $addressData['sub_project_id'] ?? null,
-                    'hubspot_tag' => $addressData['hubspot_tag'] ?? null,
-                    'notes' => $addressData['notes'] ?? null,
-                    'company_id' => $addressData['company_id'] ?? null,
-                    'deal_id' => $addressData['deal_id'] ?? null,
-                    'titel' => $addressData['titel'] ?? null,
-                ]);
+
+            $subprojectIds = SubProject::pluck('id')->all();
+
+            $existingByStreetPostal = Address::get(['street_address', 'postal_code'])
+                ->mapWithKeys(fn($r) => ["{$r->street_address}|{$r->postal_code}" => true])
+                ->all();
+            $existingByNamePostal = Address::get(['company_name', 'postal_code'])
+                ->mapWithKeys(fn($r) => ["{$r->company_name}|{$r->postal_code}" => true])
+                ->all();
+            $existingEmails = Address::pluck('email_address_system')->flip()->all();
+            $existingPhones = Address::pluck('phone_number')->flip()->all();
+
+            $errors = [];
+            $createdIds = [];
+
+            foreach ($request->input('addresses') as $index => $addressData) {
+                $rowNumber = $index + 1;
+
+                $validation = AddressDataValidator::validateRowData($addressData, $rowNumber, $subprojectIds);
+                if (!$validation['valid']) {
+                    $errors = array_merge($errors, $validation['errors']);
+                    continue;
+                }
+
+                $dupCheck = AddressDataValidator::checkDuplicates(
+                    $addressData,
+                    $existingByStreetPostal,
+                    $existingByNamePostal,
+                    $existingEmails,
+                    $existingPhones,
+                    $rowNumber
+                );
+                if (!$dupCheck['valid']) {
+                    $errors = array_merge($errors, $dupCheck['errors']);
+                    continue;
+                }
+
+                $insertData = AddressDataValidator::prepareInsert($addressData);
+                $address = Address::create($insertData);
+                $createdIds[] = $address->id;
+
+                if (!empty($address->street_address) && !empty($address->postal_code)) {
+                    $key1 = "{$address->street_address}|{$address->postal_code}";
+                    $existingByStreetPostal[$key1] = true;
+                }
+                if (!empty($address->company_name) && !empty($address->postal_code)) {
+                    $key2 = "{$address->company_name}|{$address->postal_code}";
+                    $existingByNamePostal[$key2] = true;
+                }
+                if (!empty($address->email_address_system)) {
+                    $existingEmails[$address->email_address_system] = true;
+                }
+                if (!empty($address->phone_number)) {
+                    $existingPhones[$address->phone_number] = true;
+                }
             }
 
-            // Commit the transaction after successful execution
+            if (!empty($errors)) {
+                DB::rollBack();
+                return response()->json(['errors' => $errors], 422);
+            }
+
             DB::commit();
 
-            // Return a success response
-            return response()->json(['message' => 'Addresses saved successfully.'], 200);
+            return response()->json(['message' => 'Addresses saved successfully.', 'ids' => $createdIds], 200);
 
         } catch (Exception $e) {
-            // Roll back the transaction in case of any failure
             DB::rollBack();
 
-            // Log the error (you can also use a logger here if needed)
-            // Optionally return the error message
             return response()->json([
                 'message' => 'Failed to save addresses',
                 'error' => $e->getMessage()
