@@ -320,10 +320,14 @@ class ApiController extends Controller
         $emailAddress = $request->input('email_address_system');
         $companyName = $request->input('company_name');
         $limit = $request->input('limit', 500);
+        $addressId = $request->input('address_id');
 
         // Initialize query
         $query = Address::query();
 
+        if ($addressId) {
+            $query->where('id', $addressId);
+        }
         // Apply filters based on search parameters
         if ($contactId) {
             $query->where('contact_id', $contactId);
