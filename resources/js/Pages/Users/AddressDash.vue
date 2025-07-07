@@ -478,11 +478,15 @@
                     <div class="space-y-2">
                         <!-- Input Field for New Contact ID -->
                         <div class="field">
-                            <label for="new_contact_id">New Contact ID:</label>
-                            <InputText id="new_contact_id" v-model="newContactId" placeholder="Enter new Contact ID"
+                            <label for="new_contact_id">Contact ID:</label>
+                            <InputText id="new_contact_id" v-model="newContactId" placeholder="Enter Contact ID"
                                 class="w-full !border-secondary" />
-                            <!-- Error Message Display -->
                             <small class="text-red-600" v-if="contactIdError">{{ contactIdError }}</small>
+                        </div>
+                        <div class="field">
+                            <label for="name">Name:</label>
+                            <InputText id="name" v-model="newName" placeholder="Enter Name"
+                                class="w-full !border-secondary" />
                         </div>
                         <div class="field">
                             <label for="new_contact_id">New Sub-Project:</label>
@@ -773,6 +777,7 @@ export default {
             selectedMinute: null,
             showContactIdDialog: false,
             newContactId: '',
+            newName: '',
             newsubproject: '',
             contactIdLoading: false,
             contactIdError: '',
@@ -1002,6 +1007,7 @@ export default {
         },
         openContactIdDialog() {
             this.newContactId = '';
+            this.newName = '';
             this.newsubproject = '';
             this.contactIdError = '';
             this.subprojectError = '';
@@ -1023,8 +1029,8 @@ export default {
         },
         // Method to handle the submission of the new Contact ID
         async submitNewContactId() {
-            if (!this.newContactId) {
-                this.contactIdError = 'Contact ID is required.';
+            if (!this.newContactId && !this.newName) {
+                this.contactIdError = 'Contact ID or Name is required.';
                 return;
             }
             if (!this.newsubproject) {
@@ -1037,7 +1043,11 @@ export default {
             this.subprojectError = '';
 
             try {
-                const response = await axios.get(route('address.getByContactId', { contact_id: this.newContactId, sub_project_id: this.newsubproject }));
+                const response = await axios.get(route('address.search', {
+                    contact_id: this.newContactId || null,
+                    name: this.newName || null,
+                    sub_project_id: this.newsubproject
+                }));
 
                 if (response.data && response.data.address) {
                     console.log(response.data);
@@ -1068,7 +1078,7 @@ export default {
 
                     this.showContactIdDialog = false;
                 } else {
-                    this.contactIdError = 'No address found for the provided Contact ID.';
+                    this.contactIdError = 'No address found for the provided criteria.';
                 }
             } catch (error) {
                 console.error('Error fetching address:', error);

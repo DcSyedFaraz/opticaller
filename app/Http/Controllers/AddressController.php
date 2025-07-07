@@ -16,26 +16,52 @@ use Mail;
 
 class AddressController extends Controller
 {
-    public function getAddressByContactId($contact_id, $sub_project_id)
+    public function search(Request $request)
     {
-        // Fetch the address using the Contact ID
-        $address = Address::with(['calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users'])->where('contact_id', $contact_id)->where('sub_project_id', $sub_project_id)->first();
+        $request->validate([
+            'sub_project_id' => 'required|integer',
+            'contact_id' => 'nullable|string',
+            'name' => 'nullable|string',
+        ]);
+
+        $sub_project_id = $request->input('sub_project_id');
+        $contact_id = $request->input('contact_id');
+        $name = $request->input('name');
+
+        if (!$contact_id && !$name) {
+            return response()->json([
+                'error' => 'Contact ID or name is required.'
+            ], 422);
+        }
+
+        $query = Address::with(['calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users'])
+            ->where('sub_project_id', $sub_project_id);
+
+        if ($contact_id) {
+            $query->where('contact_id', $contact_id);
+        } elseif ($name) {
+            $query->where(function ($q) use ($name) {
+                $q->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$name}%"])
+                    ->orWhere('company_name', 'like', "%{$name}%");
+            });
+        }
+
+        $address = $query->first();
 
         if ($address) {
             $address->seen = now();
             $address->save();
-            // Assuming you have lockfields logic
             $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
             return response()->json([
                 'address' => $address,
                 'lockfields' => $globalLockedFields,
             ]);
-        } else {
-            return response()->json([
-                'error' => 'Address not found for the provided Contact ID.',
-            ], 404);
         }
+
+        return response()->json([
+            'error' => 'Address not found for the provided criteria.',
+        ], 404);
     }
     public function index(Request $request)
     {
