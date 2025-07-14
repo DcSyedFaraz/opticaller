@@ -43,12 +43,13 @@ class AddressImportController extends Controller
     public function import(Request $request): \Illuminate\Http\RedirectResponse
     {
         $payload = $request->validate([
-            'excel_file' => 'required|file|mimes:xlsx,xls|max:10240',
+            'excel_file' => 'required|file|max:10240',
             'preview_data' => 'required|json',
             'options' => 'nullable|json',
         ]);
 
         $previewData = json_decode($payload['preview_data'], true);
+        dd($previewData); // For debugging purposes, remove in production
 
         if (empty($previewData)) {
             return back()->with([

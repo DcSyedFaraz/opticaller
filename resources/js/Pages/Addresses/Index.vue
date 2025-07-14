@@ -156,7 +156,7 @@
                                         <div>
                                             <p class="text-sm font-medium text-green-600 mb-1">Successfully Imported</p>
                                             <p class="text-2xl font-bold text-green-900">{{ importResults.imported || 0
-                                            }}</p>
+                                                }}</p>
                                         </div>
                                         <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
                                             <i class="pi pi-check text-green-700 text-xl"></i>
@@ -596,7 +596,8 @@ export default {
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, {
                     header: 1, // Get raw data first
                     defval: '',
-                    blankrows: false
+                    blankrows: false,
+                    raw: false
                 });
 
                 if (jsonData.length === 0) {
