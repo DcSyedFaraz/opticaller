@@ -157,6 +157,30 @@ class AddressImportController extends Controller
                             continue; // Skip to next row
                         }
                     }
+
+                    // Recover previously deleted records when re-imported
+                    if ($trashed = $this->findTrashedMatch($normalized)) {
+                        $updateData = $this->prepareInsert($normalized, $subprojects);
+                        $trashed->restore();
+                        $trashed->update($updateData);
+                        $imported++;
+
+                        if (!empty($updateData['street_address']) && !empty($updateData['postal_code'])) {
+                            $existingByStreetPostal["{$updateData['street_address']}|{$updateData['postal_code']}"] = true;
+                        }
+                        if (!empty($updateData['company_name']) && !empty($updateData['postal_code'])) {
+                            $existingByNamePostal["{$updateData['company_name']}|{$updateData['postal_code']}"] = true;
+                        }
+                        if (!empty($updateData['email_address_system'])) {
+                            $existingEmails[$updateData['email_address_system']] = true;
+                        }
+                        if (!empty($updateData['phone_number'])) {
+                            $existingPhones[$updateData['phone_number']] = true;
+                        }
+
+                        continue; // Skip normal insert path
+                    }
+
                     // Prepare the insert data array
                     $toInsert[] = $this->prepareInsert($normalized, $subprojects);
                 }
@@ -320,6 +344,56 @@ class AddressImportController extends Controller
         }
 
         return ['valid' => empty($errs), 'errors' => $errs];
+    }
+
+    /**
+     * Find a soft-deleted address matching the given row using the same
+     * duplicate rules.
+     */
+    private function findTrashedMatch(array $row): ?Address
+    {
+        if (!empty($row['contact_id'])) {
+            $match = Address::onlyTrashed()->where('contact_id', $row['contact_id'])->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if (!empty($row['street_address']) && !empty($row['postal_code'])) {
+            $match = Address::onlyTrashed()
+                ->where('street_address', $row['street_address'])
+                ->where('postal_code', $row['postal_code'])
+                ->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if (!empty($row['company_name']) && !empty($row['postal_code'])) {
+            $match = Address::onlyTrashed()
+                ->where('company_name', $row['company_name'])
+                ->where('postal_code', $row['postal_code'])
+                ->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if (!empty($row['email_address_system'])) {
+            $match = Address::onlyTrashed()->where('email_address_system', $row['email_address_system'])->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if (!empty($row['phone_number'])) {
+            $match = Address::onlyTrashed()->where('phone_number', $row['phone_number'])->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        return null;
     }
 
     /**
