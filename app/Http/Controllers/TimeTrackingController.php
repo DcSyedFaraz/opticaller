@@ -330,6 +330,13 @@ class TimeTrackingController extends Controller
                         'interest_notes' => $validatedData['interest_notes'] ?? null,
                     ]);
                 }
+
+                // Archive the address only when it was reached and no follow-up
+                // date is set. This prevents the same address from reappearing
+                // until it is imported again.
+                if (!$notreached && empty($address->follow_up_date)) {
+                    $address->delete();
+                }
             }
 
             DB::commit();
