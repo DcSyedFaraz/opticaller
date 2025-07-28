@@ -323,7 +323,7 @@ class ApiController extends Controller
         $addressId = $request->input('address_id');
 
         // Initialize query
-        $query = Address::query();
+        $query = Address::query()->withTrashed();
 
         if ($addressId) {
             $query->where('id', $addressId);
