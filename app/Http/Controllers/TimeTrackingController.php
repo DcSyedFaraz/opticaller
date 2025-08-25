@@ -249,7 +249,7 @@ class TimeTrackingController extends Controller
                 !in_array($feedbackvalue, $excludeFeedbacks)
             ) {
 
-                Log::channel('webhook')->info('Triggering webhook for contact ID: ' . $address->contact_id . ' Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                Log::channel('webhook')->info('Triggering webhook for ID: ' . $address->id . ' Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
                     ', feedback: ' . $validatedData['address']['feedback']);
 
@@ -260,9 +260,9 @@ class TimeTrackingController extends Controller
                 ]);
 
                 if ($response->successful()) {
-                    Log::channel('webhook')->info('Webhook successfully triggered for contact ID: ' . $address->contact_id);
+                    Log::channel('webhook')->info('Webhook successfully triggered for ID: ' . $address->id);
                 } else {
-                    Log::channel('webhook')->error('Webhook failed for contact ID: ' . $address->contact_id . '. Response: ' . $response->body());
+                    Log::channel('webhook')->error('Webhook failed for ID: ' . $address->id . '. Response: ' . $response->body());
                 }
 
             } else {
