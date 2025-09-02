@@ -30,16 +30,17 @@ class CallReportController extends Controller
         $start = Carbon::parse($date, $tz)->startOfDay();
         $end   = Carbon::parse($date, $tz)->endOfDay();
 
-        // Query activities joined with users and addresses
+        // Query activities joined with users and addresses (by id and by contact_id fallback)
         $rows = DB::table('activities as a')
             ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
             ->leftJoin('addresses as addr', 'addr.id', '=', 'a.address_id')
+            ->leftJoin('addresses as addr_by_contact', 'addr_by_contact.contact_id', '=', 'a.contact_id')
             ->where('a.activity_type', 'call')
             ->whereBetween('a.created_at', [$start, $end])
             ->orderBy('a.created_at', 'asc')
             ->select([
                 DB::raw('COALESCE(u.name, CONCAT("User #", a.user_id)) as user_name'),
-                DB::raw('addr.phone_number as called_number'),
+                DB::raw('COALESCE(addr.phone_number, addr_by_contact.phone_number) as called_number'),
                 'a.address_id',
                 'a.activity_type',
                 'a.feedback',
