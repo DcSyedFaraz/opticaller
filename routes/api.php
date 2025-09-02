@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\CallReportController;
 use App\Http\Controllers\CallController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -35,4 +36,6 @@ Route::post('/restore_address', [ApiController::class, 'restoreAddress']);
 Route::post('/address/update-status', [ApiController::class, 'updateStatus']);
 Route::post('/address/check-status', [ApiController::class, 'checkStatus']);
 
+// Call reports
+Route::get('/reports/calls', [CallReportController::class, 'daily']);
 
