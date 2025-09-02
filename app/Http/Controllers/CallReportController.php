@@ -18,6 +18,7 @@ class CallReportController extends Controller
     public function daily(Request $request)
     {
         $date = $request->input('date', '2024-10-24');
+        $number = $request->input('number', '06021560710');
 
         // Validate basic date format (YYYY-MM-DD)
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
@@ -37,6 +38,12 @@ class CallReportController extends Controller
             ->leftJoin('addresses as addr_by_contact', 'addr_by_contact.contact_id', '=', 'a.contact_id')
             ->where('a.activity_type', 'call')
             ->whereBetween('a.created_at', [$start, $end])
+            ->when($number, function ($query) use ($number) {
+                $query->where(function ($q) use ($number) {
+                    $q->where('addr.phone_number', 'like', "%$number%")
+                      ->orWhere('addr_by_contact.phone_number', 'like', "%$number%");
+                });
+            })
             ->orderBy('a.created_at', 'asc')
             ->select([
                 DB::raw('COALESCE(u.name, CONCAT("User #", a.user_id)) as user_name'),
