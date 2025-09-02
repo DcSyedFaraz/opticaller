@@ -18,7 +18,7 @@ class CallReportController extends Controller
     public function daily(Request $request)
     {
         $date = $request->input('date', '2024-10-24');
-        $number = $request->input('number', '06021560710');
+        $number = $request->input('number', '6021560710');
 
         // Validate basic date format (YYYY-MM-DD)
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
