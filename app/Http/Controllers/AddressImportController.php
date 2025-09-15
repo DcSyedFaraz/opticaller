@@ -112,10 +112,11 @@ class AddressImportController extends Controller
         $existingEmails = Address::pluck('email_address_system')->filter()->flip()->all();
         $existingPhones = Address::pluck('phone_number')->filter()->flip()->all();
 
-        // 3) Preload subprojects (if using sub_project_title to look up ID)
+        // 3) Preload subprojects for both ID and name lookups
         $subprojects = SubProject::pluck('id', 'title')->all();
+        $subprojectsById = SubProject::pluck('id', 'id')->all();
 
-        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $subprojects) {
+        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $subprojects, $subprojectsById) {
             foreach (array_chunk($data, 100) as $batchIndex => $batch) {
                 $toInsert = [];
 
@@ -132,7 +133,7 @@ class AddressImportController extends Controller
                     $normalized = $this->normalizeRowData($row);
 
                     // Validate required fields and format
-                    $validation = $this->validateRowData($normalized, $rowNumber, $subprojects);
+                    $validation = $this->validateRowData($normalized, $rowNumber, $subprojects, $subprojectsById);
                     if (!$validation['valid']) {
                         $errors = array_merge($errors, $validation['errors']);
                         $skipped++;
@@ -160,7 +161,7 @@ class AddressImportController extends Controller
 
                     // Recover previously deleted records when re-imported
                     if ($trashed = $this->findTrashedMatch($normalized)) {
-                        $updateData = $this->prepareInsert($normalized, $subprojects);
+                        $updateData = $this->prepareInsert($normalized, $subprojects, $subprojectsById);
                         $trashed->restore();
                         $trashed->update($updateData);
                         $imported++;
@@ -182,7 +183,7 @@ class AddressImportController extends Controller
                     }
 
                     // Prepare the insert data array
-                    $toInsert[] = $this->prepareInsert($normalized, $subprojects);
+                    $toInsert[] = $this->prepareInsert($normalized, $subprojects, $subprojectsById);
                 }
                 // dd($toInsert);
 
@@ -247,7 +248,7 @@ class AddressImportController extends Controller
     /**
      * Validate each normalized row for required/format constraints.
      */
-    private function validateRowData(array $row, int $num, array $subprojects): array
+    private function validateRowData(array $row, int $num, array $subprojects, array $subprojectsById): array
     {
         $errs = [];
 
@@ -269,9 +270,22 @@ class AddressImportController extends Controller
             $errs[] = "Row {$num}: Invalid date format ({$row['follow_up_date']})";
         }
 
-        // sub_project_id is actually passed as a title; check existence
-        if (!empty($row['sub_project_id']) && !isset($subprojects[$row['sub_project_id']])) {
-            $errs[] = "Row {$num}: Subproject '{$row['sub_project_id']}' does not exist";
+        // sub_project_id can be either an ID or a name; check existence
+        if (!empty($row['sub_project_id'])) {
+            $subProjectValue = $row['sub_project_id'];
+            $isNumeric = is_numeric($subProjectValue);
+
+            if ($isNumeric) {
+                // Check if ID exists
+                if (!isset($subprojectsById[$subProjectValue])) {
+                    $errs[] = "Row {$num}: Subproject ID '{$subProjectValue}' does not exist";
+                }
+            } else {
+                // Check if name exists
+                if (!isset($subprojects[$subProjectValue])) {
+                    $errs[] = "Row {$num}: Subproject name '{$subProjectValue}' does not exist";
+                }
+            }
         }
 
         // deal_id and contact_id, if present, must be numeric
@@ -425,12 +439,23 @@ class AddressImportController extends Controller
     /**
      * Prepare the final array to insert into the `addresses` table.
      */
-    private function prepareInsert(array $row, array $subprojects): array
+    private function prepareInsert(array $row, array $subprojects, array $subprojectsById): array
     {
-        // Resolve subproject title → ID (if provided)
+        // Resolve subproject ID or name → ID (if provided)
         $subId = null;
-        if (!empty($row['sub_project_id']) && isset($subprojects[$row['sub_project_id']])) {
-            $subId = $subprojects[$row['sub_project_id']];
+        if (!empty($row['sub_project_id'])) {
+            $subProjectValue = $row['sub_project_id'];
+            $isNumeric = is_numeric($subProjectValue);
+
+            if ($isNumeric) {
+                // It's an ID, use it directly
+                $subId = (int) $subProjectValue;
+            } else {
+                // It's a name, look it up
+                if (isset($subprojects[$subProjectValue])) {
+                    $subId = $subprojects[$subProjectValue];
+                }
+            }
         }
 
         return [
