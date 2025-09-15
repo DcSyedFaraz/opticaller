@@ -40,6 +40,9 @@
                                    file:rounded-md file:border-0 file:text-sm file:font-semibold
                                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                     </div>
+                    <div class="sm:col-span-12">
+                        <RetrySchedule v-model="newProject.retry_schedule" />
+                    </div>
                 </div>
 
                 <div class="mt-8">
@@ -102,9 +105,9 @@
                 </template>
             </DataTable>
 
-            <Dialog v-model:visible="editDialogVisible" :style="{ width: '450px' }" header="Edit Sub Project"
-                :modal="true" class="p-fluid max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-                <form @submit.prevent="updateProject" class="grid grid-cols-1 gap-4">
+            <Dialog v-model:visible="editDialogVisible" :style="{ width: '800px' }" header="Edit Sub Project"
+                :modal="true" class="p-fluid max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+                <form @submit.prevent="updateProject" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div class="field">
                         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
                         <InputText v-model="editProjectData.title" type="text"
@@ -112,13 +115,13 @@
                     </div>
                     <div class="field">
                         <label for="title" class="block text-sm font-medium text-gray-700">Reverse Countdown (Sec)</label>
-                        <InputNumber fluid v-model="editProjectData.reverse_countdown" 
+                        <InputNumber fluid v-model="editProjectData.reverse_countdown"
                             class="mt-1 block w-full" />
                     </div>
                     <div class="field">
-                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <Textarea v-model="editProjectData.description" rows="5" cols="30"
-                            class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
+                        <InputLabel for="Projects">Project</InputLabel>
+                        <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
+                            optionLabel="title" placeholder="Select Project" class="w-full" />
                     </div>
                     <div class="field">
                         <Select v-model="editProjectData.priority" :options="priorityOptions" optionValue="value"
@@ -131,11 +134,13 @@
                                    file:rounded-md file:border-0 file:text-sm file:font-semibold
                                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                     </div>
-
-                    <div class="field">
-                        <InputLabel for="Projects">Project</InputLabel>
-                        <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
-                            optionLabel="title" placeholder="Select Project" class="w-full" />
+                    <div class="field lg:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <Textarea v-model="editProjectData.description" rows="3" cols="30"
+                            class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
+                    </div>
+                    <div class="field lg:col-span-2">
+                        <RetryScheduleCompact v-model="editProjectData.retry_schedule" />
                     </div>
                     <Button type="submit" label="Update"
                         class="mt-4 justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" />
@@ -146,8 +151,14 @@
 </template>
 
 <script>
+import RetrySchedule from '@/Components/RetrySchedule.vue';
+import RetryScheduleCompact from '@/Components/RetryScheduleCompact.vue';
 
 export default {
+    components: {
+        RetrySchedule,
+        RetryScheduleCompact
+    },
     props: {
         subprojects: Array,
         projects: Array,
@@ -160,6 +171,7 @@ export default {
                 project_id: null,
                 priority: null,
                 pdf: null,
+                retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
             },
             priorityOptions: [
                 { label: 'Low', value: 1 },
@@ -169,6 +181,7 @@ export default {
             ],
             editProjectData: {
                 pdf: null,
+                retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
             },
             editDialogVisible: false,
         };
@@ -203,13 +216,18 @@ export default {
             if (this.newProject.pdf) {
                 formData.append('pdf', this.newProject.pdf);
             }
+            if (this.newProject.retry_schedule) {
+                this.newProject.retry_schedule.forEach((interval, index) => {
+                    formData.append(`retry_schedule[${index}]`, interval);
+                });
+            }
 
             this.$inertia.post('/subprojects', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
                 onSuccess: () => {
-                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null };
+                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null, retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] };
 
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project created successfully', life: 3000 });
                 },
@@ -233,6 +251,11 @@ export default {
             formData.append('priority', this.editProjectData.priority);
             if (this.editProjectData.pdf) {
                 formData.append('pdf', this.editProjectData.pdf);
+            }
+            if (this.editProjectData.retry_schedule) {
+                this.editProjectData.retry_schedule.forEach((interval, index) => {
+                    formData.append(`retry_schedule[${index}]`, interval);
+                });
             }
 
             this.$inertia.post(`/subprojects/${this.editProjectData.id}`, formData, {

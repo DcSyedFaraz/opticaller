@@ -77,9 +77,11 @@ class ProjectController extends Controller
             'project_id' => 'required|exists:projects,id',
             'reverse_countdown' => 'required|integer|min:0',
             'pdf' => 'nullable|file|mimes:pdf|max:2048',
+            'retry_schedule' => 'nullable|array|size:15',
+            'retry_schedule.*' => 'required|integer|min:1|max:168', // Max 1 week (168 hours)
         ]);
 
-        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown']);
+        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown', 'retry_schedule']);
 
         if ($request->hasFile('pdf')) {
             $path = $request->file('pdf')->store('pdfs', 'public');
@@ -101,11 +103,13 @@ class ProjectController extends Controller
             'project_id' => 'required|exists:projects,id',
             'reverse_countdown' => 'required|integer|min:0',
             'pdf' => 'nullable|file|mimes:pdf|max:2048',
+            'retry_schedule' => 'nullable|array|size:15',
+            'retry_schedule.*' => 'required|integer|min:1|max:168', // Max 1 week (168 hours)
 
         ]);
         $subproject = SubProject::findOrFail($id);
         // dd($request->all(), $project);
-        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown']);
+        $data = $request->only(['title', 'description', 'project_id', 'priority', 'reverse_countdown', 'retry_schedule']);
 
         if ($request->hasFile('pdf')) {
             // Delete old PDF if exists

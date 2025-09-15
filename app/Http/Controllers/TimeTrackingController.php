@@ -358,56 +358,140 @@ class TimeTrackingController extends Controller
     {
         $now = Carbon::now();
         $latestNotReached = $address->notreached()->latest()->first();
-        // dd($now);
-        if ($latestNotReached) {
-            // Check if the address is currently paused
-            // if ($latestNotReached->paused_until && $now->lessThan($latestNotReached->paused_until)) {
-            //     throw new \Exception('Address is currently paused and cannot be marked as not reached.');
-            // }
 
+        if ($latestNotReached) {
             // Increment attempt count
             $latestNotReached->attempt_count += 1;
+            $currentAttempt = $latestNotReached->attempt_count;
 
-            // Determine the next action based on the attempt count
-            if (in_array($latestNotReached->attempt_count, [3, 6])) {
-                // Pause for 5 business days
-                $pausedUntil = $this->calculatePausedUntil($now, 5);
-                $latestNotReached->paused_until = $pausedUntil;
-                $address->follow_up_date = null;
-                $address->feedback = 'notreached';
-            } elseif ($latestNotReached->attempt_count > 9) {
-                $address->feedback = 'notreached';
-                // dd($latestNotReached->attempt_count);
-                // Notify the team and remove the address
-                Log::channel('address')->info('Address processing limit reached', [
-                    'timestamp' => $now->toDateTimeString(),
-                    'user_id' => auth()->id(),
-                    'message' => 'Address removed after exceeding maximum retry attempts.',
-                    'address_details' => $address->toArray(),
-                ]);
-                $this->limitexceed = true;
-                // $this->notifyTeam($address);
-                // dd( session('message'));
-                // $address->delete();
-                // throw new \Exception('Address removed after 10 unsuccessful attempts.');
+            // Get the sub project to access retry schedule
+            $subProject = $address->subproject;
+
+            if ($subProject && $subProject->hasMoreRetryAttempts($currentAttempt)) {
+                // Get the retry interval for this attempt
+                $retryIntervalHours = $subProject->getRetryIntervalForAttempt($currentAttempt);
+
+                if ($retryIntervalHours) {
+                    // Set follow-up date based on retry schedule
+                    $followUpDate = $now->copy()->addHours($retryIntervalHours);
+                    $address->follow_up_date = $followUpDate;
+                    $address->feedback = 'notreached';
+
+                    Log::channel('address')->info('Address scheduled for retry', [
+                        'timestamp' => $now->toDateTimeString(),
+                        'user_id' => auth()->id(),
+                        'address_id' => $address->id,
+                        'attempt' => $currentAttempt,
+                        'retry_interval_hours' => $retryIntervalHours,
+                        'next_retry_date' => $followUpDate->toDateTimeString(),
+                    ]);
+                } else {
+                    // No more retries available
+                    $this->handleFinalRejection($address, $currentAttempt);
+                }
+            } else {
+                // No more retries available or no sub project
+                $this->handleFinalRejection($address, $currentAttempt);
             }
 
             // Save the updated NotReached record
             $latestNotReached->save();
         } else {
             // If no NotReached record exists, create one
-            NotReached::create([
+            $notReached = NotReached::create([
                 'address_id' => $address->id,
                 'attempt_count' => 1,
                 'paused_until' => null,
             ]);
-            // Set initial follow-up date (e.g., after 1 day)
-            // $address->follow_up_date = $now->addDay();
-            $address->feedback = 'notreached';
+
+            // Get the sub project to access retry schedule
+            $subProject = $address->subproject;
+
+            if ($subProject && $subProject->hasMoreRetryAttempts(1)) {
+                // Get the retry interval for first attempt
+                $retryIntervalHours = $subProject->getRetryIntervalForAttempt(1);
+
+                if ($retryIntervalHours) {
+                    // Set follow-up date based on retry schedule
+                    $followUpDate = $now->copy()->addHours($retryIntervalHours);
+                    $address->follow_up_date = $followUpDate;
+                    $address->feedback = 'notreached';
+
+                    Log::channel('address')->info('Address scheduled for first retry', [
+                        'timestamp' => $now->toDateTimeString(),
+                        'user_id' => auth()->id(),
+                        'address_id' => $address->id,
+                        'attempt' => 1,
+                        'retry_interval_hours' => $retryIntervalHours,
+                        'next_retry_date' => $followUpDate->toDateTimeString(),
+                    ]);
+                } else {
+                    // No retries available
+                    $this->handleFinalRejection($address, 1);
+                }
+            } else {
+                // No retries available or no sub project
+                $this->handleFinalRejection($address, 1);
+            }
         }
 
         // Save the address changes
         $address->save();
+    }
+
+    /**
+     * Handle final rejection after all retry attempts are exhausted
+     */
+    private function handleFinalRejection(Address $address, $attemptCount)
+    {
+        $now = Carbon::now();
+
+        // Send to API as they don't want our services
+        $this->sendFinalRejectionToAPI($address, $attemptCount);
+
+        // Log the final rejection
+        Log::channel('address')->info('Address final rejection after all retry attempts', [
+            'timestamp' => $now->toDateTimeString(),
+            'user_id' => auth()->id(),
+            'address_id' => $address->id,
+            'final_attempt' => $attemptCount,
+            'message' => 'Address rejected after exceeding all retry attempts.',
+            'address_details' => $address->toArray(),
+        ]);
+
+        $this->limitexceed = true;
+        $address->feedback = 'notreached';
+        $address->follow_up_date = null;
+    }
+
+    /**
+     * Send final rejection data to API
+     */
+    private function sendFinalRejectionToAPI(Address $address, $attemptCount)
+    {
+        try {
+            // Use the same webhook URL as the main webhook
+            $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
+
+            $dataToSend = [
+                'ID' => $address->id,
+                'Sub_Project' => $address->sub_project_id,
+                'final_rejection' => true,
+                'total_attempts' => $attemptCount,
+                'rejection_reason' => 'Exceeded maximum retry attempts',
+                'rejection_date' => Carbon::now()->toDateTimeString(),
+            ];
+
+            $response = Http::post($webhookUrl, $dataToSend);
+
+            if ($response->successful()) {
+                Log::channel('webhook')->info('Final rejection webhook successfully sent for ID: ' . $address->id);
+            } else {
+                Log::channel('webhook')->error('Final rejection webhook failed for ID: ' . $address->id . '. Response: ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            Log::channel('webhook')->error('Error sending final rejection webhook: ' . $e->getMessage());
+        }
     }
 
     /**
