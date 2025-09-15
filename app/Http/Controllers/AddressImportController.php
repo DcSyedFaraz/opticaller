@@ -109,8 +109,8 @@ class AddressImportController extends Controller
             ->all();
 
         // 2) Preload existing emails and phones (optional)
-        $existingEmails = Address::pluck('email_address_system')->flip()->all();
-        $existingPhones = Address::pluck('phone_number')->flip()->all();
+        $existingEmails = Address::pluck('email_address_system')->filter()->flip()->all();
+        $existingPhones = Address::pluck('phone_number')->filter()->flip()->all();
 
         // 3) Preload subprojects (if using sub_project_title to look up ID)
         $subprojects = SubProject::pluck('id', 'title')->all();
