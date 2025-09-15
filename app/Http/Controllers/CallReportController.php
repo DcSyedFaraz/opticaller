@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class CallReportController extends Controller
+{
+    /**
+     * Return call activity records for a given date in Europe/Berlin time as CSV.
+     * Defaults to 2024-10-24 if no date is provided.
+     *
+     * CSV columns: user_name, called_number, address_id, activity_type, feedback,
+     * call_duration, created_at_berlin, updated_at_berlin
+     */
+    public function daily(Request $request)
+    {
+        $date = $request->input('date', '2024-10-24');
+        $number = $request->input('number', '6021560710');
+
+        // Validate basic date format (YYYY-MM-DD)
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return response()->json(['error' => 'Invalid date format. Use YYYY-MM-DD.'], 422);
+        }
+
+        $tz = 'Europe/Berlin';
+
+        // Compute the Berlin local day window
+        $start = Carbon::parse($date, $tz)->startOfDay();
+        $end   = Carbon::parse($date, $tz)->endOfDay();
+
+        // Base query: activities joined with users and addresses (by id and by contact_id fallback)
+        $activitiesQuery = DB::table('activities as a')
+            ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+            ->leftJoin('addresses as addr', 'addr.id', '=', 'a.address_id')
+            ->leftJoin('addresses as addr_by_contact', 'addr_by_contact.contact_id', '=', 'a.contact_id')
+            ->where('a.activity_type', 'call')
+            ->whereBetween('a.created_at', [$start, $end])
+            ->when($number, function ($query) use ($number) {
+                $query->where(function ($q) use ($number) {
+                    $q->where('addr.phone_number', 'like', "%$number%")
+                      ->orWhere('addr_by_contact.phone_number', 'like', "%$number%");
+                });
+            })
+            ->select([
+                DB::raw('COALESCE(u.name, CONCAT("User #", a.user_id)) as user_name'),
+                DB::raw('COALESCE(addr.phone_number, addr_by_contact.phone_number) as called_number'),
+                'a.address_id',
+                'a.activity_type',
+                'a.feedback',
+                'a.call_duration',
+                'a.created_at',
+                'a.updated_at',
+            ]);
+
+        // Optional union: include matching rows directly from addresses (even if no activity)
+        if (!empty($number)) {
+            $addressesQuery = DB::table('addresses as only_addr')
+                ->where('only_addr.phone_number', 'like', "%$number%")
+                ->select([
+                    DB::raw('NULL as user_name'),
+                    DB::raw('only_addr.phone_number as called_number'),
+                    DB::raw('only_addr.id as address_id'),
+                    DB::raw('"address" as activity_type'),
+                    DB::raw('NULL as feedback'),
+                    DB::raw('NULL as call_duration'),
+                    DB::raw('only_addr.created_at as created_at'),
+                    DB::raw('only_addr.updated_at as updated_at'),
+                ]);
+
+            $activitiesQuery->unionAll($addressesQuery);
+        }
+
+        // Execute combined query
+        $rows = DB::query()->fromSub($activitiesQuery, 't')
+            ->orderBy('t.created_at', 'asc')
+            ->get();
+
+        $filename = sprintf('call_report_%s.csv', $date);
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($rows, $tz) {
+            $out = fopen('php://output', 'w');
+            // Header row
+            fputcsv($out, [
+                'user_name',
+                'called_number',
+                'address_id',
+                'activity_type',
+                'feedback',
+                'call_duration',
+                'created_at_berlin',
+                'updated_at_berlin',
+            ]);
+
+            foreach ($rows as $r) {
+                $created = $r->created_at ? Carbon::parse($r->created_at)->setTimezone($tz)->format('Y-m-d H:i:s') : null;
+                $updated = $r->updated_at ? Carbon::parse($r->updated_at)->setTimezone($tz)->format('Y-m-d H:i:s') : null;
+                fputcsv($out, [
+                    $r->user_name,
+                    $r->called_number,
+                    $r->address_id,
+                    $r->activity_type,
+                    $r->feedback,
+                    $r->call_duration,
+                    $created,
+                    $updated,
+                ]);
+            }
+
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+}
