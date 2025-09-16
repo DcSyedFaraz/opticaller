@@ -110,18 +110,19 @@ class TimeTrackingController extends Controller
             // $makeWebhookUrl = 'https://hook.make.com/your-webhook-url'; // Replace with your actual Make.com webhook URL
             // $response = Http::post($makeWebhookUrl, $dataToSend);
 
-            // if ($response->successful()) {
-            //     $addressService = new AddressService();
-            //     $address = $addressService->getDueAddress();
-            //     $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
+            $addressService = new AddressService();
+            $address = $addressService->getDueAddress();
+            $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
 
-            //     return response()->json(['address' => $address, 'lockfields' => $globalLockedFields, 'limit' => $this->limitexceed]);
+            return response()->json(['address' => $address, 'lockfields' => $globalLockedFields, 'limit' => $this->limitexceed]);
+            // if ($response->successful()) {
             // } else {
             //     throw new \Exception("Failed to send data to Make.com.");
             // }
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error in handleInvalidNumber: ' . $e->getMessage());
             // Handle the error
             return response()->json(['error' => $e->getMessage()], 500);
         }

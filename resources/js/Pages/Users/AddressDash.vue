@@ -11,12 +11,12 @@
                     <div class="flex flex-wrap justify-between items-center">
                         <div
                             class="inline-flex items-center rounded-md bg-black px-2 py-1 text-2xl xl:text-sm font-medium text-white ring-1 ring-inset ring-black ">
-                            Sub Project Title: {{ localAddress.subproject?.title }}
+                            Sub Project Title: {{ localAddress?.subproject?.title }}
                         </div>
 
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
-                            <div v-if="localAddress.subproject?.pdf_url" class="mt-2">
-                                <a :href="localAddress.subproject.pdf_url" target="_blank" rel="noopener noreferrer"
+                            <div v-if="localAddress?.subproject?.pdf_url" class="mt-2">
+                                <a :href="localAddress?.subproject?.pdf_url" target="_blank" rel="noopener noreferrer"
                                     class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                                     <i class="pi pi-file-pdf "></i>
                                 </a>
@@ -31,9 +31,9 @@
 
                     </div>
                     <div class="flex flex-wrap justify-between items-center">
-                        <div :class="getBorderClass(localAddress.subproject?.projects?.color)"
+                        <div :class="getBorderClass(localAddress?.subproject?.projects?.color)"
                             class="inline-flex items-center rounded-md  px-2 py-1 text-sm md:text-xs font-medium text-white ring-1 ring-inset  mb-1">
-                            Project Title: {{ localAddress.subproject?.projects?.title }}
+                            Project Title: {{ localAddress?.subproject?.projects?.title }}
                         </div>
                         <!-- Existing Contact ID Field -->
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
@@ -621,7 +621,7 @@
             </Dialog>
 
             <!-- Twilio Call Component -->
-            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" :addressID="this.localAddress.id"
+            <TwilioCallComponent :phoneNumber="formattedPhoneNumber" :addressID="this.localAddress?.id"
                 ref="twilioCallComponent" :isPaused="isPaused" @incoming-call="handleIncomingCall"
                 @call-connected="handleCallConnected" @call-accepted="startCallDurationTimer"
                 @call-disconnected="handleCallDisconnected" @twilio-error="handleTwilioError" />
@@ -683,7 +683,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9m0 0h3.03M13 16h-1v-4h-1m-1-4h.01M12 14h.01M9 9h3.03M15 11V9a3 3 0 00-6 0v2m6 0H9" />
             </svg>
-            <p class="font-semibold text-red-500" v-if="this.localAddress.original?.warning">
+            <p class="font-semibold text-red-500" v-if="this.localAddress?.original?.warning">
                 {{ this.localAddress.original.warning }}
             </p>
             <p class="font-semibold" v-else>
@@ -808,7 +808,7 @@ export default {
     },
     computed: {
         formattedPhoneNumber() {
-            return this.formatPhoneNumber(this.localAddress.phone_number);
+            return this.formatPhoneNumber(this.localAddress?.phone_number);
         },
         formattedCallDuration() {
             const minutes = Math.floor(this.callDuration / 60);
@@ -820,7 +820,7 @@ export default {
         },
         isHidden() {
             return (fieldName) => {
-                return this.localAddress.subproject?.field_visibilities?.some(
+                return this.localAddress?.subproject?.field_visibilities?.some(
                     (visibility) => visibility.field_name === fieldName && visibility.is_hidden === 1
                 ) ?? false; // Default to false if undefined
             };
@@ -840,8 +840,8 @@ export default {
             ];
         },
         feedbackOptions() {
-            if (this.localAddress.subproject && this.localAddress.subproject.feedbacks) {
-                return this.localAddress.subproject.feedbacks.map(fb => ({
+            if (this.localAddress?.subproject && this.localAddress?.subproject.feedbacks) {
+                return this.localAddress?.subproject.feedbacks.map(fb => ({
                     label: fb.label,
                     value: fb.value,
                 }));
@@ -949,7 +949,7 @@ export default {
         }
 
         if (this.localAddress && this.localAddress.id) {
-            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+            this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
 
             // Only start tracking and reset values if state was not restored
             if (!stateRestored) {
@@ -957,7 +957,7 @@ export default {
                 this.reverseCountdownFunc();
                 this.localAddress.feedback = '';
                 this.localAddress.follow_up_date = null;
-                this.previousProject = this.localAddress.subproject?.projects?.title;
+                this.previousProject = this.localAddress?.subproject?.projects?.title;
 
                 if (this.auto_calling) {
                     this.triggerCallOnNewRecord();
@@ -1100,6 +1100,7 @@ export default {
         },
 
         formatPhoneNumber(number) {
+            if (!number) return '';
             const cleaned = ('' + number).replace(/\D/g, '');
 
             if (cleaned.length > 10) {
@@ -1143,7 +1144,7 @@ export default {
         triggerCallOnNewRecord() {
             if (this.$refs.twilioCallComponent && this.formattedPhoneNumber) {
                 clearInterval(this.reversetimer);
-                this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+                this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
                 this.$refs.twilioCallComponent.triggerCall();
                 this.reverseCountdownFunc();
             }
@@ -1258,7 +1259,7 @@ export default {
                     this.localAddress = response.data.address;
                     this.locallockfields = response.data.lockfields || [];
                     this.callHistory = response.data.address.cal_logs || [];
-                    this.previousProject = this.localAddress.subproject?.projects?.title || '';
+                    this.previousProject = this.localAddress?.subproject?.projects?.title || '';
 
                     clearInterval(this.timer);
                     clearInterval(this.reversetimer);
@@ -1268,7 +1269,7 @@ export default {
                         }
                     });
                     this.countdown = 0;
-                    this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+                    this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
 
                     await this.startTracking();
 
@@ -1409,7 +1410,7 @@ export default {
         },
         resetReverseCountdown() {
             clearInterval(this.reversetimer);
-            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
+            this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
             this.reverseCountdownFunc();
         },
         async togglePause() {
@@ -1452,7 +1453,7 @@ export default {
                     notreached: this.notreached,
                     save_edits: this.saveEdits,
                 });
-
+                console.log(response, 'response');
                 this.handleResponse(response);
             } catch (error) {
                 this.handleError(error);
@@ -1520,8 +1521,10 @@ export default {
                 this.startTracking();
             }
 
-            this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
-            this.localAddress.follow_up_date = null;
+            this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
+            if (this.localAddress) {
+                this.localAddress.follow_up_date = null;
+            }
 
             // Save the new state after getting a new address
             this.saveState();
@@ -1530,7 +1533,9 @@ export default {
         handleError(error) {
             this.notreached = false;
             this.saveEdits = false;
-            this.localAddress.follow_up_date = null;
+            if (this.localAddress) {
+                this.localAddress.follow_up_date = null;
+            }
             console.error(error);
 
             const errorMessage = error.response?.data?.error || error.response?.data?.details;
