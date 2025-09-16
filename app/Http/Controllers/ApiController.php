@@ -395,8 +395,8 @@ class ApiController extends Controller
             $existingByNamePostal = Address::get(['company_name', 'postal_code'])
                 ->mapWithKeys(fn($r) => ["{$r->company_name}|{$r->postal_code}" => true])
                 ->all();
-            $existingEmails = Address::pluck('email_address_system')->flip()->all();
-            $existingPhones = Address::pluck('phone_number')->flip()->all();
+            $existingEmails = Address::pluck('email_address_system')->filter()->flip()->all();
+            $existingPhones = Address::pluck('phone_number')->filter()->flip()->all();
 
             $errors = [];
             $createdIds = [];
