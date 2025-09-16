@@ -727,7 +727,8 @@ export default {
             errors: {},
             form: {},
             countdown: 0,
-            ReverseCountdown: this.address.subproject?.reverse_countdown, // Initialize dynamically
+            // Initialize safely; will be updated when address/subproject is set
+            ReverseCountdown: this.address?.subproject?.reverse_countdown || 180,
             pauseTime: 0,
             projectTitle: '',
             feedback: '',
@@ -802,6 +803,7 @@ export default {
             // State persistence properties
             stateKey: 'addressDash_state',
             isStateRestored: false,
+            saveStateTimeout: null,
         };
     },
     computed: {
@@ -871,20 +873,23 @@ export default {
         },
         // Watch for changes in important data and save state
         localAddress: {
-            handler() {
-                if (this.isStateRestored) {
+            handler(newVal, oldVal) {
+                // Only save if state is restored and there are actual changes
+                if (this.isStateRestored && newVal && oldVal && newVal.id !== oldVal.id) {
                     this.saveState();
                 }
             },
             deep: true,
         },
         countdown() {
-            if (this.isStateRestored) {
+            // Only save countdown changes every 10 seconds to reduce frequency
+            if (this.isStateRestored && this.countdown % 10 === 0) {
                 this.saveState();
             }
         },
         ReverseCountdown() {
-            if (this.isStateRestored) {
+            // Only save ReverseCountdown changes every 10 seconds to reduce frequency
+            if (this.isStateRestored && this.ReverseCountdown % 10 === 0) {
                 this.saveState();
             }
         },
@@ -894,8 +899,9 @@ export default {
             }
         },
         logdata: {
-            handler() {
-                if (this.isStateRestored) {
+            handler(newVal, oldVal) {
+                // Only save if state is restored and there are actual changes
+                if (this.isStateRestored && newVal && oldVal && JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
                     this.saveState();
                 }
             },
@@ -903,6 +909,11 @@ export default {
         },
     },
     beforeUnmount() {
+        // Clear any pending save state timeout
+        if (this.saveStateTimeout) {
+            clearTimeout(this.saveStateTimeout);
+        }
+
         // Save state before component is unmounted
         this.saveState();
 
@@ -966,29 +977,54 @@ export default {
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
     },
     methods: {
+        // Cookie helpers to signal server whether client has restorable state
+        setStateCookie() {
+            try {
+                const maxAgeSeconds = 60 * 60; // 1 hour, aligned with localStorage state TTL
+                document.cookie = `addressdash_state=1; Max-Age=${maxAgeSeconds}; Path=/`;
+            } catch (e) {
+                console.warn('Unable to set addressdash_state cookie:', e);
+            }
+        },
+        clearStateCookie() {
+            try {
+                document.cookie = 'addressdash_state=; Max-Age=0; Path=/';
+            } catch (e) {
+                console.warn('Unable to clear addressdash_state cookie:', e);
+            }
+        },
         // State persistence methods
         saveState() {
-            try {
-                const stateToSave = {
-                    localAddress: this.localAddress,
-                    locallockfields: this.locallockfields,
-                    callHistory: this.callHistory,
-                    logdata: this.logdata,
-                    countdown: this.countdown,
-                    ReverseCountdown: this.ReverseCountdown,
-                    isPaused: this.isPaused,
-                    previousProject: this.previousProject,
-                    startTime: this.startTime,
-                    pauseTime: this.pauseTime,
-                    breakDuration: this.breakDuration,
-                    timestamp: Date.now()
-                };
-
-                localStorage.setItem(this.stateKey, JSON.stringify(stateToSave));
-                console.log('AddressDash state saved to localStorage');
-            } catch (error) {
-                console.error('Error saving state to localStorage:', error);
+            // Clear existing timeout
+            if (this.saveStateTimeout) {
+                clearTimeout(this.saveStateTimeout);
             }
+
+            // Debounce the save operation to prevent excessive saving
+            this.saveStateTimeout = setTimeout(() => {
+                try {
+                    const stateToSave = {
+                        localAddress: this.localAddress,
+                        locallockfields: this.locallockfields,
+                        callHistory: this.callHistory,
+                        logdata: this.logdata,
+                        countdown: this.countdown,
+                        ReverseCountdown: this.ReverseCountdown,
+                        isPaused: this.isPaused,
+                        previousProject: this.previousProject,
+                        startTime: this.startTime,
+                        pauseTime: this.pauseTime,
+                        breakDuration: this.breakDuration,
+                        timestamp: Date.now()
+                    };
+
+                    localStorage.setItem(this.stateKey, JSON.stringify(stateToSave));
+                    // Mark to server that client has valid state cached
+                    this.setStateCookie();
+                } catch (error) {
+                    console.error('Error saving state to localStorage:', error);
+                }
+            }, 500); // 500ms debounce delay
         },
 
         restoreState() {
@@ -1016,6 +1052,8 @@ export default {
                         this.breakDuration = parsedState.breakDuration || 0;
 
                         this.isStateRestored = true;
+                        // Ensure cookie is set when we do have valid state
+                        this.setStateCookie();
                         console.log('AddressDash state restored from localStorage');
 
                         // Adjust startTime to account for time passed while away
@@ -1028,12 +1066,15 @@ export default {
                     } else {
                         // State is too old or invalid, remove it
                         localStorage.removeItem(this.stateKey);
+                        // Also clear the cookie so server fetches fresh next time
+                        this.clearStateCookie();
                         console.log('AddressDash state too old, removed from localStorage');
                     }
                 }
             } catch (error) {
                 console.error('Error restoring state from localStorage:', error);
                 localStorage.removeItem(this.stateKey);
+                this.clearStateCookie();
             }
             return false;
         },
@@ -1041,6 +1082,7 @@ export default {
         clearState() {
             try {
                 localStorage.removeItem(this.stateKey);
+                this.clearStateCookie();
                 console.log('AddressDash state cleared from localStorage');
             } catch (error) {
                 console.error('Error clearing state from localStorage:', error);
@@ -1460,7 +1502,7 @@ export default {
                 this.triggerCallOnNewRecord();
             }
 
-            const newProjectTitle = this.localAddress.subproject?.projects?.title;
+            const newProjectTitle = this.localAddress?.subproject?.projects?.title;
 
             if (this.previousProject && newProjectTitle !== this.previousProject) {
                 this.projectChanged = true;

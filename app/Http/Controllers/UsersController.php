@@ -85,15 +85,25 @@ class UsersController extends Controller
         return Redirect::back()->with('message', 'User status updated successfully!');
     }
 
-    public function dash()
+    public function dash(Request $request)
     {
-        $addressService = new AddressService();
-        $address = $addressService->getDueAddress();
+        $skipAddressFetch = ($request->cookie('addressdash_state') === '1') || $request->boolean('skip');
+
+        $address = null;
+        if (!$skipAddressFetch) {
+            $addressService = new AddressService();
+            $address = $addressService->getDueAddress();
+        }
+
         $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
-        $subproject = SubProject::select('id', 'title')->get();
+        $subproject = SubProject::select(['id', 'title'])->get();
 
         // Return the address with Inertia
-        return Inertia::render('Users/AddressDash', ['address' => $address, 'subproject' => $subproject, 'lockfields' => $globalLockedFields]);
+        return Inertia::render('Users/AddressDash', [
+            'address' => $address,
+            'subproject' => $subproject,
+            'lockfields' => $globalLockedFields,
+        ]);
     }
 
     public function index(Request $request)
