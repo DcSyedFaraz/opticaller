@@ -41,7 +41,7 @@ class AddressService
                 ->where('forbidden_promotion', false)
                 ->where(function ($query) {
                     $query->whereNull('addresses.seen')
-                        ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
+                        ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(15));
                 })
                 ->where(function ($query) use ($now) {
                     $query->where('follow_up_date', '<=', $now)
@@ -76,7 +76,7 @@ class AddressService
                 ->where('forbidden_promotion', false)
                 ->where(function ($query) {
                     $query->whereNull('addresses.seen')
-                        ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
+                        ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(15));
                 })
                 ->whereNull('follow_up_date')
                 ->where(function ($query) use ($now) {

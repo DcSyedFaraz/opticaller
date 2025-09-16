@@ -720,9 +720,9 @@ export default {
             incomingCallFrom: "",
             showActiveCallDialog: false,
             activeCallNumber: "",
-            localAddress: { ...this.address },
-            locallockfields: this.lockfields ? [...this.lockfields] : [],
-            callHistory: [...(this.address?.cal_logs ?? [])],
+            localAddress: {},
+            locallockfields: [],
+            callHistory: [],
             logdata: {},
             errors: {},
             form: {},
@@ -799,6 +799,9 @@ export default {
                 { label: '30', value: '30' },
                 { label: '45', value: '45' },
             ],
+            // State persistence properties
+            stateKey: 'addressDash_state',
+            isStateRestored: false,
         };
     },
     computed: {
@@ -866,8 +869,46 @@ export default {
             },
             deep: true,
         },
+        // Watch for changes in important data and save state
+        localAddress: {
+            handler() {
+                if (this.isStateRestored) {
+                    this.saveState();
+                }
+            },
+            deep: true,
+        },
+        countdown() {
+            if (this.isStateRestored) {
+                this.saveState();
+            }
+        },
+        ReverseCountdown() {
+            if (this.isStateRestored) {
+                this.saveState();
+            }
+        },
+        isPaused() {
+            if (this.isStateRestored) {
+                this.saveState();
+            }
+        },
+        logdata: {
+            handler() {
+                if (this.isStateRestored) {
+                    this.saveState();
+                }
+            },
+            deep: true,
+        },
     },
     beforeUnmount() {
+        // Save state before component is unmounted
+        this.saveState();
+
+        // Remove event listener
+        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+
         if (this.reversetimer) {
             clearInterval(this.reversetimer);
             console.log('Interval cleared on component unmount.');
@@ -882,20 +923,140 @@ export default {
         }
     },
     mounted() {
+        // Try to restore state from localStorage first
+        const stateRestored = this.restoreState();
+
+        // Only use props data if state was not restored
+        if (!stateRestored && this.address && this.address.id) {
+            // Use fresh data from props
+            console.log('AddressDash: Using fresh data from server');
+            this.localAddress = { ...this.address };
+            this.locallockfields = this.lockfields ? [...this.lockfields] : [];
+            this.callHistory = [...(this.address?.cal_logs ?? [])];
+        } else if (stateRestored) {
+            console.log('AddressDash: Using restored state from localStorage');
+        }
+
         if (this.localAddress && this.localAddress.id) {
             this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
-            this.startTracking();
-            this.reverseCountdownFunc();
-            this.localAddress.feedback = '';
-            this.localAddress.follow_up_date = null;
-            this.previousProject = this.localAddress.subproject?.projects?.title;
 
-            if (this.auto_calling) {
-                this.triggerCallOnNewRecord();
+            // Only start tracking and reset values if state was not restored
+            if (!stateRestored) {
+                this.startTracking();
+                this.reverseCountdownFunc();
+                this.localAddress.feedback = '';
+                this.localAddress.follow_up_date = null;
+                this.previousProject = this.localAddress.subproject?.projects?.title;
+
+                if (this.auto_calling) {
+                    this.triggerCallOnNewRecord();
+                }
+            } else {
+                // If state was restored, resume tracking with existing timers
+                this.startTracking();
+                this.reverseCountdownFunc();
+
+                if (this.auto_calling) {
+                    this.triggerCallOnNewRecord();
+                }
             }
         }
+
+        // Add event listener for page visibility changes
+        document.addEventListener('visibilitychange', this.handleVisibilityChange);
     },
     methods: {
+        // State persistence methods
+        saveState() {
+            try {
+                const stateToSave = {
+                    localAddress: this.localAddress,
+                    locallockfields: this.locallockfields,
+                    callHistory: this.callHistory,
+                    logdata: this.logdata,
+                    countdown: this.countdown,
+                    ReverseCountdown: this.ReverseCountdown,
+                    isPaused: this.isPaused,
+                    previousProject: this.previousProject,
+                    startTime: this.startTime,
+                    pauseTime: this.pauseTime,
+                    breakDuration: this.breakDuration,
+                    timestamp: Date.now()
+                };
+
+                localStorage.setItem(this.stateKey, JSON.stringify(stateToSave));
+                console.log('AddressDash state saved to localStorage');
+            } catch (error) {
+                console.error('Error saving state to localStorage:', error);
+            }
+        },
+
+        restoreState() {
+            try {
+                const savedState = localStorage.getItem(this.stateKey);
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+
+                    // Check if the saved state is not too old (e.g., within 1 hour)
+                    const stateAge = Date.now() - parsedState.timestamp;
+                    const maxAge = 60 * 60 * 1000; // 1 hour in milliseconds
+
+                    if (stateAge < maxAge && parsedState.localAddress && parsedState.localAddress.id) {
+                        // Restore the state
+                        this.localAddress = parsedState.localAddress;
+                        this.locallockfields = parsedState.locallockfields || [];
+                        this.callHistory = parsedState.callHistory || [];
+                        this.logdata = parsedState.logdata || {};
+                        this.countdown = parsedState.countdown || 0;
+                        this.ReverseCountdown = parsedState.ReverseCountdown || 180;
+                        this.isPaused = parsedState.isPaused || false;
+                        this.previousProject = parsedState.previousProject || '';
+                        this.startTime = parsedState.startTime || 0;
+                        this.pauseTime = parsedState.pauseTime || 0;
+                        this.breakDuration = parsedState.breakDuration || 0;
+
+                        this.isStateRestored = true;
+                        console.log('AddressDash state restored from localStorage');
+
+                        // Adjust startTime to account for time passed while away
+                        if (this.startTime > 0) {
+                            const timeAway = Date.now() - parsedState.timestamp;
+                            this.startTime += timeAway;
+                        }
+
+                        return true;
+                    } else {
+                        // State is too old or invalid, remove it
+                        localStorage.removeItem(this.stateKey);
+                        console.log('AddressDash state too old, removed from localStorage');
+                    }
+                }
+            } catch (error) {
+                console.error('Error restoring state from localStorage:', error);
+                localStorage.removeItem(this.stateKey);
+            }
+            return false;
+        },
+
+        clearState() {
+            try {
+                localStorage.removeItem(this.stateKey);
+                console.log('AddressDash state cleared from localStorage');
+            } catch (error) {
+                console.error('Error clearing state from localStorage:', error);
+            }
+        },
+
+        handleVisibilityChange() {
+            if (document.hidden) {
+                // Page is hidden, save state
+                this.saveState();
+            } else {
+                // Page is visible again, restore state if needed
+                this.restoreState();
+            }
+        },
+
         formatPhoneNumber(number) {
             const cleaned = ('' + number).replace(/\D/g, '');
 
@@ -1077,6 +1238,10 @@ export default {
                     });
 
                     this.showContactIdDialog = false;
+
+                    // Clear old state and save new state after loading a new address
+                    this.clearState();
+                    this.saveState();
                 } else {
                     this.contactIdError = 'No address found for the provided criteria.';
                 }
@@ -1130,6 +1295,8 @@ export default {
 
             this.localAddress.follow_up_date = followUpDateTime;
 
+            // Clear state when scheduling follow-up (completing task)
+            this.clearState();
             await this.submitFeedback();
         },
         formatnewDate(date) {
@@ -1253,10 +1420,14 @@ export default {
         },
 
         async submitFeedback() {
+            // Clear state when submitting feedback (completing task)
+            this.clearState();
             await this.handleButtonClick('stop.tracking');
         },
 
         async handleInvalidNumber() {
+            // Clear state when marking as invalid number (completing task)
+            this.clearState();
             await this.handleButtonClick('invalid.number');
         },
 
@@ -1309,6 +1480,9 @@ export default {
 
             this.ReverseCountdown = this.localAddress.subproject?.reverse_countdown || 180;
             this.localAddress.follow_up_date = null;
+
+            // Save the new state after getting a new address
+            this.saveState();
         },
 
         handleError(error) {
