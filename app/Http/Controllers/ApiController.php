@@ -454,7 +454,7 @@ class ApiController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-
+Log::error('Failed to save addresses', ['error' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Failed to save addresses',
                 'error' => $e->getMessage()
