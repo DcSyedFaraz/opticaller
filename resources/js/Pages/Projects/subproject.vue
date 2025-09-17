@@ -240,6 +240,16 @@ export default {
         },
         editProject(project) {
             this.editProjectData = { ...project };
+            // Ensure retry_schedule is properly parsed as an array
+            if (typeof this.editProjectData.retry_schedule === 'string') {
+                try {
+                    this.editProjectData.retry_schedule = JSON.parse(this.editProjectData.retry_schedule);
+                } catch (e) {
+                    this.editProjectData.retry_schedule = [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+                }
+            } else if (!Array.isArray(this.editProjectData.retry_schedule)) {
+                this.editProjectData.retry_schedule = [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+            }
             this.editDialogVisible = true;
         },
         updateProject() {
