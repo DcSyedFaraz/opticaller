@@ -534,7 +534,7 @@
                                 optionLabel="label" optionValue="value" placeholder="Select minute"
                                 class="w-full !border-secondary" />
                             <small class="text-red-600" v-if="errors.follow_up_minute">{{ errors.follow_up_minute
-                            }}</small>
+                                }}</small>
                         </div>
                     </div>
 
@@ -686,6 +686,9 @@
             <p class="font-semibold text-red-500" v-if="this.localAddress?.original?.warning">
                 {{ this.localAddress.original.warning }}
             </p>
+            <p class="font-semibold text-red-500" v-else-if="error">
+                {{ error }}
+            </p>
             <p class="font-semibold" v-else>
                 No address available at the moment. Please check back later or contact support for assistance.
             </p>
@@ -711,6 +714,7 @@ export default {
         address: Object,
         subproject: Object,
         lockfields: Array,
+        error: String,
     },
     data() {
         return {
@@ -863,6 +867,19 @@ export default {
         }
     },
     watch: {
+        error: {
+            handler(newError) {
+                if (newError) {
+                    this.$toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: newError,
+                        life: 5000,
+                    });
+                }
+            },
+            immediate: true,
+        },
         'localAddress.subproject': {
             handler(newSubproject) {
                 console.log(newSubproject);
@@ -934,11 +951,16 @@ export default {
         }
     },
     mounted() {
-        // Try to restore state from localStorage first
-        const stateRestored = this.restoreState();
+        // Check if address_id query parameter is present or if there's an error
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasAddressIdParam = urlParams.has('address_id');
+        const hasError = !!this.error;
+
+        // Try to restore state from localStorage first, but skip if address_id param is present or there's an error
+        const stateRestored = (hasAddressIdParam || hasError) ? false : this.restoreState();
 
         // Only use props data if state was not restored
-        if (!stateRestored && this.address && this.address.id) {
+        if (!stateRestored && this.address && this.address.id && !hasError) {
             // Use fresh data from props
             console.log('AddressDash: Using fresh data from server');
             this.localAddress = { ...this.address };
@@ -948,7 +970,7 @@ export default {
             console.log('AddressDash: Using restored state from localStorage');
         }
 
-        if (this.localAddress && this.localAddress.id) {
+        if (this.localAddress && this.localAddress.id && !hasError) {
             this.ReverseCountdown = this.localAddress?.subproject?.reverse_countdown || 180;
 
             // Only start tracking and reset values if state was not restored

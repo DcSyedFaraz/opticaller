@@ -90,7 +90,31 @@ class UsersController extends Controller
         $skipAddressFetch = ($request->cookie('addressdash_state') === '1') || $request->boolean('skip');
 
         $address = null;
-        if (!$skipAddressFetch) {
+        // Check if address_id is provided as query parameter
+        if ($request->has('address_id') && $request->input('address_id')) {
+            $addressId = $request->input('address_id');
+
+            // Get user's accessible subproject IDs
+            $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
+
+            // Load the specific address if user has access to it
+            $address = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+            ->whereIn('sub_project_id', $subProjectIds)
+            ->where('id', $addressId)
+            ->first();
+
+            // dd($address,$subProjectIds,$addressId);
+            if (!$address) {
+                // dd('address not found');
+                // If address not found or user doesn't have access, return error message
+                return Inertia::render('Users/AddressDash', [
+                    'address' => null,
+                    'subproject' => SubProject::select(['id', 'title'])->get(),
+                    'lockfields' => GlobalLockedFields::firstOrCreate()->locked_fields,
+                    'error' => 'Address not found or you do not have access to this address.'
+                ]);
+            }
+        } elseif (!$skipAddressFetch) {
             $addressService = new AddressService();
             $address = $addressService->getDueAddress();
         }
