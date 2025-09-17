@@ -109,8 +109,8 @@ class ApiController extends Controller
                 // Log that the address was found and proceeding to delete
                 Log::channel('address_deletion')->info('Address found, proceeding with deletion.', ['address_id' => $address->id]);
 
-                // Force delete the address
-                $address->forceDelete();
+                // Delete the address
+                $address->delete();
 
                 // Commit the transaction
                 DB::commit();
@@ -380,6 +380,7 @@ class ApiController extends Controller
                 'addresses.*.hubspot_tag' => 'nullable|string',
                 'addresses.*.deal_id' => 'nullable|string',
                 'addresses.*.company_id' => 'nullable|string',
+                'addresses.*.forbidden_promotion' => 'nullable',
                 'addresses.*.sub_project_id' => 'required|integer|exists:sub_projects,id',
             ]);
 
