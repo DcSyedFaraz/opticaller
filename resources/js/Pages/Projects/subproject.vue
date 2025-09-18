@@ -41,6 +41,11 @@
                                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                     </div>
                     <div class="sm:col-span-12">
+                        <label for="calendar_link" class="block text-sm font-medium text-gray-700">Calendar Link</label>
+                        <InputText id="calendar_link" v-model="newProject.calendar_link" type="url"
+                            placeholder="https://example.com/path" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    </div>
+                    <div class="sm:col-span-12">
                         <RetrySchedule v-model="newProject.retry_schedule" />
                     </div>
                 </div>
@@ -134,6 +139,11 @@
                                    file:rounded-md file:border-0 file:text-sm file:font-semibold
                                    file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                     </div>
+                    <div class="field">
+                        <label for="calendar_link_edit" class="block text-sm font-medium text-gray-700">Calendar Link</label>
+                        <InputText id="calendar_link_edit" v-model="editProjectData.calendar_link" type="url"
+                            placeholder="https://example.com/path" class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
+                    </div>
                     <div class="field lg:col-span-2">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
                         <Textarea v-model="editProjectData.description" rows="3" cols="30"
@@ -171,6 +181,7 @@ export default {
                 project_id: null,
                 priority: null,
                 pdf: null,
+                calendar_link: '',
                 retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
             },
             priorityOptions: [
@@ -213,6 +224,9 @@ export default {
             formData.append('description', this.newProject.description);
             formData.append('project_id', this.newProject.project_id);
             formData.append('priority', this.newProject.priority);
+            if (this.newProject.calendar_link) {
+                formData.append('calendar_link', this.newProject.calendar_link);
+            }
             if (this.newProject.pdf) {
                 formData.append('pdf', this.newProject.pdf);
             }
@@ -227,7 +241,7 @@ export default {
                     'Content-Type': 'multipart/form-data',
                 },
                 onSuccess: () => {
-                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null, retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] };
+                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null, calendar_link: '', retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] };
 
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project created successfully', life: 3000 });
                 },
@@ -259,6 +273,9 @@ export default {
             formData.append('description', this.editProjectData.description);
             formData.append('project_id', this.editProjectData.project_id);
             formData.append('priority', this.editProjectData.priority);
+            if (this.editProjectData.calendar_link) {
+                formData.append('calendar_link', this.editProjectData.calendar_link);
+            }
             if (this.editProjectData.pdf) {
                 formData.append('pdf', this.editProjectData.pdf);
             }

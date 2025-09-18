@@ -88,7 +88,6 @@ class UsersController extends Controller
     public function dash(Request $request)
     {
         $skipAddressFetch = ($request->cookie('addressdash_state') === '1') || $request->boolean('skip');
-
         $address = null;
         // Check if address_id is provided as query parameter
         if ($request->has('address_id') && $request->input('address_id')) {
@@ -115,6 +114,7 @@ class UsersController extends Controller
                 ]);
             }
         } elseif (!$skipAddressFetch) {
+            // dd('address not found 2');
             $addressService = new AddressService();
             $address = $addressService->getDueAddress();
         }

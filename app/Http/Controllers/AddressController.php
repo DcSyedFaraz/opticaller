@@ -369,4 +369,56 @@ class AddressController extends Controller
 
         return redirect()->route('addresses.index')->with('message', 'Address deleted successfully.');
     }
+
+    /**
+     * Hit the subproject calendar link with address context parameters.
+     */
+    public function hitCalendarLink(Address $address)
+    {
+        $subproject = $address->subproject()->first();
+
+        if (!$subproject || empty($subproject->calendar_link)) {
+            return response()->json(['message' => 'Calendar link not configured for this subproject.'], 422);
+        }
+
+        $name = trim(trim(($address->first_name ?? '') . ' ' . ($address->last_name ?? '')));
+        if ($name === '') {
+            $name = $address->company_name ?? '';
+        }
+
+        $params = [
+            'name' => $name,
+            'deal-id' => $address->deal_id ?? '',
+            'email' => $address->email_address_system ?? '',
+            'attendeePhoneNumber' => $address->phone_number ?? '',
+            'smsReminderNumber' => $address->phone_number ?? '',
+        ];
+
+        $url = $subproject->calendar_link;
+
+        try {
+            $response = Http::timeout(10)->get($url, $params);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'message' => 'Calendar link called successfully.',
+                    'status' => $response->status(),
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => 'Calendar link request failed.',
+                'status' => $response->status(),
+            ], $response->status());
+        } catch (\Throwable $e) {
+            Log::error('Calendar link call failed', [
+                'error' => $e->getMessage(),
+                'url' => $url,
+                'address_id' => $address->id,
+                'params' => $params,
+            ]);
+
+            return response()->json(['message' => 'Calendar link call encountered an error.'], 500);
+        }
+    }
 }

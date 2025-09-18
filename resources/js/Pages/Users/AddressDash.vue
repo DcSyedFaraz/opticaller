@@ -21,6 +21,11 @@
                                     <i class="pi pi-file-pdf "></i>
                                 </a>
                             </div>
+                            <div v-if="localAddress?.subproject?.calendar_link" class="mt-2 ml-2">
+                                <Button icon="pi pi-calendar"
+                                    class="inline-flex items-center px-2 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                    @click="hitCalendarLink" v-tooltip.top="'Open Calendar Link'" />
+                            </div>
                             <!-- <div class="mt-2">
                                 <Button @click="makeCall()"
                                     class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
@@ -194,7 +199,8 @@
                                             <label class="font-extrabold text-sm" for="feedback">
                                                 Feedback:
                                             </label>
-                                            <Select id="feedback" v-model="localAddress.feedback"
+                                            <Select id="feedback" v-model="localAddress.feedback" filter
+                                            placeholder="Select Feedback"
                                                 class="w-full !border-secondary" :options="feedbackOptions"
                                                 optionValue="value" optionLabel="label"
                                                 :disabled="isFieldLocked('feedback')" />
@@ -534,7 +540,7 @@
                                 optionLabel="label" optionValue="value" placeholder="Select minute"
                                 class="w-full !border-secondary" />
                             <small class="text-red-600" v-if="errors.follow_up_minute">{{ errors.follow_up_minute
-                                }}</small>
+                            }}</small>
                         </div>
                     </div>
 
@@ -808,6 +814,9 @@ export default {
             stateKey: 'addressDash_state',
             isStateRestored: false,
             saveStateTimeout: null,
+            // Address auto-removal timer
+            addressRemovalTimer: null,
+            addressRemovalTimeout: 15 * 60 * 1000, // 15 minutes in milliseconds
         };
     },
     computed: {
@@ -931,6 +940,9 @@ export default {
             clearTimeout(this.saveStateTimeout);
         }
 
+        // Clear address removal timer
+        this.clearAddressRemovalTimer();
+
         // Save state before component is unmounted
         this.saveState();
 
@@ -993,6 +1005,9 @@ export default {
                     this.triggerCallOnNewRecord();
                 }
             }
+
+            // Start the 15-minute address removal timer
+            this.startAddressRemovalTimer();
         }
 
         // Add event listener for page visibility changes
@@ -1111,6 +1126,58 @@ export default {
             }
         },
 
+        // Address auto-removal methods
+        startAddressRemovalTimer() {
+            // Clear any existing timer
+            this.clearAddressRemovalTimer();
+
+            // Set new timer for 15 minutes
+            this.addressRemovalTimer = setTimeout(() => {
+                this.clearAddressAfterTimeout();
+            }, this.addressRemovalTimeout);
+
+            console.log('Address removal timer started - will clear address in 15 minutes');
+        },
+
+        clearAddressRemovalTimer() {
+            if (this.addressRemovalTimer) {
+                clearTimeout(this.addressRemovalTimer);
+                this.addressRemovalTimer = null;
+            }
+        },
+
+        clearAddressAfterTimeout() {
+            console.log('15 minutes elapsed - clearing address from state');
+
+            // Clear all timers
+            this.clearAddressRemovalTimer();
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+            if (this.reversetimer) {
+                clearInterval(this.reversetimer);
+                this.reversetimer = null;
+            }
+            if (this.callDurationTimer) {
+                clearInterval(this.callDurationTimer);
+                this.callDurationTimer = null;
+            }
+
+
+
+            // Clear localStorage state
+            this.clearState();
+
+            // Show notification to user
+            this.$toast.add({
+                severity: 'info',
+                summary: 'Address Cleared',
+                detail: 'Address has been automatically removed after 15 minutes of inactivity.',
+                life: 5000,
+            });
+        },
+
         handleVisibilityChange() {
             if (document.hidden) {
                 // Page is hidden, save state
@@ -1224,6 +1291,25 @@ export default {
                 this.activeConnection = null;
             }
         },
+        async hitCalendarLink() {
+            try {
+                await axios.post(`/addresses/${this.localAddress.id}/calendar-link`);
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Calendar link called successfully.',
+                    life: 3000,
+                });
+            } catch (error) {
+                const msg = error?.response?.data?.message || 'Failed to call calendar link.';
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: msg,
+                    life: 4000,
+                });
+            }
+        },
         hangUp() {
             this.$refs.twilioCallComponent.hangUp();
             this.resetReverseCountdown();
@@ -1307,6 +1393,9 @@ export default {
                     // Clear old state and save new state after loading a new address
                     this.clearState();
                     this.saveState();
+
+                    // Start the 15-minute address removal timer for the new address
+                    this.startAddressRemovalTimer();
                 } else {
                     this.contactIdError = 'No address found for the provided criteria.';
                 }
@@ -1361,6 +1450,7 @@ export default {
             this.localAddress.follow_up_date = followUpDateTime;
 
             // Clear state when scheduling follow-up (completing task)
+            this.clearAddressRemovalTimer();
             this.clearState();
             await this.submitFeedback();
         },
@@ -1486,12 +1576,14 @@ export default {
 
         async submitFeedback() {
             // Clear state when submitting feedback (completing task)
+            this.clearAddressRemovalTimer();
             this.clearState();
             await this.handleButtonClick('stop.tracking');
         },
 
         async handleInvalidNumber() {
             // Clear state when marking as invalid number (completing task)
+            this.clearAddressRemovalTimer();
             this.clearState();
             await this.handleButtonClick('invalid.number');
         },
@@ -1550,6 +1642,9 @@ export default {
 
             // Save the new state after getting a new address
             this.saveState();
+
+            // Start the 15-minute address removal timer for the new address
+            this.startAddressRemovalTimer();
         },
 
         handleError(error) {
