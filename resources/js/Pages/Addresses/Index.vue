@@ -217,7 +217,7 @@
                                                         :key="index" class="flex items-start">
                                                         <span
                                                             class="inline-block w-2 h-2 bg-red-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                                                        <span>{{ error.message || error }}</span>
+                                                        <span>{{ renderImportError(error) }}</span>
                                                     </li>
                                                     <li v-if="importResults.errors.length > 5"
                                                         class="text-red-600 font-medium">
@@ -247,6 +247,9 @@
                             <div class="flex justify-center gap-3 mt-6">
                                 <Button label="View Imported Data" icon="pi pi-eye"
                                     class="p-button-outlined p-button-success" @click="viewImportedData" />
+                                <Button v-if="importResults && importResults.errors && importResults.errors.length"
+                                    label="Export Errors" icon="pi pi-file-excel"
+                                    class="p-button-outlined p-button-danger" @click="exportImportErrors" />
                                 <Button label="Import Another File" icon="pi pi-upload"
                                     class="p-button-outlined p-button-info" @click="startNewImport" />
                             </div>
@@ -771,6 +774,105 @@ export default {
             if (this.$refs.fileInput) {
                 this.$refs.fileInput.value = '';
             }
+        },
+
+        renderImportError(error) {
+            if (!error) {
+                return '';
+            }
+            if (typeof error === 'string') {
+                return error;
+            }
+            const message = error.message || '';
+            const rowNumber = error.rowNumber ?? error.row_number;
+            if (rowNumber) {
+                const trimmed = message.replace(/^Row\s+\d+:\s*/i, '').trim();
+                return `Row ${rowNumber}: ${trimmed || message}`;
+            }
+            return message;
+        },
+
+        escapeForCsv(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            const stringValue = String(value);
+            if (/[",\n]/.test(stringValue)) {
+                return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+        },
+
+        exportImportErrors() {
+            if (!this.importResults || !Array.isArray(this.importResults.errors) || !this.importResults.errors.length) {
+                return;
+            }
+            const errors = this.importResults.errors.filter(Boolean);
+            if (!errors.length) {
+                return;
+            }
+
+            const grouped = new Map();
+            errors.forEach((error, index) => {
+                const rowNumber = error.rowNumber ?? error.row_number ?? '';
+                const rawRow = error.rawRow || error.raw_row || {};
+                const normalizedRow = error.normalizedRow || error.normalized_row || {};
+                const key = rowNumber !== '' ? `row-${rowNumber}` : `idx-${index}`;
+                const message = typeof error === 'string' ? error : (error.message || '');
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        rowNumber,
+                        rawRow,
+                        normalizedRow,
+                        messages: []
+                    });
+                }
+                const cleanedMessage = message.replace(/^Row\s+\d+:\s*/i, '').trim();
+                grouped.get(key).messages.push(cleanedMessage || message);
+            });
+
+            const groupedRows = Array.from(grouped.values());
+
+            const columnOrder = [];
+            const seenColumns = new Set();
+            groupedRows.forEach(group => {
+                const rawRow = group.rawRow || {};
+                const normalizedRow = group.normalizedRow || {};
+                const source = Object.keys(rawRow).length ? rawRow : normalizedRow;
+                Object.keys(source).forEach(column => {
+                    if (!seenColumns.has(column)) {
+                        seenColumns.add(column);
+                        columnOrder.push(column);
+                    }
+                });
+            });
+
+            const header = ['Row Number', 'Errors', ...columnOrder];
+            const dataRows = groupedRows.map(group => {
+                const rawRow = group.rawRow || {};
+                const normalizedRow = group.normalizedRow || {};
+                const source = Object.keys(rawRow).length ? rawRow : normalizedRow;
+                const rowValues = columnOrder.map(column => source[column] ?? '');
+                return [
+                    group.rowNumber ?? '',
+                    group.messages.join(' | '),
+                    ...rowValues
+                ];
+            });
+
+            const csvLines = [header, ...dataRows].map(row =>
+                row.map(value => this.escapeForCsv(value)).join(',')
+            ).join('\n');
+
+            const blob = new Blob([csvLines], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `address-import-errors-${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         },
 
         formatFileSize(bytes) {

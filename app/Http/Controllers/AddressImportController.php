@@ -133,7 +133,7 @@ class AddressImportController extends Controller
                     $normalized = $this->normalizeRowData($row);
 
                     // Validate required fields and format
-                    $validation = $this->validateRowData($normalized, $rowNumber, $subprojects, $subprojectsById);
+                    $validation = $this->validateRowData($normalized, $row, $rowNumber, $subprojects, $subprojectsById);
                     if (!$validation['valid']) {
                         $errors = array_merge($errors, $validation['errors']);
                         $skipped++;
@@ -150,7 +150,8 @@ class AddressImportController extends Controller
                             $existingByNamePostal,
                             $existingEmails,
                             $existingPhones,
-                            $rowNumber
+                            $rowNumber,
+                            $row
                         );
                         if (!$duplicateCheck['valid']) {
                             $errors = array_merge($errors, $duplicateCheck['errors']);
@@ -248,31 +249,31 @@ class AddressImportController extends Controller
     /**
      * Validate each normalized row for required/format constraints.
      */
-    private function validateRowData(array $row, int $num, array $subprojects, array $subprojectsById): array
+    private function validateRowData(array $normalizedRow, array $rawRow, int $num, array $subprojects, array $subprojectsById): array
     {
         $errs = [];
 
         // company_name is required
-        if (empty($row['company_name'])) {
+        if (empty($normalizedRow['company_name'])) {
             $errs[] = "Row {$num}: Company name is required";
         }
 
         // email_address_system if present must be a valid email
         if (
-            !empty($row['email_address_system'])
-            && !filter_var($row['email_address_system'], FILTER_VALIDATE_EMAIL)
+            !empty($normalizedRow['email_address_system'])
+            && !filter_var($normalizedRow['email_address_system'], FILTER_VALIDATE_EMAIL)
         ) {
-            $errs[] = "Row {$num}: Invalid email format ({$row['email_address_system']})";
+            $errs[] = "Row {$num}: Invalid email format ({$normalizedRow['email_address_system']})";
         }
 
         // follow_up_date if present must parse as a date
-        if (!empty($row['follow_up_date']) && !$this->parseDate($row['follow_up_date'])) {
-            $errs[] = "Row {$num}: Invalid date format ({$row['follow_up_date']})";
+        if (!empty($normalizedRow['follow_up_date']) && !$this->parseDate($normalizedRow['follow_up_date'])) {
+            $errs[] = "Row {$num}: Invalid date format ({$normalizedRow['follow_up_date']})";
         }
 
         // sub_project_id can be either an ID or a name; check existence
-        if (!empty($row['sub_project_id'])) {
-            $subProjectValue = $row['sub_project_id'];
+        if (!empty($normalizedRow['sub_project_id'])) {
+            $subProjectValue = $normalizedRow['sub_project_id'];
             $isNumeric = is_numeric($subProjectValue);
 
             if ($isNumeric) {
@@ -290,22 +291,44 @@ class AddressImportController extends Controller
 
         // deal_id and contact_id, if present, must be numeric
         foreach (['deal_id', 'contact_id'] as $field) {
-            if (!empty($row[$field]) && !is_numeric($row[$field])) {
-                $errs[] = "Row {$num}: {$field} must be numeric ({$row[$field]})";
+            if (!empty($normalizedRow[$field]) && !is_numeric($normalizedRow[$field])) {
+                $errs[] = "Row {$num}: {$field} must be numeric ({$normalizedRow[$field]})";
             }
         }
 
         // company_name length limit
-        if (!empty($row['company_name']) && strlen($row['company_name']) > 255) {
+        if (!empty($normalizedRow['company_name']) && strlen($normalizedRow['company_name']) > 255) {
             $errs[] = "Row {$num}: Company name too long";
         }
 
         // feedback length limit
-        if (!empty($row['feedback']) && strlen($row['feedback']) > 1000) {
+        if (!empty($normalizedRow['feedback']) && strlen($normalizedRow['feedback']) > 1000) {
             $errs[] = "Row {$num}: Feedback too long";
         }
 
-        return ['valid' => empty($errs), 'errors' => $errs];
+        return [
+            'valid' => empty($errs),
+            'errors' => $this->createErrorEntries($num, $errs, $rawRow, $normalizedRow),
+        ];
+    }
+
+    private function createErrorEntries(int $rowNumber, array $messages, array $rawRow, array $normalizedRow): array
+    {
+        if (empty($messages)) {
+            return [];
+        }
+
+        return array_map(
+            function ($message) use ($rowNumber, $rawRow, $normalizedRow) {
+                return [
+                    'rowNumber' => $rowNumber,
+                    'message' => $message,
+                    'rawRow' => $rawRow,
+                    'normalizedRow' => $normalizedRow,
+                ];
+            },
+            $messages
+        );
     }
 
     /**
@@ -321,14 +344,18 @@ class AddressImportController extends Controller
         array &$byNamePostal,
         array &$emails,
         array &$phones,
-        int $num
+        int $num,
+        array $rawRow
     ): array {
         $errs = [];
 
         // If forbidden_promotion is flagged, skip entirely (special handling)
         if (!empty($row['forbidden_promotion'])) {
             $errs[] = "Row {$num}: Marked forbidden_promotion, not imported";
-            return ['valid' => false, 'errors' => $errs];
+            return [
+                'valid' => false,
+                'errors' => $this->createErrorEntries($num, $errs, $rawRow, $row),
+            ];
         }
 
         // street_address + postal_code (Set 1)
@@ -357,7 +384,10 @@ class AddressImportController extends Controller
             $errs[] = "Row {$num}: Phone number '{$row['phone_number']}' already exists";
         }
 
-        return ['valid' => empty($errs), 'errors' => $errs];
+        return [
+            'valid' => empty($errs),
+            'errors' => $this->createErrorEntries($num, $errs, $rawRow, $row),
+        ];
     }
 
     /**
