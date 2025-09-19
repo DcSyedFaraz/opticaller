@@ -40,13 +40,16 @@ class CallReportController extends Controller
             ->whereBetween('a.created_at', [$start, $end])
             ->when($number, function ($query) use ($number) {
                 $query->where(function ($q) use ($number) {
-                    $q->where('addr.phone_number', 'like', "%$number%")
-                      ->orWhere('addr_by_contact.phone_number', 'like', "%$number%");
+                    $like = "%$number%";
+                    $q->where('addr.phone_number', 'like', $like)
+                      ->orWhere('addr.mobile_number', 'like', $like)
+                      ->orWhere('addr_by_contact.phone_number', 'like', $like)
+                      ->orWhere('addr_by_contact.mobile_number', 'like', $like);
                 });
             })
             ->select([
                 DB::raw('COALESCE(u.name, CONCAT("User #", a.user_id)) as user_name'),
-                DB::raw('COALESCE(addr.phone_number, addr_by_contact.phone_number) as called_number'),
+                DB::raw('COALESCE(addr.mobile_number, addr.phone_number, addr_by_contact.mobile_number, addr_by_contact.phone_number) as called_number'),
                 'a.address_id',
                 'a.activity_type',
                 'a.feedback',
@@ -58,10 +61,14 @@ class CallReportController extends Controller
         // Optional union: include matching rows directly from addresses (even if no activity)
         if (!empty($number)) {
             $addressesQuery = DB::table('addresses as only_addr')
-                ->where('only_addr.phone_number', 'like', "%$number%")
+                ->where(function ($q) use ($number) {
+                    $like = "%$number%";
+                    $q->where('only_addr.phone_number', 'like', $like)
+                      ->orWhere('only_addr.mobile_number', 'like', $like);
+                })
                 ->select([
                     DB::raw('NULL as user_name'),
-                    DB::raw('only_addr.phone_number as called_number'),
+                    DB::raw('COALESCE(only_addr.mobile_number, only_addr.phone_number) as called_number'),
                     DB::raw('only_addr.id as address_id'),
                     DB::raw('"address" as activity_type'),
                     DB::raw('NULL as feedback'),

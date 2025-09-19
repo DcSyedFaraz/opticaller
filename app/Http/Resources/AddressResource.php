@@ -27,6 +27,7 @@ class AddressResource extends JsonResource
             'country' => $this->country,
             'website' => $this->website,
             'phone_number' => $this->phone_number,
+            'mobile_number' => $this->mobile_number,
             'email_address_system' => $this->email_address_system,
             'email_address_new' => $this->email_address_new,
             'feedback' => $this->feedback,
@@ -68,3 +69,4 @@ class AddressResource extends JsonResource
         ];
     }
 }
+

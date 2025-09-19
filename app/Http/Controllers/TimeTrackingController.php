@@ -150,6 +150,7 @@ class TimeTrackingController extends Controller
                 'address.website' => 'nullable|string',
                 'address.titel' => 'nullable|string',
                 'address.phone_number' => 'nullable|string',
+                'address.mobile_number' => 'nullable|string',
                 'address.email_address_system' => [
                     'required',
                     'email',
@@ -205,6 +206,7 @@ class TimeTrackingController extends Controller
                     'address.contact_id.string' => 'Contact ID must be a string',
                     'address.phone_number.required' => 'Phone number is required',
                     'address.phone_number.string' => 'Phone number must be a string',
+                    'address.mobile_number.string' => 'Mobile number must be a string',
                     'address.email_address_system.required' => 'Email address is required',
                     'address.feedback.required' => 'Feedback is required',
                     'address.email_address_system.email' => 'Email address must be a valid email address',

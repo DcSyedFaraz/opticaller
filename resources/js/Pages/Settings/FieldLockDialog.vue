@@ -51,6 +51,7 @@ export default {
                 country: 'Country',
                 website: 'Website',
                 phone_number: 'Phone Number',
+                mobile_number: 'Mobile Number',
                 email_address_new: 'Email Address (New)',
             },
             fieldLocks: {},
@@ -85,3 +86,4 @@ export default {
     align-items: center;
 }
 </style>
+

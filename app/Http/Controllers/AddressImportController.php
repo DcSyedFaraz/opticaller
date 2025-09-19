@@ -24,6 +24,7 @@ class AddressImportController extends Controller
         'country' => ['country'],
         'website' => ['site'],
         'phone_number' => ['phone'],
+        'mobile_number' => ['mobile'],
         'email_address_system' => ['email_1'],
         'notes' => ['vim_info'],
         // Retain feedback, follow-up, deal/contact, sub_project if present
@@ -111,12 +112,13 @@ class AddressImportController extends Controller
         // 2) Preload existing emails and phones (optional)
         $existingEmails = Address::pluck('email_address_system')->filter()->flip()->all();
         $existingPhones = Address::pluck('phone_number')->filter()->flip()->all();
+        $existingMobiles = Address::pluck('mobile_number')->filter()->flip()->all();
 
         // 3) Preload subprojects for both ID and name lookups
         $subprojects = SubProject::pluck('id', 'title')->all();
         $subprojectsById = SubProject::pluck('id', 'id')->all();
 
-        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $subprojects, $subprojectsById) {
+        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $existingMobiles, $subprojects, $subprojectsById) {
             foreach (array_chunk($data, 100) as $batchIndex => $batch) {
                 $toInsert = [];
 
@@ -150,6 +152,7 @@ class AddressImportController extends Controller
                             $existingByNamePostal,
                             $existingEmails,
                             $existingPhones,
+                            $existingMobiles,
                             $rowNumber,
                             $row
                         );
@@ -179,6 +182,9 @@ class AddressImportController extends Controller
                         if (!empty($updateData['phone_number'])) {
                             $existingPhones[$updateData['phone_number']] = true;
                         }
+                        if (!empty($updateData['mobile_number'])) {
+                            $existingMobiles[$updateData['mobile_number']] = true;
+                        }
 
                         continue; // Skip normal insert path
                     }
@@ -207,6 +213,9 @@ class AddressImportController extends Controller
                         }
                         if (!empty($record['phone_number'])) {
                             $existingPhones[$record['phone_number']] = true;
+                        }
+                        if (!empty($record['mobile_number'])) {
+                            $existingMobiles[$record['mobile_number']] = true;
                         }
                     }
                 }
@@ -344,6 +353,7 @@ class AddressImportController extends Controller
         array &$byNamePostal,
         array &$emails,
         array &$phones,
+        array &$mobiles,
         int $num,
         array $rawRow
     ): array {
@@ -382,6 +392,11 @@ class AddressImportController extends Controller
         // phone_number duplicates
         if (!empty($row['phone_number']) && isset($phones[$row['phone_number']])) {
             $errs[] = "Row {$num}: Phone number '{$row['phone_number']}' already exists";
+        }
+
+        // mobile_number duplicates
+        if (!empty($row['mobile_number']) && isset($mobiles[$row['mobile_number']])) {
+            $errs[] = "Row {$num}: Mobile number '{$row['mobile_number']}' already exists";
         }
 
         return [
@@ -432,6 +447,13 @@ class AddressImportController extends Controller
 
         if (!empty($row['phone_number'])) {
             $match = Address::onlyTrashed()->where('phone_number', $row['phone_number'])->first();
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if (!empty($row['mobile_number'])) {
+            $match = Address::onlyTrashed()->where('mobile_number', $row['mobile_number'])->first();
             if ($match) {
                 return $match;
             }
@@ -500,6 +522,7 @@ class AddressImportController extends Controller
             'country' => $row['country'] ?? null,
             'website' => $row['website'] ?? null,
             'phone_number' => $row['phone_number'] ?? null,
+            'mobile_number' => $row['mobile_number'] ?? null,
             'email_address_system' => $row['email_address_system'] ?? null,
             'email_address_new' => $row['email_address_new'] ?? null,
             'feedback' => $row['feedback'] ?? null,

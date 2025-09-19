@@ -79,6 +79,7 @@ export default {
                 { name: 'country', label: 'Country' },
                 { name: 'website', label: 'Website' },
                 { name: 'phone_number', label: 'Phone Number' },
+                { name: 'mobile_number', label: 'Mobile Number' },
                 { name: 'email_address_new', label: 'Email Address (New)' },
                 // Add other fields as needed
             ],
@@ -233,3 +234,4 @@ export default {
 <style scoped>
 /* Add any necessary styles */
 </style>
+

@@ -70,6 +70,7 @@ class AddressDataValidator
         array &$byNamePostal,
         array &$emails,
         array &$phones,
+        array &$mobiles,
         int $num
     ): array {
         $errs = [];
@@ -101,6 +102,10 @@ class AddressDataValidator
             $errs[] = "Row {$num}: Phone number '{$row['phone_number']}' already exists";
         }
 
+        if (!empty($row['mobile_number']) && isset($mobiles[$row['mobile_number']])) {
+            $errs[] = "Row {$num}: Mobile number '{$row['mobile_number']}' already exists";
+        }
+
         return ['valid' => empty($errs), 'errors' => $errs];
     }
 
@@ -117,6 +122,7 @@ class AddressDataValidator
             'country' => $row['country'] ?? null,
             'website' => $row['website'] ?? null,
             'phone_number' => $row['phone_number'] ?? null,
+            'mobile_number' => $row['mobile_number'] ?? ($row['mobile'] ?? null),
             'email_address_system' => $row['email_address_system'] ?? null,
             'email_address_new' => $row['email_address_new'] ?? null,
             'feedback' => $row['feedback'] ?? null,

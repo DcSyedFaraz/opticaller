@@ -50,6 +50,7 @@ class ApiController extends Controller
                 'company_name' => $addressData['name'] ?? null,
                 'email_address_system' => $addressData['email'],
                 'phone_number' => $addressData['phone'] ?? null,
+                'mobile_number' => $addressData['mobile'] ?? null,
                 'sub_project_id' => 6,  // Ensuring sub_project_id is set to 1
             ]);
 
@@ -370,6 +371,7 @@ class ApiController extends Controller
                 'addresses.*.country' => 'nullable|string',
                 'addresses.*.website' => 'nullable|string',
                 'addresses.*.phone_number' => 'nullable|string',
+                'addresses.*.mobile' => 'nullable|string',
                 'addresses.*.email_address_new' => 'nullable|email|max:255',
                 'addresses.*.feedback' => 'nullable|string',
                 'addresses.*.follow_up_date' => 'nullable|string',
@@ -398,25 +400,31 @@ class ApiController extends Controller
                 ->all();
             $existingEmails = Address::pluck('email_address_system')->filter()->flip()->all();
             $existingPhones = Address::pluck('phone_number')->filter()->flip()->all();
+            $existingMobiles = Address::pluck('mobile_number')->filter()->flip()->all();
 
             $errors = [];
             $createdIds = [];
 
             foreach ($request->input('addresses') as $index => $addressData) {
                 $rowNumber = $index + 1;
+                $normalizedData = $addressData;
+                if (!array_key_exists('mobile_number', $normalizedData)) {
+                    $normalizedData['mobile_number'] = $normalizedData['mobile'] ?? null;
+                }
 
-                $validation = AddressDataValidator::validateRowData($addressData, $rowNumber, $subprojectIds);
+                $validation = AddressDataValidator::validateRowData($normalizedData, $rowNumber, $subprojectIds);
                 if (!$validation['valid']) {
                     $errors = array_merge($errors, $validation['errors']);
                     continue;
                 }
 
                 $dupCheck = AddressDataValidator::checkDuplicates(
-                    $addressData,
+                    $normalizedData,
                     $existingByStreetPostal,
                     $existingByNamePostal,
                     $existingEmails,
                     $existingPhones,
+                    $existingMobiles,
                     $rowNumber
                 );
                 if (!$dupCheck['valid']) {
@@ -424,7 +432,7 @@ class ApiController extends Controller
                     continue;
                 }
 
-                $insertData = AddressDataValidator::prepareInsert($addressData);
+                $insertData = AddressDataValidator::prepareInsert($normalizedData);
                 $address = Address::create($insertData);
                 $createdIds[] = $address->id;
 
@@ -441,6 +449,9 @@ class ApiController extends Controller
                 }
                 if (!empty($address->phone_number)) {
                     $existingPhones[$address->phone_number] = true;
+                }
+                if (!empty($address->mobile_number)) {
+                    $existingMobiles[$address->mobile_number] = true;
                 }
             }
 
@@ -464,3 +475,4 @@ Log::error('Failed to save addresses', ['error' => $e->getMessage()]);
 
     }
 }
+

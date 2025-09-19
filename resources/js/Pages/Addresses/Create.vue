@@ -61,6 +61,12 @@
                     </Message>
                 </div>
                 <div class="mb-4">
+                    <InputLabel for="mobile_number">Mobile Number</InputLabel>
+                    <InputText v-model="newAddress.mobile_number" type="text" class="w-full" />
+                    <Message v-if="errors.mobile_number" severity="error" class="mt-2">{{ errors.mobile_number }}
+                    </Message>
+                </div>
+                <div class="mb-4">
                     <InputLabel for="email_address_system">System Email Address</InputLabel>
                     <InputText v-model="newAddress.email_address_system" type="email" class="w-full" />
                     <Message v-if="errors.email_address_system" severity="error" class="mt-2">{{
@@ -199,6 +205,7 @@ export default {
                 city: '',
                 website: '',
                 phone_number: '',
+                mobile_number: '',
                 email_address: '',
                 personal_notes: '',
                 interest_notes: '',

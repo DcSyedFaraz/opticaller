@@ -180,6 +180,19 @@
                                         </div>
                                     </div>
 
+                                <div v-if="!isHidden('mobile_number')" class="field">
+                                    <label class="font-extrabold text-sm mr-2" for="mobile_number">
+                                        Mobile Number:
+                                    </label>
+                                    <div class="flex items-center">
+                                        <InputText id="mobile_number" v-model="localAddress.mobile_number"
+                                            :disabled="isFieldLocked('mobile_number')"
+                                            class="w-full !border-secondary" />
+                                        <Button icon="pi pi-lock" v-if="isFieldLocked('mobile_number')"
+                                            class="p-button-text p-button-rounded text-xs !text-red-500 ml-2" disabled />
+                                    </div>
+                                </div>
+
 
                                     <!-- Email Address Field -->
                                     <div v-if="!isHidden('email_address_system')" class="field">
@@ -821,7 +834,8 @@ export default {
     },
     computed: {
         formattedPhoneNumber() {
-            return this.formatPhoneNumber(this.localAddress?.phone_number);
+            const primaryNumber = this.localAddress?.mobile_number || this.localAddress?.phone_number;
+            return this.formatPhoneNumber(primaryNumber);
         },
         formattedCallDuration() {
             const minutes = Math.floor(this.callDuration / 60);
@@ -1332,7 +1346,7 @@ export default {
         async makeCall() {
             try {
                 const response = await axios.post(route('call'), {
-                    phone_number: this.localAddress.phone_number,
+                    phone_number: this.localAddress.mobile_number || this.localAddress.phone_number,
                 });
                 console.log('Call SID:', response.data);
             } catch (error) {
@@ -1781,3 +1795,4 @@ main {
     padding-bottom: 0px !important;
 }
 </style>
+

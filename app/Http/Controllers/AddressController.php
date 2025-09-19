@@ -168,7 +168,7 @@ class AddressController extends Controller
     {
         $validated = $request->validate([
             'locked_fields' => 'array',
-            'locked_fields.*' => 'string|in:company_name,salutation,first_name,last_name,street_address,postal_code,city,website,phone_number,email_address_new,country,contact_id',
+            'locked_fields.*' => 'string|in:company_name,salutation,first_name,last_name,street_address,postal_code,city,website,phone_number,mobile_number,email_address_new,country,contact_id',
         ]);
 
         $globalLockedFields = GlobalLockedFields::firstOrCreate();
@@ -192,6 +192,7 @@ class AddressController extends Controller
             'city' => 'nullable|string|max:255',
             'website' => 'nullable|max:255',
             'phone_number' => 'nullable|string|max:20',
+            'mobile_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'nullable|email|max:255',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
@@ -237,6 +238,7 @@ class AddressController extends Controller
             'city' => 'nullable|string|max:255',
             'website' => 'nullable|max:255',
             'phone_number' => 'nullable|string|max:20',
+            'mobile_number' => 'nullable|string|max:20',
             'email_address_system' => 'required|email|max:255',
             'email_address_new' => 'nullable|email|max:255',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
@@ -390,8 +392,8 @@ class AddressController extends Controller
             'name' => $name,
             'deal-id' => $address->deal_id ?? '',
             'email' => $address->email_address_system ?? '',
-            'attendeePhoneNumber' => $address->phone_number ?? '',
-            'smsReminderNumber' => $address->phone_number ?? '',
+            'attendeePhoneNumber' => $address->mobile_number ?? $address->phone_number ?? '',
+            'smsReminderNumber' => $address->mobile_number ?? $address->phone_number ?? '',
         ];
 
         $url = $subproject->calendar_link;
@@ -422,3 +424,4 @@ class AddressController extends Controller
         }
     }
 }
+
