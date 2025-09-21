@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Feedback;
 use App\Models\SubProject;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -24,6 +24,7 @@ class FeedbackController extends Controller
             'value' => 'required|string|max:255',
             'no_validation' => 'required|boolean',
             'no_statistics' => 'required|boolean',
+            're_call_days' => 'nullable|integer|min:0|max:365',
             'sub_project_ids' => 'required|array',
             'sub_project_ids.*' => 'exists:sub_projects,id',
         ]);
@@ -33,6 +34,7 @@ class FeedbackController extends Controller
             'value' => $request->value,
             'no_validation' => $request->no_validation,
             'no_statistics' => $request->no_statistics,
+            're_call_days' => $request->re_call_days,
         ]);
 
         $feedback->subProjects()->attach($request->input('sub_project_ids'));
@@ -65,7 +67,8 @@ class FeedbackController extends Controller
             'label' => 'required|string|max:255',
             'value' => 'required|string|max:255',
             'no_validation' => 'required|boolean',
-            'no_statistics' => 'required|boolean', // Add this line
+            'no_statistics' => 'required|boolean',
+            're_call_days' => 'nullable|integer|min:0|max:365',
             'sub_project_ids' => 'required|array',
             'sub_project_ids.*' => 'exists:sub_projects,id',
         ]);
@@ -74,7 +77,8 @@ class FeedbackController extends Controller
             'label' => $request->label,
             'value' => $request->value,
             'no_validation' => $request->no_validation,
-            'no_statistics' => $request->no_statistics, // Add this line
+            'no_statistics' => $request->no_statistics,
+            're_call_days' => $request->re_call_days,
         ]);
 
         $feedback->subProjects()->sync($request->input('sub_project_ids'));

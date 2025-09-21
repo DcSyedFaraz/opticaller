@@ -29,6 +29,16 @@
                 </label>
             </div>
 
+            <!-- Re-Call Days Field -->
+            <div class="sm:col-span-6">
+                <label for="re_call_days" class="block text-sm font-medium text-gray-700">Re-Call Days</label>
+                <InputNumber v-model="feedback.re_call_days" id="re_call_days"
+                    :min="0" :max="365"
+                    placeholder="Enter days (e.g., 7 for 7 days)"
+                    class="mt-1 block w-full" :disabled="loading" />
+                <small class="text-gray-500">Number of days after which the address will appear again for re-calling</small>
+            </div>
+
 
             <!-- Sub-Projects MultiSelect Field -->
             <div class="sm:col-span-6">
@@ -50,7 +60,7 @@ export default {
     props: {
         initialFeedback: {
             type: Object,
-            default: () => ({ label: '', value: '', no_validation: false, no_statistics: false, sub_project_ids: [] }),
+            default: () => ({ label: '', value: '', no_validation: false, no_statistics: false, re_call_days: null, sub_project_ids: [] }),
         },
         submitLabel: {
             type: String,
@@ -76,7 +86,7 @@ export default {
             this.$emit('submit', { ...this.feedback });
         },
         resetForm() {
-            this.feedback = { label: '', value: '', no_validation: false, no_statistics: false, sub_project_ids: [] };
+            this.feedback = { label: '', value: '', no_validation: false, no_statistics: false, re_call_days: null, sub_project_ids: [] };
         },
     },
     watch: {

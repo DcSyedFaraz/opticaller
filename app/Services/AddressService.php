@@ -45,9 +45,11 @@ class AddressService
                 })
                 ->where(function ($query) use ($now) {
                     $query->where('follow_up_date', '<=', $now)
-                        ->orWhere('follow_up_date', '=', $now);
+                        ->orWhere('follow_up_date', '=', $now)
+                        ->orWhere('re_call_date', '<=', $now)
+                        ->orWhere('re_call_date', '=', $now);
                 })
-                ->orderBy('follow_up_date', 'asc')
+                ->orderByRaw('COALESCE(follow_up_date, re_call_date) ASC')
                 ->lockForUpdate() // Lock the selected rows for update
                 ->first();
 
@@ -79,6 +81,7 @@ class AddressService
                         ->orWhere('addresses.seen', '<', Carbon::now()->subMinutes(15));
                 })
                 ->whereNull('follow_up_date')
+                ->whereNull('re_call_date')
                 ->where(function ($query) use ($now) {
                     $query->whereHas('notreached', function ($q) use ($now) {
                         $q->where(function ($subQuery) use ($now) {

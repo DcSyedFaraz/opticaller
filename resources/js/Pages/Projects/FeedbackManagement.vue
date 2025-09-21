@@ -30,6 +30,12 @@
                                 binary />
                         </template>
                     </Column>
+                    <Column field="re_call_days" header="Re-Call Days" class="text-center w-24">
+                        <template #body="slotProps">
+                            <span v-if="slotProps.data.re_call_days">{{ slotProps.data.re_call_days }} days</span>
+                            <span v-else class="text-gray-400">-</span>
+                        </template>
+                    </Column>
                     <Column header="Sub-Projects" class="text-left">
                         <template #body="slotProps">
                             <ul>
@@ -95,6 +101,8 @@ export default {
                 label: '',
                 value: '',
                 no_validation: false,
+                no_statistics: false,
+                re_call_days: null,
                 sub_project_ids: [],
             },
             editDialogVisible: false,
@@ -121,6 +129,7 @@ export default {
                 value: feedback.value,
                 no_validation: feedback.no_validation,
                 no_statistics: feedback.no_statistics,
+                re_call_days: feedback.re_call_days,
                 sub_project_ids: feedback.sub_project_ids,
             };
 
@@ -163,6 +172,7 @@ export default {
                 value: feedback.value,
                 no_statistics: feedback.no_statistics,
                 no_validation: feedback.no_validation,
+                re_call_days: feedback.re_call_days,
                 sub_project_ids: feedback.sub_projects.map((sp) => sp.id),
             };
             this.editDialogVisible = true;
@@ -200,6 +210,7 @@ export default {
                 value: updatedFeedback.value,
                 no_validation: updatedFeedback.no_validation,
                 no_statistics: updatedFeedback.no_statistics,
+                re_call_days: updatedFeedback.re_call_days,
                 sub_project_ids: updatedFeedback.sub_project_ids,
             };
 
