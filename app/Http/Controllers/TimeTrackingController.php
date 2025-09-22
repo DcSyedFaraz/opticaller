@@ -278,9 +278,7 @@ class TimeTrackingController extends Controller
             }
 
 
-            if ($validatedData['address']['feedback'] == 'Delete Address') {
-                $address->delete();
-            } else {
+
                 // Clean up unwanted fields
                 $fieldsToUnset = ['cal_logs', 'subproject', 'feedbacks', 'project'];
                 foreach ($fieldsToUnset as $field) {
@@ -352,7 +350,7 @@ class TimeTrackingController extends Controller
                 if (!$notreached && empty($address->follow_up_date) && empty($address->re_call_date)) {
                     $address->delete();
                 }
-            }
+            
 
             DB::commit();
 

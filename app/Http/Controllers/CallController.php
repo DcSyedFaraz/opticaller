@@ -367,13 +367,24 @@ class CallController extends Controller
             $response = new VoiceResponse();
 
             $to = $request->input('To');
-            $number = env('TWILIO_PHONE_NUMBER');
+            $addressID = $request->addressID;
+
+            // Get the calling phone number from sub project or use default
+            $number = '+4976619759042'; // Default fallback
+            if ($addressID) {
+                $address = \App\Models\Address::with('subproject')->find($addressID);
+                if ($address && $address->subproject) {
+                    $number = $address->subproject->getCallingPhoneNumber();
+                }
+            } else {
+                // Fallback to env variable if no addressID
+                $number = env('TWILIO_PHONE_NUMBER', '+4976619759042');
+            }
 
             if ($to) {
 
                 // $conferenceName = 'SupportConference_' . uniqid();
                 $conferenceName = $request->Caller;
-                $addressID = $request->addressID;
                 $statusCallbackUrl = route('recording.callback') . '?callerIdentity=' . urlencode($conferenceName);
                 $dial = $response->dial('', [
                     'callerId' => $number,
@@ -425,11 +436,23 @@ class CallController extends Controller
             $twilioSid = env('TWILIO_ACCOUNT_SID');
             $twilioAuthToken = env('TWILIO_AUTH_TOKEN');
 
+            // Get the calling phone number from sub project or use default
+            $callingNumber = '+4976619759042'; // Default fallback
+            if ($addressID) {
+                $address = \App\Models\Address::with('subproject')->find($addressID);
+                if ($address && $address->subproject) {
+                    $callingNumber = $address->subproject->getCallingPhoneNumber();
+                }
+            } else {
+                // Fallback to env variable if no addressID
+                $callingNumber = env('TWILIO_PHONE_NUMBER', '+4976619759042');
+            }
+
             $twilio = new Client($twilioSid, $twilioAuthToken);
             $participant = $twilio->conferences($conferenceName)
                 ->participants
                 ->create(
-                    env('TWILIO_PHONE_NUMBER'),
+                    $callingNumber,
                     $participantNumber,
                     [
                         // 'muted' => true,
@@ -477,8 +500,11 @@ class CallController extends Controller
 
         $response = new VoiceResponse();
 
+        // Use default calling number for conference join
+        $callingNumber = env('TWILIO_PHONE_NUMBER', '+4976619759042');
+
         $dial = $response->dial('', [
-            'callerId' => env('TWILIO_PHONE_NUMBER'),
+            'callerId' => $callingNumber,
             'record' => 'true',
         ]);
         $response->record([
@@ -542,8 +568,11 @@ class CallController extends Controller
 
         $response = new VoiceResponse();
 
+        // Use default calling number for admin conference join
+        $callingNumber = env('TWILIO_PHONE_NUMBER', '+4976619759042');
+
         $dial = $response->dial('', [
-            'callerId' => env('TWILIO_PHONE_NUMBER'),
+            'callerId' => $callingNumber,
         ]);
 
         $dial->conference($conferenceName, [

@@ -24,6 +24,12 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
+                        <label for="calling_phone_number" class="block text-sm font-medium text-gray-700">Calling Phone Number</label>
+                        <InputText v-model="newProject.calling_phone_number" type="text" placeholder="+4976619759042"
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <p class="mt-1 text-sm text-gray-500">Leave empty to use default number (+4976619759042)</p>
+                    </div>
+                    <div class="sm:col-span-12">
                         <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="newProject.project_id" :options="projects" optionValue="id" optionLabel="title"
                             placeholder="Select Project" class="w-full" />
@@ -124,6 +130,12 @@
                             class="mt-1 block w-full" />
                     </div>
                     <div class="field">
+                        <label for="calling_phone_number" class="block text-sm font-medium text-gray-700">Calling Phone Number</label>
+                        <InputText v-model="editProjectData.calling_phone_number" type="text" placeholder="+4976619759042"
+                            class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
+                        <p class="mt-1 text-sm text-gray-500">Leave empty to use default number (+4976619759042)</p>
+                    </div>
+                    <div class="field">
                         <InputLabel for="Projects">Project</InputLabel>
                         <Select v-model="editProjectData.project_id" :options="projects" optionValue="id"
                             optionLabel="title" placeholder="Select Project" class="w-full" />
@@ -182,6 +194,7 @@ export default {
                 priority: null,
                 pdf: null,
                 calendar_link: '',
+                calling_phone_number: '',
                 retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
             },
             priorityOptions: [
@@ -227,6 +240,9 @@ export default {
             if (this.newProject.calendar_link) {
                 formData.append('calendar_link', this.newProject.calendar_link);
             }
+            if (this.newProject.calling_phone_number) {
+                formData.append('calling_phone_number', this.newProject.calling_phone_number);
+            }
             if (this.newProject.pdf) {
                 formData.append('pdf', this.newProject.pdf);
             }
@@ -241,7 +257,7 @@ export default {
                     'Content-Type': 'multipart/form-data',
                 },
                 onSuccess: () => {
-                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null, calendar_link: '', retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] };
+                    this.newProject = { title: '', description: '', project_id: null, priority: null, pdf: null, calendar_link: '', calling_phone_number: '', retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5] };
 
                     this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Sub project created successfully', life: 3000 });
                 },
@@ -275,6 +291,9 @@ export default {
             formData.append('priority', this.editProjectData.priority);
             if (this.editProjectData.calendar_link) {
                 formData.append('calendar_link', this.editProjectData.calendar_link);
+            }
+            if (this.editProjectData.calling_phone_number) {
+                formData.append('calling_phone_number', this.editProjectData.calling_phone_number);
             }
             if (this.editProjectData.pdf) {
                 formData.append('pdf', this.editProjectData.pdf);
