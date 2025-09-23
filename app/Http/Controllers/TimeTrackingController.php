@@ -238,42 +238,6 @@ class TimeTrackingController extends Controller
             // Determine if 'notreached' is true
             $notreached = filter_var($request->notreached, FILTER_VALIDATE_BOOLEAN);
 
-            // testing hook
-            // $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
-
-            // live hook
-            $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
-            $feedbackvalue = $validatedData['address']['feedback'];
-            $excludeFeedbacks = ['Follow-up', 'notreached'];
-
-            // Enhanced condition to trigger webhook
-            if (
-                !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date']) &&
-                !in_array($feedbackvalue, $excludeFeedbacks)
-            ) {
-
-                Log::channel('webhook')->info('Triggering webhook for ID: ' . $address->id . ' Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
-                    ', notreached: ' . ($notreached ? 'true' : 'false') .
-                    ', feedback: ' . $validatedData['address']['feedback']);
-
-
-                $response = Http::post($webhookUrl, [
-                    'ID' => $address->id,
-                    'Sub_Project' => $address->sub_project_id
-                ]);
-
-                if ($response->successful()) {
-                    Log::channel('webhook')->info('Webhook successfully triggered for ID: ' . $address->id);
-                } else {
-                    Log::channel('webhook')->error('Webhook failed for ID: ' . $address->id . '. Response: ' . $response->body());
-                }
-
-            } else {
-                // Optional: Log why webhook is not triggered
-                Log::channel('webhook')->info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
-                    ', notreached: ' . ($notreached ? 'true' : 'false') .
-                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty'));
-            }
 
 
             if ($validatedData['address']['feedback'] == 'Delete Address') {
@@ -343,6 +307,43 @@ class TimeTrackingController extends Controller
             }
 
             DB::commit();
+
+            // testing hook
+            // $webhookUrl = 'https://hook.eu1.make.com/9tjpua1qx1dhgil7zbisfhaucr11hqge';
+
+            // live hook
+            $webhookUrl = 'https://hook.eu1.make.com/5qruvb50swmc3wdj7obdzbxgosov09jf';
+            $feedbackvalue = $validatedData['address']['feedback'];
+            $excludeFeedbacks = ['Follow-up', 'notreached'];
+
+            // Enhanced condition to trigger webhook
+            if (
+                !$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date']) &&
+                !in_array($feedbackvalue, $excludeFeedbacks)
+            ) {
+
+                Log::channel('webhook')->info('Triggering webhook for ID: ' . $address->id . ' Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                    ', notreached: ' . ($notreached ? 'true' : 'false') .
+                    ', feedback: ' . $validatedData['address']['feedback']);
+
+
+                $response = Http::post($webhookUrl, [
+                    'ID' => $address->id,
+                    'Sub_Project' => $address->sub_project_id
+                ]);
+
+                if ($response->successful()) {
+                    Log::channel('webhook')->info('Webhook successfully triggered for ID: ' . $address->id);
+                } else {
+                    Log::channel('webhook')->error('Webhook failed for ID: ' . $address->id . '. Response: ' . $response->body());
+                }
+
+            } else {
+                // Optional: Log why webhook is not triggered
+                Log::channel('webhook')->info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                    ', notreached: ' . ($notreached ? 'true' : 'false') .
+                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty'));
+            }
 
             $addressService = new AddressService();
             $address = $addressService->getDueAddress();
