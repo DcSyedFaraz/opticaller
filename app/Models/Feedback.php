@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Feedback extends Model
 {
     use HasFactory;
-    protected $fillable = ['label', 'value','no_validation','no_statistics','order'];
+    protected $fillable = ['label', 'value','no_validation','no_statistics','re_call_days','order'];
     protected $casts = [
         'no_validation' => 'boolean',
         'no_statistics' => 'boolean',

@@ -82,4 +82,13 @@ class SubProject extends Model
         $schedule = $this->getRetrySchedule();
         return $currentAttempt < count($schedule);
     }
+
+    /**
+     * Get the calling phone number for this sub project
+     * Falls back to default number if not set
+     */
+    public function getCallingPhoneNumber()
+    {
+        return $this->calling_phone_number ?? '+4976619759042';
+    }
 }

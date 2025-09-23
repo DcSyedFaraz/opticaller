@@ -175,6 +175,8 @@ class TimeTrackingController extends Controller
 
             // Fetch feedback
             $feedback = Feedback::where('value', $request->address['feedback'])->first();
+            // Handle re_call_date if feedback has re_call_days
+
 
             // Apply validation only if saveEdits is true and feedback requires validation
             if ($request->saveEdits && $feedback && !$feedback->no_validation) {
@@ -240,9 +242,7 @@ class TimeTrackingController extends Controller
 
 
 
-            if ($validatedData['address']['feedback'] == 'Delete Address') {
-                $address->delete();
-            } else {
+
                 // Clean up unwanted fields
                 $fieldsToUnset = ['cal_logs', 'subproject', 'feedbacks', 'project'];
                 foreach ($fieldsToUnset as $field) {
@@ -259,6 +259,11 @@ class TimeTrackingController extends Controller
                 if ($address->follow_up_date) {
                     $validatedData['address']['feedback'] = 'Follow-up';
                 }
+                if ($feedback && $feedback->re_call_days && $feedback->re_call_days > 0) {
+                    $validatedData['address']['re_call_date'] = Carbon::now()->addDays($feedback->re_call_days);
+                    // dd($feedback, $validatedData['address']['re_call_date']);
+                }
+                // dd($validatedData['address']);
                 $address->update($validatedData['address']);
 
                 // dd($validatedData['address']);
@@ -274,6 +279,11 @@ class TimeTrackingController extends Controller
                     $address->follow_up_date = Carbon::parse($address->follow_up_date);
                     // dd($request->address['follow_up_date'], $address->follow_up_date);
                 }
+
+                // Clear re_call_date when address is processed
+                // if ($address->re_call_date) {
+                //     $address->re_call_date = null;
+                // }
 
                 $address->save();
                 // dd($request->address['subproject']['projects']['title']);
@@ -299,12 +309,12 @@ class TimeTrackingController extends Controller
                 }
 
                 // Archive the address only when it was reached and no follow-up
-                // date is set. This prevents the same address from reappearing
+                // or re-call date is set. This prevents the same address from reappearing
                 // until it is imported again.
-                if (!$notreached && empty($address->follow_up_date)) {
+                if (!$notreached && empty($address->follow_up_date) && empty($address->re_call_date)) {
                     $address->delete();
                 }
-            }
+            
 
             DB::commit();
 
