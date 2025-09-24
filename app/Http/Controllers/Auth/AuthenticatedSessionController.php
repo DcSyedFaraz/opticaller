@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
         if ($user && $credentials['password'] == $user->otp) {
             // dd('here');
             $request->session()->put('otp_login_email', $credentials['email']);
-            return redirect()->route('change-password.page'); 
+            return redirect()->route('change-password.page');
         } else {
             $request->authenticate();
 
@@ -56,11 +56,17 @@ class AuthenticatedSessionController extends Controller
         }
 
 
-        return match ($user[0]) {
+        // Clear any existing addressdash_state cookie to ensure fresh data
+        $response = match ($user[0]) {
             'admin' => redirect()->route('dashboard'),
             'milung' => redirect()->route('dashboard'),
             default => redirect()->route('dash'),
         };
+
+        // Clear the addressdash_state cookie to ensure fresh data on login
+        $response->withCookie(cookie('addressdash_state', '', 0, '/'));
+
+        return $response;
         // return redirect()->intended(RouteServiceProvider::HOME);
     }
 
@@ -81,6 +87,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        // Clear the addressdash_state cookie to ensure fresh data on next login
+        $response = redirect('/');
+        $response->withCookie(cookie('addressdash_state', '', 0, '/'));
+
+        return $response;
     }
 }

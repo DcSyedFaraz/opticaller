@@ -977,13 +977,22 @@ export default {
         }
     },
     mounted() {
+        // Check if this is a fresh login by checking if we have a fresh session
+        const isFreshLogin = !document.cookie.includes('addressdash_state=1');
+
         // Check if address_id query parameter is present or if there's an error
         const urlParams = new URLSearchParams(window.location.search);
         const hasAddressIdParam = urlParams.has('address_id');
         const hasError = !!this.error;
 
-        // Try to restore state from localStorage first, but skip if address_id param is present or there's an error
-        const stateRestored = (hasAddressIdParam || hasError) ? false : this.restoreState();
+        // Clear state on fresh login to ensure new user gets fresh data
+        if (isFreshLogin) {
+            console.log('AddressDash: Fresh login detected - clearing any existing state');
+            this.clearStateOnAuthChange();
+        }
+
+        // Try to restore state from localStorage first, but skip if address_id param is present, there's an error, or fresh login
+        const stateRestored = (hasAddressIdParam || hasError || isFreshLogin) ? false : this.restoreState();
 
         // Only use props data if state was not restored
         if (!stateRestored && this.address && this.address.id && !hasError) {
@@ -1026,6 +1035,11 @@ export default {
 
         // Add event listener for page visibility changes
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
+        // Make clearStateOnAuthChange globally available for logout
+        window.clearAddressDashState = () => {
+            this.clearStateOnAuthChange();
+        };
     },
     methods: {
         // Cookie helpers to signal server whether client has restorable state
@@ -1046,6 +1060,12 @@ export default {
         },
         // State persistence methods
         saveState() {
+            // Don't save state if address is empty or invalid
+            if (!this.localAddress || !this.localAddress.id) {
+                console.log('AddressDash: Not saving state - no valid address');
+                return;
+            }
+
             // Clear existing timeout
             if (this.saveStateTimeout) {
                 clearTimeout(this.saveStateTimeout);
@@ -1137,6 +1157,39 @@ export default {
                 console.log('AddressDash state cleared from localStorage');
             } catch (error) {
                 console.error('Error clearing state from localStorage:', error);
+            }
+        },
+
+        // Clear state on logout/login - can be called globally
+        clearStateOnAuthChange() {
+            this.clearState();
+            // Reset all state variables to initial values
+            this.localAddress = {};
+            this.locallockfields = [];
+            this.callHistory = [];
+            this.logdata = {};
+            this.countdown = 0;
+            this.ReverseCountdown = 180;
+            this.isPaused = false;
+            this.previousProject = '';
+            this.startTime = 0;
+            this.pauseTime = 0;
+            this.breakDuration = 0;
+            this.isStateRestored = false;
+
+            // Clear any active timers
+            this.clearAddressRemovalTimer();
+            if (this.timer) {
+                clearInterval(this.timer);
+                this.timer = null;
+            }
+            if (this.reversetimer) {
+                clearInterval(this.reversetimer);
+                this.reversetimer = null;
+            }
+            if (this.callDurationTimer) {
+                clearInterval(this.callDurationTimer);
+                this.callDurationTimer = null;
             }
         },
 

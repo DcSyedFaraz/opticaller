@@ -116,7 +116,20 @@ class UsersController extends Controller
         } elseif (!$skipAddressFetch) {
             // dd('address not found 2');
             $addressService = new AddressService();
-            $address = $addressService->getDueAddress();
+            $addressResult = $addressService->getDueAddress();
+
+            // Check if the result is a JSON response (error case)
+            if (is_object($addressResult) && method_exists($addressResult, 'getData')) {
+                $data = $addressResult->getData(true);
+                if (isset($data['message']) || isset($data['warning'])) {
+                    $address = null;
+                    $error = $data['message'] ?? $data['warning'] ?? 'No addresses available';
+                } else {
+                    $address = $addressResult;
+                }
+            } else {
+                $address = $addressResult;
+            }
         }
 
         $globalLockedFields = GlobalLockedFields::firstOrCreate()->locked_fields;
@@ -127,6 +140,7 @@ class UsersController extends Controller
             'address' => $address,
             'subproject' => $subproject,
             'lockfields' => $globalLockedFields,
+            'error' => $error ?? null,
         ]);
     }
 
