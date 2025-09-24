@@ -6,7 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { ref, onUpdated, onMounted } from 'vue';
+import { computed, onUpdated, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast'
 
 
@@ -19,7 +19,6 @@ defineProps({
         type: String,
     },
 });
-const loading = ref(false);
 const toast = useToast()
 
 onUpdated(() => {
@@ -55,15 +54,18 @@ const form = useForm({
     remember: false,
 });
 
+const buttonClasses = computed(() => ([
+    'mt-4 !py-3 w-full',
+    form.processing ? '!bg-gray-400 !border-gray-400 cursor-not-allowed' : '!bg-black !border-black',
+]));
+
 const submit = async () => {
-    loading.value = true;
-    try {
-        await form.post(route('login'), {
-            onFinish: () => form.reset('password'),
-        });
-    } finally {
-        loading.value = false;
+    if (form.processing) {
+        return;
     }
+    await form.post(route('login'), {
+        onFinish: () => form.reset('password'),
+    });
 };
 </script>
 
@@ -155,8 +157,8 @@ const submit = async () => {
                             </div>
                         </div>
 
-                        <Button label="Sign In" :loading="loading" icon="pi pi-sign-in"
-                            class="mt-4 !py-3 w-full !bg-black !border-black" @click="submit" />
+                        <Button label="Sign In" :loading="form.processing" :disabled="form.processing" icon="pi pi-sign-in"
+                            loadingIcon="pi pi-spin pi-spinner" :class="buttonClasses" @click="submit" />
 
 
                     </div>
@@ -172,7 +174,7 @@ const submit = async () => {
                 <img src="images/login_image.webp" alt="Image" class="w-full h-full object-cover rounded-r-xl " />
             </div>
         </div>
-        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 3.2</div>
+        <div class="absolute bottom-0 right-0 mr-2 text-xs text-gray-500">v 3.5</div>
     </div>
 </template>
 

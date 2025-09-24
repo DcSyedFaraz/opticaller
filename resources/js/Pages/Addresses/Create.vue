@@ -30,6 +30,7 @@
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="street_address">Street Address</InputLabel>
                     <InputText v-model="newAddress.street_address" type="text" class="w-full" />
+                    <!-- <InputText ref="streetAddressInput" v-model="newAddress.street_address" type="text" class="w-full" /> -->
                     <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}
                     </Message>
                 </div>
@@ -149,6 +150,71 @@
 <script>
 import InputLabel from '@/Components/InputLabel.vue';
 
+let googleMapsScriptPromise;
+
+const COUNTRY_CODE_MAP = {
+    Germany: 'DE',
+    Austria: 'AT',
+    Switzerland: 'CH',
+    France: 'FR',
+    Italy: 'IT',
+};
+
+const loadGooglePlacesLibrary = (apiKey) => {
+    if (typeof window === 'undefined') {
+        return Promise.reject(new Error('window is not available'));
+    }
+
+    if (window.google?.maps?.places) {
+        return Promise.resolve();
+    }
+
+    if (googleMapsScriptPromise) {
+        return googleMapsScriptPromise;
+    }
+
+    if (!apiKey) {
+        console.warn('Google Maps API key is missing. Autocomplete will be disabled.');
+        return Promise.reject(new Error('Google Maps API key is missing'));
+    }
+
+    googleMapsScriptPromise = new Promise((resolve, reject) => {
+        const existingScript = document.querySelector('script[data-google-maps-loader="true"]');
+
+        if (existingScript) {
+            if (window.google?.maps?.places) {
+                resolve();
+                return;
+            }
+
+            existingScript.addEventListener('load', resolve, { once: true });
+            existingScript.addEventListener('error', reject, { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+        script.async = true;
+        script.defer = true;
+        script.dataset.googleMapsLoader = 'true';
+        script.addEventListener('load', resolve, { once: true });
+        script.addEventListener('error', reject, { once: true });
+        document.head.appendChild(script);
+    });
+
+    return googleMapsScriptPromise;
+};
+
+const findAddressComponent = (components, types) => {
+    if (!Array.isArray(components)) {
+        return '';
+    }
+
+    const match = components.find((component) => types.every((type) => component.types.includes(type)));
+
+    return match ? match.long_name : '';
+};
+
 export default {
     components: {
 
@@ -159,6 +225,8 @@ export default {
             newAddress: {},
             errors: {},
             country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy'],
+            autocompleteInstance: null,
+            autocompleteListener: null,
             salutationOptions: [
                 { label: 'Herr', value: 'Herr' },
                 { label: 'Frau', value: 'Frau' },
@@ -177,7 +245,112 @@ export default {
         subprojects: Array,
         users: Array,
     },
+    mounted() {
+        this.initGoogleAutocomplete();
+    },
+    beforeUnmount() {
+        if (this.autocompleteListener && window.google?.maps?.event?.removeListener) {
+            window.google.maps.event.removeListener(this.autocompleteListener);
+        }
+        if (this.autocompleteInstance && window.google?.maps?.event?.clearInstanceListeners) {
+            window.google.maps.event.clearInstanceListeners(this.autocompleteInstance);
+        }
+        this.autocompleteListener = null;
+        this.autocompleteInstance = null;
+    },
     methods: {
+        async initGoogleAutocomplete() {
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+            if (!apiKey) {
+                console.warn('VITE_GOOGLE_MAPS_API_KEY is missing; Google Autocomplete is disabled.');
+                return;
+            }
+
+            try {
+                await loadGooglePlacesLibrary(apiKey);
+            } catch (error) {
+                console.error('Unable to initialise Google Places Autocomplete', error);
+                return;
+            }
+
+            if (this.autocompleteInstance) {
+                return;
+            }
+
+            const inputComponent = this.$refs.streetAddressInput;
+            const inputEl = inputComponent?.$el ?? inputComponent;
+
+            if (!inputEl) {
+                return;
+            }
+
+            if (!window.google?.maps?.places?.Autocomplete) {
+                console.warn('Google Places Autocomplete is unavailable.');
+                return;
+            }
+
+            const countryCodes = this.country_names
+                .map((name) => COUNTRY_CODE_MAP[name])
+                .filter(Boolean);
+
+            const options = {
+                types: ['address'],
+                fields: ['address_components', 'formatted_address'],
+            };
+
+            if (countryCodes.length) {
+                options.componentRestrictions = { country: countryCodes };
+            }
+
+            this.autocompleteInstance = new window.google.maps.places.Autocomplete(inputEl, options);
+            this.autocompleteListener = this.autocompleteInstance.addListener('place_changed', () => this.handlePlaceSelect());
+        },
+        handlePlaceSelect() {
+            if (!this.autocompleteInstance) {
+                return;
+            }
+
+            const place = this.autocompleteInstance.getPlace();
+
+            if (!place || !place.address_components) {
+                return;
+            }
+
+            const components = place.address_components;
+            const streetNumber = findAddressComponent(components, ['street_number']);
+            const route = findAddressComponent(components, ['route']);
+            const postalCode = findAddressComponent(components, ['postal_code']);
+            const locality = findAddressComponent(components, ['locality']);
+            const postalTown = findAddressComponent(components, ['postal_town']);
+            const adminLevel2 = findAddressComponent(components, ['administrative_area_level_2']);
+            const adminLevel1 = findAddressComponent(components, ['administrative_area_level_1']);
+            const country = findAddressComponent(components, ['country']);
+
+            const street = [streetNumber, route].filter(Boolean).join(' ').trim() || place.name || '';
+
+            if (street) {
+                this.newAddress.street_address = street;
+            }
+
+            if (postalCode) {
+                this.newAddress.postal_code = postalCode;
+            }
+
+            const city = locality || postalTown || adminLevel2 || adminLevel1;
+
+            if (city) {
+                this.newAddress.city = city;
+            }
+
+            if (country) {
+                if (!this.country_names.includes(country)) {
+                    this.country_names = [...this.country_names, country];
+                }
+
+                this.newAddress.country = country;
+            }
+        },
         createAddress() {
 
 
@@ -203,6 +376,7 @@ export default {
                 street_address: '',
                 postal_code: '',
                 city: '',
+                country: '',
                 website: '',
                 phone_number: '',
                 mobile_number: '',
