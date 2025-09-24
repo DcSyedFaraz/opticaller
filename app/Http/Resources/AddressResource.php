@@ -38,6 +38,7 @@ class AddressResource extends JsonResource
             'hubspot_tag' => $this->hubspot_tag,
             'company_id' => $this->company_id,
             'deal_id' => $this->deal_id,
+            'seen' => $this->seen,
             'deleted_at' => $this->deleted_at,
             'sub_project_title' => optional($this->subproject)->title,
             'transcriptions' => $this->transcriptions,
