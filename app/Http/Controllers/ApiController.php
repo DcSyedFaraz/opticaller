@@ -474,5 +474,121 @@ Log::error('Failed to save addresses', ['error' => $e->getMessage()]);
         }
 
     }
+
+    /**
+     * Get count of addresses by sub project IDs 1, 2, and 3
+     */
+    public function getAddressCountsBySubProjects(Request $request)
+    {
+
+
+        try {
+            // Get counts for sub project IDs 1, 2, and 3
+            $subProjectIds = [1, 2, 3];
+            $counts = [];
+            $totalCount = 0;
+
+            foreach ($subProjectIds as $subProjectId) {
+                $count = Address::where('sub_project_id', $subProjectId)->count();
+                $counts[$subProjectId] = $count;
+                $totalCount += $count;
+            }
+
+            // Get sub project details for context
+            $subProjects = SubProject::whereIn('id', $subProjectIds)
+                ->select('id', 'title', 'description')
+                ->get()
+                ->keyBy('id');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'counts' => $counts,
+                    'total_count' => $totalCount,
+                    'sub_projects' => $subProjects,
+                    'sub_project_ids' => $subProjectIds
+                ]
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Failed to get address counts by sub projects', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to get address counts: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Hard delete addresses by sub project IDs 1, 2, and 3
+     */
+    public function hardDeleteAddressesBySubProjects(Request $request)
+    {
+
+        DB::beginTransaction();
+
+        try {
+            $subProjectIds = [1, 2, 3];
+            $deletedCounts = [];
+            $totalDeleted = 0;
+
+            // Get addresses to be deleted for logging
+            $addressesToDelete = Address::whereIn('sub_project_id', $subProjectIds)->get();
+
+            Log::channel('address_deletion')->info('Starting hard deletion of addresses by sub project IDs', [
+                'sub_project_ids' => $subProjectIds,
+                'total_addresses' => $addressesToDelete->count(),
+            ]);
+
+            foreach ($subProjectIds as $subProjectId) {
+                $addresses = Address::where('sub_project_id', $subProjectId)->get();
+                $count = $addresses->count();
+
+                if ($count > 0) {
+                    // Hard delete addresses (forceDelete bypasses soft delete)
+                    Address::where('sub_project_id', $subProjectId)->forceDelete();
+                    $deletedCounts[$subProjectId] = $count;
+                    $totalDeleted += $count;
+
+                    Log::channel('address_deletion')->info('Hard deleted addresses for sub project', [
+                        'sub_project_id' => $subProjectId,
+                        'deleted_count' => $count
+                    ]);
+                } else {
+                    $deletedCounts[$subProjectId] = 0;
+                }
+            }
+
+            DB::commit();
+
+            Log::channel('address_deletion')->info('Successfully completed hard deletion of addresses', [
+                'total_deleted' => $totalDeleted,
+                'deleted_by_sub_project' => $deletedCounts,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Addresses hard deleted successfully.',
+                'data' => [
+                    'deleted_counts' => $deletedCounts,
+                    'total_deleted' => $totalDeleted,
+                    'sub_project_ids' => $subProjectIds
+                ]
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::channel('address_deletion')->error('Failed to hard delete addresses by sub projects', [
+                'error' => $e->getMessage(),
+                'sub_project_ids' => $subProjectIds,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to hard delete addresses: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
