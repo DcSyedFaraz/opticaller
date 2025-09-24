@@ -41,7 +41,7 @@ class Address extends Model
     // }
     public function calLogs()
     {
-        return $this->hasMany(Activity::class, 'id', 'address_id')->where('activity_type', 'call')->orderBy('id', 'desc');
+        return $this->hasMany(Activity::class, 'address_id', 'id')->where('activity_type', 'call')->orderBy('id', 'desc');
     }
     public function lastuser()
     {
