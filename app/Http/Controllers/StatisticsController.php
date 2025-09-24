@@ -6,7 +6,7 @@ use App\Models\Activity;
 use App\Models\Address;
 use App\Models\LoginTime;
 use App\Models\NotReached;
-use App\Models\Project;
+use App\Models\SubProject;
 use App\Models\User;
 use Carbon\Carbon;
 use DB;
@@ -127,8 +127,6 @@ class StatisticsController extends Controller
 
         $employeeLeaderboard = $userData->sortByDesc('addresses_processed')->first()['user_name'] ?? null;
 
-        $totalAddressesWithNullFeedback = Address::whereNull('feedback')->count();
-
         $feedbackCounts = Activity::whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull('feedback')
             ->select('user_id', 'feedback', DB::raw('count(*) as total'))
@@ -148,12 +146,33 @@ class StatisticsController extends Controller
         });
 
         // dd($userData);
-        // Counts per project
-        $projectsWithAddressCounts = Project::withCount([
-            'addresses' => function ($query) {
-                $query->whereNull('feedback');
-            }
-        ])->get();
+        // Open address counts grouped by sub-project
+        $openAddressCountsBySubProject = Address::whereNull('feedback')
+            ->select('sub_project_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('sub_project_id')
+            ->get()
+            ->keyBy('sub_project_id');
+
+        $subProjectsWithAddressCounts = SubProject::select('id', 'title', 'project_id')
+            ->with(['projects:id,title'])
+            ->get()
+            ->map(function ($subProject) use ($openAddressCountsBySubProject) {
+                $count = (int) ($openAddressCountsBySubProject->get($subProject->id)->total ?? 0);
+
+                return [
+                    'id' => $subProject->id,
+                    'title' => $subProject->title,
+                    'project' => $subProject->projects ? [
+                        'id' => $subProject->projects->id,
+                        'title' => $subProject->projects->title,
+                    ] : null,
+                    'addresses_count' => $count,
+                ];
+            });
+
+        $unassignedOpenAddresses = (int) ($openAddressCountsBySubProject->get(null)->total ?? 0);
+        $totalAddressesWithNullFeedback = (int) $subProjectsWithAddressCounts->sum('addresses_count') + $unassignedOpenAddresses;
+        $subProjectsWithAddressCounts = $subProjectsWithAddressCounts->values()->all();
 
         $data = [
             'dailyCallOutVolume' => $dailyCallOutVolume,
@@ -166,7 +185,8 @@ class StatisticsController extends Controller
             'avgCall' => $avgCall,
             'totalBreak' => $totalBreak,
             'totalAddressesWithNullFeedback' => $totalAddressesWithNullFeedback,
-            'projectsWithAddressCounts' => $projectsWithAddressCounts,
+            'unassignedOpenAddresses' => $unassignedOpenAddresses,
+            'subProjectsWithAddressCounts' => $subProjectsWithAddressCounts,
         ];
 
         // dd($data, $userData);

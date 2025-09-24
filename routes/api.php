@@ -40,6 +40,6 @@ Route::post('/address/check-status', [ApiController::class, 'checkStatus']);
 Route::get('/reports/calls', [CallReportController::class, 'daily']);
 
 // Address management by sub projects
-Route::get('/addresses/count-by-subprojects', [ApiController::class, 'getAddressCountsBySubProjects']);
-Route::get('/addresses/hard-delete-by-subprojects', [ApiController::class, 'hardDeleteAddressesBySubProjects']);
+// Route::get('/addresses/count-by-subprojects', [ApiController::class, 'getAddressCountsBySubProjects']);
+// Route::get('/addresses/hard-delete-by-subprojects', [ApiController::class, 'hardDeleteAddressesBySubProjects']);
 

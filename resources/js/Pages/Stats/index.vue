@@ -161,13 +161,17 @@
                     </h3>
                 </div>
 
-                <!-- Open Addresses per Project -->
+                <!-- Open Addresses per Sub-Project -->
                 <div class="my-6">
-                    <h3 class="text-lg font-semibold text-gray-800">Open Addresses by Project:</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Open Addresses by Sub-Project:</h3>
                     <ul class="list-disc list-inside text-gray-600 mt-3 space-y-2">
-                        <li v-for="project in data.projectsWithAddressCounts" :key="project.id">
-                            <span class="font-semibold text-gray-700">{{ project.title }}:</span>
-                            <span class="text-indigo-500">{{ project.addresses_count }}</span> open addresses
+                        <li v-for="subProject in data.subProjectsWithAddressCounts" :key="subProject.id">
+                            <span class="font-semibold text-gray-700">{{ subProject.title }}:</span>
+                            <span class="text-indigo-500">{{ subProject.addresses_count }}</span> open addresses
+                        </li>
+                        <li v-if="data.unassignedOpenAddresses">
+                            <span class="font-semibold text-gray-700">Unassigned:</span>
+                            <span class="text-indigo-500">{{ data.unassignedOpenAddresses }}</span> open addresses
                         </li>
                     </ul>
                 </div>
