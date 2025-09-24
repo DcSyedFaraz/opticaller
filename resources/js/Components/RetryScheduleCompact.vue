@@ -57,6 +57,8 @@
 <script>
 import InputNumber from 'primevue/inputnumber';
 
+const DEFAULT_SCHEDULE = [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+
 export default {
     name: 'RetryScheduleCompact',
     components: {
@@ -70,8 +72,12 @@ export default {
     },
     emits: ['update:modelValue'],
     data() {
+        const initialSchedule = Array.isArray(this.modelValue) && this.modelValue.length > 0
+            ? this.modelValue.map(Number)
+            : [...DEFAULT_SCHEDULE];
+
         return {
-            retrySchedule: [...this.modelValue],
+            retrySchedule: initialSchedule,
             showSetAllInput: false,
             allSameValue: 5
         };
@@ -79,24 +85,45 @@ export default {
     watch: {
         modelValue: {
             handler(newVal) {
-                if (newVal && newVal.length > 0) {
-                    this.retrySchedule = [...newVal];
-                } else {
-                    this.retrySchedule = this.getDefaultSchedule();
+                const normalized = this.normalizeSchedule(newVal);
+
+                if (!this.areSchedulesEqual(this.retrySchedule, normalized)) {
+                    this.retrySchedule = [...normalized];
                 }
             },
-            immediate: true
+            immediate: true,
+            deep: true
         },
         retrySchedule: {
             handler(newVal) {
-                this.$emit('update:modelValue', newVal);
+                if (!this.areSchedulesEqual(newVal, this.modelValue ?? [])) {
+                    this.$emit('update:modelValue', [...newVal]);
+                }
             },
             deep: true
         }
     },
     methods: {
         getDefaultSchedule() {
-            return [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+            return [...DEFAULT_SCHEDULE];
+        },
+        normalizeSchedule(value) {
+            if (Array.isArray(value) && value.length > 0) {
+                return value.map(Number);
+            }
+
+            return this.getDefaultSchedule();
+        },
+        areSchedulesEqual(a = [], b = []) {
+            if (!Array.isArray(a) || !Array.isArray(b)) {
+                return false;
+            }
+
+            if (a.length !== b.length) {
+                return false;
+            }
+
+            return a.every((value, index) => value === b[index]);
         },
         resetToDefault() {
             this.retrySchedule = this.getDefaultSchedule();
