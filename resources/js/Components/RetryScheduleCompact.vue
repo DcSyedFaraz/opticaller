@@ -18,7 +18,7 @@
                 />
             </div>
         </div>
-        <div class="mt-3 flex gap-2 flex-wrap">
+        <!-- <div class="mt-3 flex gap-2 flex-wrap">
             <button
                 type="button"
                 @click="resetToDefault"
@@ -50,7 +50,7 @@
             >
                 Apply
             </button>
-        </div>
+        </div> -->
     </div>
 </template>
 
