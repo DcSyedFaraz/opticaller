@@ -533,7 +533,7 @@ Log::error('Failed to save addresses', ['error' => $e->getMessage()]);
             $totalDeleted = 0;
 
             // Get addresses to be deleted for logging
-            $addressesToDelete = Address::whereIn('sub_project_id', $subProjectIds)->get();
+            $addressesToDelete = Address::whereIn('sub_project_id', $subProjectIds)->withTrashed()->get();
 
             Log::channel('address_deletion')->info('Starting hard deletion of addresses by sub project IDs', [
                 'sub_project_ids' => $subProjectIds,
