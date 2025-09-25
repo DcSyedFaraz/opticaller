@@ -57,6 +57,10 @@ class TimeTrackingController extends Controller
     }
     public function handleInvalidNumber(Request $request)
     {
+        Log::channel('webhook')->info('Invalid Number button clicked for address ID: ' . ($request->address['id'] ?? 'unknown') .
+            ', user_id: ' . auth()->id() .
+            ', total_duration: ' . ($request->total_duration ?? 'unknown'));
+
         DB::beginTransaction();
 
         try {
@@ -130,6 +134,12 @@ class TimeTrackingController extends Controller
 
     public function stopTracking(Request $request)
     {
+        Log::channel('webhook')->info('Save & Next button clicked for address ID: ' . ($request->address['id'] ?? 'unknown') .
+            ', user_id: ' . auth()->id() .
+            ', saveEdits: ' . ($request->save_edits ? 'true' : 'false') .
+            ', notreached: ' . ($request->notreached ? 'true' : 'false') .
+            ', feedback: ' . ($request->address['feedback'] ?? 'empty'));
+
         // dd($request->all());
         DB::beginTransaction();
 
@@ -177,9 +187,19 @@ class TimeTrackingController extends Controller
             $feedback = Feedback::where('value', $request->address['feedback'])->first();
             // Handle re_call_date if feedback has re_call_days
 
+            // Enhanced logging for debugging validation flow
+            Log::channel('webhook')->info('Validation Debug - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                ', feedback_value: ' . ($request->address['feedback'] ?? 'null') .
+                ', feedback_found: ' . ($feedback ? 'true' : 'false') .
+                ', feedback_no_validation: ' . ($feedback && $feedback->no_validation ? 'true' : 'false'));
 
-            // Apply validation only if saveEdits is true and feedback requires validation
-            if ($request->saveEdits && $feedback && !$feedback->no_validation) {
+            // Apply validation when saveEdits is true, but skip detailed validation if feedback has no_validation flag
+            if ($request->saveEdits) {
+                if ($feedback && !$feedback->no_validation) {
+                    Log::channel('webhook')->info('Applying full validation rules');
+                } else {
+                    Log::channel('webhook')->info('Applying basic validation (feedback has no_validation flag or not found)');
+                }
 
                 $validatedData = $request->validate($rules, [
                     'personal_notes.string' => 'Personal notes must be a string',
@@ -218,13 +238,17 @@ class TimeTrackingController extends Controller
                     'address.follow_up_date.after' => 'Follow up date must be after today',
                 ]);
             } else {
-                // If not validating, ensure 'address' and 'feedback' exist to prevent issues
+                // If saveEdits is false, skip validation but still ensure data structure
+                Log::channel('webhook')->info('Skipping validation - saveEdits is false, using request data directly');
                 $validatedData = $request->only(['address', 'personal_notes', 'interest_notes', 'total_duration']);
                 $validatedData['address']['feedback'] = $validatedData['address']['feedback'] ?? null;
             }
 
-            // Ensure 'feedback' is present and not empty when saveEdits is true
+            // Enhanced feedback validation with better logging
             if ($request->saveEdits && empty($validatedData['address']['feedback'])) {
+                Log::channel('webhook')->error('Validation failed - saveEdits is true but feedback is empty. ' .
+                    'Original feedback: ' . ($request->address['feedback'] ?? 'null') .
+                    ', Validated feedback: ' . ($validatedData['address']['feedback'] ?? 'null'));
                 DB::rollBack();
                 return response()->json(['error' => 'Feedback is required when saving edits.'], 422);
             }
@@ -253,12 +277,17 @@ class TimeTrackingController extends Controller
 
                 // Update address
                 if ($notreached) {
+                    Log::channel('webhook')->info('Setting feedback to "notreached" due to notreached flag');
                     $validatedData['address']['feedback'] = 'notreached';
                 }
 
                 if ($address->follow_up_date) {
+                    Log::channel('webhook')->info('Setting feedback to "Follow-up" due to existing follow_up_date');
                     $validatedData['address']['feedback'] = 'Follow-up';
                 }
+
+                // Log final feedback value before processing
+                Log::channel('webhook')->info('Final feedback value before webhook check: ' . ($validatedData['address']['feedback'] ?? 'null'));
                 if ($feedback && $feedback->re_call_days && $feedback->re_call_days > 0) {
                     $validatedData['address']['re_call_date'] = Carbon::now()->addDays($feedback->re_call_days);
                     // dd($feedback, $validatedData['address']['re_call_date']);
@@ -349,10 +378,18 @@ class TimeTrackingController extends Controller
                 }
 
             } else {
-                // Optional: Log why webhook is not triggered
-                Log::channel('webhook')->info('Webhook not triggered for contact ID: ' . $address->contact_id . '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
+                // Enhanced logging for webhook not triggered
+                $followUpDate = $validatedData['address']['follow_up_date'] ?? 'null';
+                $feedbackInExcludeList = in_array($feedbackvalue, $excludeFeedbacks) ? 'true' : 'false';
+
+                Log::channel('webhook')->info('Webhook not triggered for contact ID: ' . $address->id .
+                    '. Conditions - saveEdits: ' . ($request->saveEdits ? 'true' : 'false') .
                     ', notreached: ' . ($notreached ? 'true' : 'false') .
-                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty'));
+                    ', feedback: ' . (!empty($validatedData['address']['feedback']) ? $validatedData['address']['feedback'] : 'empty') .
+                    ', feedback_value: ' . $feedbackvalue .
+                    ', follow_up_date: ' . $followUpDate .
+                    ', feedback_in_exclude_list: ' . $feedbackInExcludeList .
+                    ', webhook_condition_met: ' . (!$notreached && !empty($feedbackvalue) && empty($validatedData['address']['follow_up_date']) && !in_array($feedbackvalue, $excludeFeedbacks) ? 'true' : 'false'));
             }
 
             $addressService = new AddressService();

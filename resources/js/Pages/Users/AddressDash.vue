@@ -239,7 +239,7 @@
                                     </div>
                                 </div>
                                 <div class="flex justify-center flex-wrap my-1">
-                                    <button @click="notreached = true; submitFeedback()" :disabled="isButtonDisabled"
+                                    <button @click="console.log('Not Reached button clicked'); notreached = true; submitFeedback()" :disabled="isButtonDisabled"
                                         class="bg-primary justify-center text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
                                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -269,14 +269,14 @@
                                         </svg>
                                         <span class="mx-2 my-1">Follow-Ups</span>
                                     </button>
-                                    <button @click="saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
+                                    <button @click="console.log('Save & Next button clicked'); saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
                                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-save !text-2xl"></i>
                                         <span class="mx-2 my-1 text-center">Save & Next</span>
                                     </button>
 
                                     <!-- Modified Invalid Number Button -->
-                                    <button @click="saveEdits = true; handleInvalidNumber()"
+                                    <button @click="console.log('Invalid Number button clicked'); saveEdits = true; handleInvalidNumber()"
                                         :disabled="isButtonDisabled"
                                         class="bg-red-500 justify-center hover:bg-red-400 disabled:bg-red-500 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-times !text-2xl"></i>
@@ -1611,6 +1611,7 @@ export default {
             }
         },
         async handleButtonClick(routeName) {
+            console.log('Button clicked - route:', routeName, 'address_id:', this.localAddress?.id);
             this.isButtonDisabled = true;
             setTimeout(() => {
                 this.isButtonDisabled = false;
@@ -1642,6 +1643,7 @@ export default {
         },
 
         async submitFeedback() {
+            console.log('Save & Next button clicked - submitFeedback()');
             // Clear state when submitting feedback (completing task)
             this.clearAddressRemovalTimer();
             this.clearState();
@@ -1649,6 +1651,7 @@ export default {
         },
 
         async handleInvalidNumber() {
+            console.log('Invalid Number button clicked - handleInvalidNumber()');
             // Clear state when marking as invalid number (completing task)
             this.clearAddressRemovalTimer();
             this.clearState();
