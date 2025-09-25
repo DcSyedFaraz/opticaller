@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transcription;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Twilio\Rest\Client;
 
@@ -67,5 +68,27 @@ class TranscriptionController extends Controller
     {
         $transcription->delete();
         return redirect()->back()->with('message', 'Transcription deleted successfully.');
+    }
+
+    /**
+     * Return the latest completed transcription for a given address as JSON.
+     */
+    public function latestByAddress(Address $address)
+    {
+        $latest = $address->transcriptions()
+            ->where('status', 'completed')
+            ->orderByDesc('updated_at')
+            ->get();
+
+        if ($latest->isEmpty()) {
+            return response()->json([
+                'transcription' => null,
+                'message' => 'No completed transcription found for this address.',
+            ], 200);
+        }
+
+        return response()->json([
+            'transcription' => $latest,
+        ]);
     }
 }

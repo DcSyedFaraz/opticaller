@@ -134,6 +134,7 @@ Route::get('/newcall', [CallController::class, 'index']);
 Route::middleware(['auth'])->group(function () {
     Route::get('/address/dashboard', [UsersController::class, 'dash'])->name('dash');
     Route::post('/addresses/{address}/calendar-link', [AddressController::class, 'hitCalendarLink'])->name('addresses.calendarLink');
+    Route::get('/addresses/{address}/transcriptions/latest', [TranscriptionController::class, 'latestByAddress'])->name('addresses.transcriptions.latest');
 
     // Route::post('/start-tracking', [TimeTrackingController::class, 'startTracking']);
     // Route::post('/pause-tracking/{id}', [TimeTrackingController::class, 'pauseTracking']);

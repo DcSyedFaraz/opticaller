@@ -26,6 +26,13 @@
                                     class="inline-flex items-center px-2 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                                     @click="hitCalendarLink" v-tooltip.top="'Open Calendar Link'" />
                             </div>
+                            <!-- Transcription Button -->
+                            <div class="mt-2 ml-2">
+                                <Button icon="pi pi-microphone"
+                                    class="inline-flex items-center px-2 py-2 !bg-green-600 text-white rounded-md !border-green-600 hover:!bg-green-700"
+                                    :disabled="transcriptionLoading || !localAddress?.id"
+                                    @click="openTranscriptionModal" v-tooltip.top="'View Transcriptions'" />
+                            </div>
                             <!-- <div class="mt-2">
                                 <Button @click="makeCall()"
                                     class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
@@ -180,18 +187,19 @@
                                         </div>
                                     </div>
 
-                                <div v-if="!isHidden('mobile_number')" class="field">
-                                    <label class="font-extrabold text-sm mr-2" for="mobile_number">
-                                        Mobile Number:
-                                    </label>
-                                    <div class="flex items-center">
-                                        <InputText id="mobile_number" v-model="localAddress.mobile_number"
-                                            :disabled="isFieldLocked('mobile_number')"
-                                            class="w-full !border-secondary" />
-                                        <Button icon="pi pi-lock" v-if="isFieldLocked('mobile_number')"
-                                            class="p-button-text p-button-rounded text-xs !text-red-500 ml-2" disabled />
+                                    <div v-if="!isHidden('mobile_number')" class="field">
+                                        <label class="font-extrabold text-sm mr-2" for="mobile_number">
+                                            Mobile Number:
+                                        </label>
+                                        <div class="flex items-center">
+                                            <InputText id="mobile_number" v-model="localAddress.mobile_number"
+                                                :disabled="isFieldLocked('mobile_number')"
+                                                class="w-full !border-secondary" />
+                                            <Button icon="pi pi-lock" v-if="isFieldLocked('mobile_number')"
+                                                class="p-button-text p-button-rounded text-xs !text-red-500 ml-2"
+                                                disabled />
+                                        </div>
                                     </div>
-                                </div>
 
 
                                     <!-- Email Address Field -->
@@ -213,9 +221,8 @@
                                                 Feedback:
                                             </label>
                                             <Select id="feedback" v-model="localAddress.feedback" filter
-                                            placeholder="Select Feedback"
-                                                class="w-full !border-secondary" :options="feedbackOptions"
-                                                optionValue="value" optionLabel="label"
+                                                placeholder="Select Feedback" class="w-full !border-secondary"
+                                                :options="feedbackOptions" optionValue="value" optionLabel="label"
                                                 :disabled="isFieldLocked('feedback')" />
                                         </div>
                                         <!-- Interest Notes Field -->
@@ -239,7 +246,9 @@
                                     </div>
                                 </div>
                                 <div class="flex justify-center flex-wrap my-1">
-                                    <button @click="console.log('Not Reached button clicked'); notreached = true; submitFeedback()" :disabled="isButtonDisabled"
+                                    <button
+                                        @click="console.log('Not Reached button clicked'); notreached = true; submitFeedback()"
+                                        :disabled="isButtonDisabled"
                                         class="bg-primary justify-center text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2 disabled:cursor-not-allowed">
                                         <svg width="25" height="25" viewBox="0 0 25 25" class="my-1" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -269,14 +278,17 @@
                                         </svg>
                                         <span class="mx-2 my-1">Follow-Ups</span>
                                     </button>
-                                    <button @click="console.log('Save & Next button clicked'); saveEdits = true; submitFeedback()" :disabled="isButtonDisabled"
+                                    <button
+                                        @click="console.log('Save & Next button clicked'); saveEdits = true; submitFeedback()"
+                                        :disabled="isButtonDisabled"
                                         class="bg-secondary justify-center hover:bg-secondary/75 disabled:bg-secondary/75 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-save !text-2xl"></i>
                                         <span class="mx-2 my-1 text-center">Save & Next</span>
                                     </button>
 
                                     <!-- Modified Invalid Number Button -->
-                                    <button @click="console.log('Invalid Number button clicked'); saveEdits = true; handleInvalidNumber()"
+                                    <button
+                                        @click="console.log('Invalid Number button clicked'); saveEdits = true; handleInvalidNumber()"
                                         :disabled="isButtonDisabled"
                                         class="bg-red-500 justify-center hover:bg-red-400 disabled:bg-red-500 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
                                         <i class="pi pi-times !text-2xl"></i>
@@ -408,11 +420,13 @@
                         <div class="grid grid-cols-1">
                         </div>
                         <div class="field col-span-1 md:col-span-1 lg:col-span-1 flex justify-between items-center">
-
                             <h3 class="text-sm font-semibold text-gray-800">Call History</h3>
-                            <button class="text-gray-500 hover:text-gray-700 focus:outline-none" @click="showNotes()">
-                                <i class="pi pi-expand !text-xl text-secondary"></i>
-                            </button>
+                            <div class="flex items-center space-x-2">
+                                <button class="text-gray-500 hover:text-gray-700 focus:outline-none"
+                                    @click="showNotes()">
+                                    <i class="pi pi-expand !text-xl text-secondary"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="my-3" v-for="(item, index) in callHistory.slice(0, 3)" :key="index"
@@ -553,7 +567,7 @@
                                 optionLabel="label" optionValue="value" placeholder="Select minute"
                                 class="w-full !border-secondary" />
                             <small class="text-red-600" v-if="errors.follow_up_minute">{{ errors.follow_up_minute
-                            }}</small>
+                                }}</small>
                         </div>
                     </div>
 
@@ -690,6 +704,123 @@
                     <div class="flex space-x-4 mt-6">
                         <Button label="Hang Up" icon="pi pi-phone-slash" class="p-button-danger p-button-rounded"
                             @click="hangUp" />
+                    </div>
+                </div>
+            </Dialog>
+
+            <!-- Transcription Modal -->
+            <Dialog header="Call Transcriptions" v-model:visible="showTranscriptionModal" modal
+                :style="{ width: '90%', maxWidth: '60rem' }" class="rounded-lg shadow-lg">
+                <template #header>
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center space-x-2">
+                            <i class="pi pi-microphone text-green-600"></i>
+                            <span class="font-semibold">Call Transcriptions</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <Button icon="pi pi-refresh" class="p-button-text p-button-sm hover:!text-white"
+                                :loading="transcriptionLoading" @click="fetchLatestTranscription"
+                                v-tooltip.top="'Refresh Transcriptions'" />
+                        </div>
+                    </div>
+                </template>
+
+                <div class="space-y-4">
+                    <!-- Loading State -->
+                    <div v-if="transcriptionLoading" class="flex items-center justify-center py-8">
+                        <i class="pi pi-spin pi-spinner text-2xl text-green-600 mr-2"></i>
+                        <span class="text-gray-600">Loading transcriptions...</span>
+                    </div>
+
+                    <!-- Error State -->
+                    <div v-else-if="transcriptionError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="pi pi-exclamation-triangle text-red-600 mr-2"></i>
+                            <span class="text-red-800">{{ transcriptionError }}</span>
+                        </div>
+                    </div>
+
+                    <!-- No Transcriptions -->
+                    <div v-else-if="!transcriptionItems.length" class="text-center py-8">
+                        <i class="pi pi-microphone-slash text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600 text-lg">No transcriptions available</p>
+                        <p class="text-gray-500 text-sm">Transcriptions will appear here after calls are completed</p>
+                    </div>
+
+                    <!-- Transcription Content -->
+                    <div v-else class="space-y-4">
+                        <!-- Last fetched info -->
+                        <div v-if="transcriptionFetchedAt" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex items-center text-xs text-blue-700">
+                                <i class="pi pi-refresh mr-2"></i>
+                                Last fetched: {{ transcriptionFetchedAt }}
+                            </div>
+                        </div>
+
+                        <!-- List each transcription separately -->
+                        <div v-for="(item, tIndex) in transcriptionItems" :key="tIndex"
+                            class="border border-gray-200 rounded-lg">
+                            <!-- Per-transcription header with timestamps and meta -->
+                            <div class="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-t-lg">
+                                <div class="flex items-center space-x-2">
+                                    <i class="pi pi-clock text-blue-600"></i>
+                                    <span class="text-sm font-medium text-gray-800">Transcription {{ tIndex + 1 }}</span>
+                                    <span v-if="item.to_number" class="text-xs text-gray-500">• To: {{ item.to_number }}</span>
+                                </div>
+                                <div class="text-xs text-gray-600 text-right">
+                                    <div v-if="item.createdAt">
+                                        <strong>Created:</strong> {{ formatTranscriptionTimestamp(item.createdAt) }}
+                                    </div>
+                                    <div v-if="item.updatedAt && item.updatedAt !== item.createdAt">
+                                        <strong>Updated:</strong> {{ formatTranscriptionTimestamp(item.updatedAt) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="flex items-center justify-between px-4 py-2">
+                                <p class="text-sm text-gray-600">
+                                    Conversation Transcript
+                                    <span class="ml-2 text-xs bg-gray-100 px-2 py-1 rounded">
+                                        {{ item.lines.length }} lines
+                                    </span>
+                                </p>
+                                <Button v-if="item.lines.length > maxTranscriptionLines" class="p-button-text p-button-sm hover:!text-white"
+                                    :label="item.expanded ? 'Show less' : `Show more (${item.lines.length - maxTranscriptionLines} more)`"
+                                    @click="item.expanded = !item.expanded" />
+                            </div>
+
+                            <!-- Content -->
+                            <div class="bg-white rounded-b-lg px-4 pb-4">
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+                                    <div class="space-y-3">
+                                        <div v-for="(line, idx) in displayedLines(item)" :key="idx"
+                                            class="text-sm leading-relaxed">
+                                            <!-- Speaker lines -->
+                                            <template v-if="line.speaker">
+                                                <div class="flex items-start space-x-3">
+                                                    <span :class="[
+                                                        'font-semibold text-xs px-3 py-1 rounded-full flex-shrink-0',
+                                                        line.speaker === 'Agent'
+                                                            ? 'bg-blue-100 text-blue-800'
+                                                            : 'bg-green-100 text-green-800'
+                                                    ]">
+                                                        {{ line.speaker }}
+                                                    </span>
+                                                    <span class="flex-1 text-gray-800 leading-relaxed">{{ line.text }}</span>
+                                                </div>
+                                            </template>
+                                            <!-- Regular text lines -->
+                                            <template v-else>
+                                                <div class="text-gray-700 pl-4 border-l-2 border-gray-300 ml-6">
+                                                    {{ line.text }}
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </Dialog>
@@ -830,6 +961,14 @@ export default {
             // Address auto-removal timer
             addressRemovalTimer: null,
             addressRemovalTimeout: 15 * 60 * 1000, // 15 minutes in milliseconds
+
+            // Transcription UI state
+            transcriptionLoading: false,
+            transcriptionItems: [], // [{ createdAt, updatedAt, to_number, lines: [], expanded: false }]
+            maxTranscriptionLines: 6,
+            transcriptionFetchedAt: null,
+            transcriptionError: '',
+            showTranscriptionModal: false,
         };
     },
     computed: {
@@ -887,7 +1026,8 @@ export default {
         },
         progressValue() {
             return (this.countdown / (5 * 60)) * 100; // Assume 5 minutes as full progress for demo
-        }
+        },
+
     },
     watch: {
         error: {
@@ -1739,6 +1879,102 @@ export default {
             }
         },
 
+        // Open transcription modal and fetch data
+        async openTranscriptionModal() {
+            this.showTranscriptionModal = true;
+            await this.fetchLatestTranscription();
+        },
+
+        // Fetch latest completed transcriptions for current address (list)
+        async fetchLatestTranscription() {
+            if (!this.localAddress || !this.localAddress.id) return;
+            this.transcriptionLoading = true;
+            this.transcriptionError = '';
+            try {
+                const { data } = await axios.get(route('addresses.transcriptions.latest', this.localAddress.id));
+                const transcriptions = data?.transcription;
+
+                if (Array.isArray(transcriptions) && transcriptions.length > 0) {
+                    this.transcriptionItems = transcriptions.map(t => ({
+                        createdAt: t.created_at || null,
+                        updatedAt: t.updated_at || null,
+                        to_number: t.to_number || null,
+                        lines: this.processTranscriptionText(t.transcription_text || ''),
+                        expanded: false,
+                    }));
+                    this.transcriptionFetchedAt = new Date().toLocaleTimeString();
+                } else {
+                    this.transcriptionItems = [];
+                    const msg = data?.message || 'No completed transcription found for this address yet.';
+                    if (!this.showTranscriptionModal) {
+                        this.$toast.add({ severity: 'info', summary: 'No Transcription', detail: msg, life: 4000 });
+                    }
+                }
+            } catch (e) {
+                this.transcriptionError = e?.response?.data?.message || 'Failed to fetch transcription.';
+                if (!this.showTranscriptionModal) {
+                    this.$toast.add({ severity: 'error', summary: 'Error', detail: this.transcriptionError, life: 5000 });
+                }
+            } finally {
+                this.transcriptionLoading = false;
+            }
+        },
+
+        // Process transcription text to handle formatting and speaker labels
+        processTranscriptionText(text) {
+            if (!text) return [];
+
+            // Split by \n and clean up
+            const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            const processedLines = [];
+
+            lines.forEach(line => {
+                // Check if line starts with [Agent]: or [Caller]:
+                if (line.startsWith('[Agent]:') || line.startsWith('[Caller]:')) {
+                    processedLines.push({
+                        speaker: line.startsWith('[Agent]:') ? 'Agent' : 'Caller',
+                        text: line.replace(/^\[(Agent|Caller)\]:\s*/, ''),
+                        isSpeaker: true
+                    });
+                } else {
+                    // If it's a continuation of previous speaker's text
+                    if (processedLines.length > 0 && !processedLines[processedLines.length - 1].isSpeaker) {
+                        // Append to previous text
+                        processedLines[processedLines.length - 1].text += ' ' + line;
+                    } else {
+                        // Add as new line without speaker
+                        processedLines.push({
+                            speaker: null,
+                            text: line,
+                            isSpeaker: false
+                        });
+                    }
+                }
+            });
+
+            return processedLines;
+        },
+
+        // Compute displayed lines for a transcription item based on expand state
+        displayedLines(item) {
+            if (!item || !Array.isArray(item.lines)) return [];
+            return item.expanded ? item.lines : item.lines.slice(0, this.maxTranscriptionLines);
+        },
+
+        // Format timestamp for display
+        formatTranscriptionTimestamp(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleString('de-DE', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        },
+
     },
 };
 </script>
@@ -1851,4 +2087,3 @@ main {
     padding-bottom: 0px !important;
 }
 </style>
-

@@ -9,7 +9,7 @@
                 <DataTable :value="subProjects" dataKey="id" class="w-full">
                     <Column header="Project Title" class="text-lg font-semibold">
                         <template #body="slotProps">
-                            {{ slotProps.data.projects.title ? slotProps.data.projects.title : 'N/A' }}
+                            {{ slotProps.data?.projects?.title ? slotProps.data.projects.title : 'N/A' }}
                         </template>
                     </Column>
                     <Column field="title" header="Sub Project Title" class="font-semibold text-lg"></Column>
@@ -17,7 +17,7 @@
                         <template #body="slotProps">
                             <div>
                                 <span v-if="slotProps.data.users && slotProps.data.users.length > 0">
-                                
+
                                     <ul>
                                         <li v-for="user in slotProps.data.users" :key="user.id">{{ user.name }}</li>
                                     </ul>
