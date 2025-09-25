@@ -162,7 +162,7 @@ class TimeTrackingController extends Controller
                 'address.phone_number' => 'nullable|string',
                 'address.mobile_number' => 'nullable|string',
                 'address.email_address_system' => [
-                    'required',
+                    'nullable',
                     'email',
                     'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/',
                     'regex:/^((?!no-mail).)*$/i',
