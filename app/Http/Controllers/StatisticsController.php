@@ -147,17 +147,79 @@ class StatisticsController extends Controller
 
         // dd($userData);
         // Open address counts grouped by sub-project
+        \Log::info('=== DEBUGGING OPEN ADDRESS COUNTING ===');
+
+        // First, let's check all addresses with null feedback
+        $allAddressesWithNullFeedback = Address::whereNull('feedback')->get();
+        \Log::info('Total addresses with null feedback: ' . $allAddressesWithNullFeedback->count());
+        \Log::info('Addresses with null feedback details:', $allAddressesWithNullFeedback->map(function($addr) {
+            return [
+                'id' => $addr->id,
+                'sub_project_id' => $addr->sub_project_id,
+                'feedback' => $addr->feedback,
+                'updated_at' => $addr->updated_at
+            ];
+        })->toArray());
+
+        // Also check for addresses with empty string feedback
+        $allAddressesWithEmptyFeedback = Address::where('feedback', '')->get();
+        \Log::info('Total addresses with empty string feedback: ' . $allAddressesWithEmptyFeedback->count());
+
+        // Check for addresses with any feedback (not null and not empty)
+        $allAddressesWithFeedback = Address::whereNotNull('feedback')->where('feedback', '!=', '')->get();
+        \Log::info('Total addresses with actual feedback: ' . $allAddressesWithFeedback->count());
+
+        // Let's also check the total count of all addresses
+        $totalAddresses = Address::count();
+        \Log::info('Total addresses in database: ' . $totalAddresses);
+
+        // Check if there are any addresses with sub_project_id but no feedback
+        $addressesWithSubProjectButNoFeedback = Address::whereNotNull('sub_project_id')
+            ->whereNull('feedback')
+            ->get();
+        \Log::info('Addresses with sub_project_id but null feedback: ' . $addressesWithSubProjectButNoFeedback->count());
+
         $openAddressCountsBySubProject = Address::whereNull('feedback')
             ->select('sub_project_id', DB::raw('COUNT(*) as total'))
             ->groupBy('sub_project_id')
             ->get()
             ->keyBy('sub_project_id');
 
+        \Log::info('Open address counts by sub-project:', $openAddressCountsBySubProject->toArray());
+
+        // Let's also try a different approach to see if we get different results
+        $alternativeCounts = Address::whereNull('feedback')
+            ->get()
+            ->groupBy('sub_project_id')
+            ->map(function($addresses) {
+                return $addresses->count();
+            });
+        \Log::info('Alternative counting method:', $alternativeCounts->toArray());
+
+        // Let's also check if there are any addresses with sub_project_id that are being missed
+        $addressesBySubProject = Address::whereNull('feedback')
+            ->whereNotNull('sub_project_id')
+            ->get()
+            ->groupBy('sub_project_id');
+        \Log::info('Addresses with null feedback grouped by sub_project_id:', $addressesBySubProject->map(function($addresses, $subProjectId) {
+            return [
+                'sub_project_id' => $subProjectId,
+                'count' => $addresses->count(),
+                'address_ids' => $addresses->pluck('id')->toArray()
+            ];
+        })->toArray());
+
+        // Let's also check all sub-projects
+        $allSubProjects = SubProject::select('id', 'title', 'project_id')->get();
+        \Log::info('All sub-projects:', $allSubProjects->toArray());
+
         $subProjectsWithAddressCounts = SubProject::select('id', 'title', 'project_id')
             ->with(['projects:id,title'])
             ->get()
             ->map(function ($subProject) use ($openAddressCountsBySubProject) {
                 $count = (int) ($openAddressCountsBySubProject->get($subProject->id)->total ?? 0);
+
+                \Log::info("Sub-project {$subProject->id} ({$subProject->title}): count = {$count}");
 
                 return [
                     'id' => $subProject->id,
@@ -171,8 +233,16 @@ class StatisticsController extends Controller
             });
 
         $unassignedOpenAddresses = (int) ($openAddressCountsBySubProject->get(null)->total ?? 0);
+        \Log::info("Unassigned open addresses (sub_project_id = null): {$unassignedOpenAddresses}");
+
         $totalAddressesWithNullFeedback = (int) $subProjectsWithAddressCounts->sum('addresses_count') + $unassignedOpenAddresses;
+        \Log::info("Total addresses with null feedback: {$totalAddressesWithNullFeedback}");
+        \Log::info("Sum from sub-projects: " . $subProjectsWithAddressCounts->sum('addresses_count'));
+        \Log::info("Unassigned addresses: {$unassignedOpenAddresses}");
+
         $subProjectsWithAddressCounts = $subProjectsWithAddressCounts->values()->all();
+        \Log::info('Final sub-projects with address counts:', $subProjectsWithAddressCounts);
+        \Log::info('=== END DEBUGGING OPEN ADDRESS COUNTING ===');
 
         $data = [
             'dailyCallOutVolume' => $dailyCallOutVolume,
