@@ -152,7 +152,7 @@ class TimeTrackingController extends Controller
                 'address.phone_number' => 'nullable|string',
                 'address.mobile_number' => 'nullable|string',
                 'address.email_address_system' => [
-                    'required',
+                    'nullable',
                     'email',
                     'regex:/^[^@\s]+@[^@\s]+\.[^@\s]+$/',
                     'regex:/^((?!no-mail).)*$/i',
@@ -314,7 +314,7 @@ class TimeTrackingController extends Controller
                 if (!$notreached && empty($address->follow_up_date) && empty($address->re_call_date)) {
                     $address->delete();
                 }
-            
+
 
             DB::commit();
 
