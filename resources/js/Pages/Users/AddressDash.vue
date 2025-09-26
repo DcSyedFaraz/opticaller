@@ -49,7 +49,7 @@
                         </div>
                         <!-- Existing Contact ID Field -->
                         <div class="inline-flex items-center rounded-md mr-2 mb-1 w-full md:w-auto">
-                            <InputText id="contact_id" v-model="localAddress.contact_id" placeholder="Contact ID"
+                            <InputText id="contact_id" v-model="localAddress.id" placeholder="Address ID"
                                 class="w-full !border-black" disabled />
                             <!-- New Button to Open Dialog -->
                             <Button icon="pi pi-search" class="ml-2" v-if="$page.props.auth.roles[0] == 'admin'"
