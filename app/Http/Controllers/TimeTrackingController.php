@@ -253,6 +253,20 @@ class TimeTrackingController extends Controller
                 return response()->json(['error' => 'Feedback is required when saving edits.'], 422);
             }
 
+            // Validate follow_up_date from request data if present
+            if (!empty($validatedData['address']['follow_up_date'])) {
+                try {
+                    $followUpDate = Carbon::parse($validatedData['address']['follow_up_date']);
+                    if (!$followUpDate->isValid() || !$followUpDate->isFuture()) {
+                        Log::channel('webhook')->warning('Invalid follow_up_date in request data - not a valid future date: ' . $validatedData['address']['follow_up_date']);
+                        $validatedData['address']['follow_up_date'] = null; // Clear invalid date
+                    }
+                } catch (\Exception $e) {
+                    Log::channel('webhook')->error('Error parsing follow_up_date from request data: ' . $e->getMessage() . '. Raw value: ' . $validatedData['address']['follow_up_date']);
+                    $validatedData['address']['follow_up_date'] = null; // Clear invalid date
+                }
+            }
+
             $addressID = $validatedData['address']['id'];
             $address = Address::find($addressID);
 
@@ -281,9 +295,22 @@ class TimeTrackingController extends Controller
                     $validatedData['address']['feedback'] = 'notreached';
                 }
 
+                // Validate follow_up_date is a proper timestamp before setting feedback to Follow-up
                 if ($address->follow_up_date) {
-                    Log::channel('webhook')->info('Setting feedback to "Follow-up" due to existing follow_up_date');
-                    $validatedData['address']['feedback'] = 'Follow-up';
+                    try {
+                        // Parse the follow_up_date to ensure it's a valid timestamp
+                        $followUpDate = Carbon::parse($address->follow_up_date);
+
+                        // Additional validation: ensure it's a future date and not just a random string
+                        if ($followUpDate->isValid() && $followUpDate->isFuture()) {
+                            Log::channel('webhook')->info('Setting feedback to "Follow-up" due to valid future follow_up_date: ' . $followUpDate->toDateTimeString());
+                            $validatedData['address']['feedback'] = 'Follow-up';
+                        } else {
+                            Log::channel('webhook')->warning('Invalid follow_up_date detected - not setting feedback to Follow-up. Date: ' . $address->follow_up_date . ', Valid: ' . ($followUpDate->isValid() ? 'true' : 'false') . ', Future: ' . ($followUpDate->isFuture() ? 'true' : 'false'));
+                        }
+                    } catch (\Exception $e) {
+                        Log::channel('webhook')->error('Error parsing follow_up_date: ' . $e->getMessage() . '. Raw value: ' . $address->follow_up_date);
+                    }
                 }
 
                 // Log final feedback value before processing
@@ -303,10 +330,23 @@ class TimeTrackingController extends Controller
                     $this->handleNotReached($address);
                 }
 
+                // Additional validation for follow_up_date from request data
                 if ($address->follow_up_date) {
-                    $address->feedback = 'Follow-up';
-                    $address->follow_up_date = Carbon::parse($address->follow_up_date);
-                    // dd($request->address['follow_up_date'], $address->follow_up_date);
+                    try {
+                        // Parse the follow_up_date to ensure it's a valid timestamp
+                        $followUpDate = Carbon::parse($address->follow_up_date);
+
+                        // Additional validation: ensure it's a future date and not just a random string
+                        if ($followUpDate->isValid() && $followUpDate->isFuture()) {
+                            $address->feedback = 'Follow-up';
+                            $address->follow_up_date = $followUpDate;
+                            Log::channel('webhook')->info('Setting address feedback to "Follow-up" due to valid future follow_up_date: ' . $followUpDate->toDateTimeString());
+                        } else {
+                            Log::channel('webhook')->warning('Invalid follow_up_date from request - not setting feedback to Follow-up. Date: ' . $address->follow_up_date . ', Valid: ' . ($followUpDate->isValid() ? 'true' : 'false') . ', Future: ' . ($followUpDate->isFuture() ? 'true' : 'false'));
+                        }
+                    } catch (\Exception $e) {
+                        Log::channel('webhook')->error('Error parsing follow_up_date from request: ' . $e->getMessage() . '. Raw value: ' . $address->follow_up_date);
+                    }
                 }
 
                 // Clear re_call_date when address is processed
