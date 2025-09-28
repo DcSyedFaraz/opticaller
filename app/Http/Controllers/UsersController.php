@@ -89,18 +89,29 @@ class UsersController extends Controller
     {
         $skipAddressFetch = ($request->cookie('addressdash_state') === '1') || $request->boolean('skip');
         $address = null;
+        $user = auth()->user();
+        $isAdmin = $user->hasRole('admin');
+
         // Check if address_id is provided as query parameter
         if ($request->has('address_id') && $request->input('address_id')) {
             $addressId = $request->input('address_id');
 
-            // Get user's accessible subproject IDs
-            $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
+            // Load the specific address - admin can access any address including trashed ones
+            if ($isAdmin) {
+                $address = Address::withTrashed()
+                    ->with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+                    ->where('id', $addressId)
+                    ->first();
+            } else {
+                // Get user's accessible subproject IDs for non-admin users
+                $subProjectIds = $user->subProjects()->pluck('sub_project_id');
 
-            // Load the specific address if user has access to it
-            $address = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
-            ->whereIn('sub_project_id', $subProjectIds)
-            ->where('id', $addressId)
-            ->first();
+                // Load the specific address if user has access to it
+                $address = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+                    ->whereIn('sub_project_id', $subProjectIds)
+                    ->where('id', $addressId)
+                    ->first();
+            }
 
             // dd($address,$subProjectIds,$addressId);
             if (!$address) {
