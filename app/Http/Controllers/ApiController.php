@@ -179,7 +179,6 @@ class ApiController extends Controller
      */
     public function deleteDuplicateRecords(Request $request)
     {
-
         DB::beginTransaction();
         try {
             // Define the fields used to identify duplicates
@@ -201,8 +200,8 @@ class ApiController extends Controller
             $selectGroupCols = implode(', ', array_map(fn($c) => "`$c`", $groupFields));
             $joinConditions = implode(' AND ', array_map(fn($c) => "a.`$c` <=> g.`$c`", $groupFields));
 
-            // Find duplicate groups where records have null feedback and null seen
-            $sql = "
+            // First, let's get all duplicates (not just those with null feedback/seen)
+            $allDuplicatesSql = "
                 SELECT
                     a.id,
                     a.created_at,
@@ -229,25 +228,32 @@ class ApiController extends Controller
                     HAVING COUNT(*) > 1
                 ) g ON {$joinConditions}
                 WHERE a.deleted_at IS NULL
-                AND (a.feedback IS NULL OR a.feedback = '')
-                AND (a.seen IS NULL OR a.seen = '')
                 ORDER BY a.created_at ASC
             ";
 
-            $duplicateRecords = DB::select($sql);
+            $allDuplicateRecords = DB::select($allDuplicatesSql);
 
-            if (empty($duplicateRecords)) {
+            // Now filter for records with null feedback and null seen
+            $targetRecords = array_filter($allDuplicateRecords, function($record) {
+                return (empty($record->feedback) && empty($record->seen));
+            });
+
+            if (empty($targetRecords)) {
                 Log::channel('address_deletion')->info('No duplicate records found with null feedback and null seen values.');
                 return response()->json([
                     'success' => true,
                     'message' => 'No duplicate records found with null feedback and null seen values.',
-                    'deleted_count' => 0
+                    'deleted_count' => 0,
+                    'debug_info' => [
+                        'total_duplicates_found' => count($allDuplicateRecords),
+                        'target_records_count' => 0
+                    ]
                 ], 200);
             }
 
             // Group records by duplicate criteria
             $groups = [];
-            foreach ($duplicateRecords as $record) {
+            foreach ($targetRecords as $record) {
                 $keyParts = [];
                 foreach ($groupFields as $field) {
                     $keyParts[$field] = $record->{$field} ?? null;
@@ -263,27 +269,48 @@ class ApiController extends Controller
             $deletedCount = 0;
             $deletedIds = [];
             $keptIds = [];
+            $groupDetails = [];
 
-            // For each group, keep the oldest record and delete the rest
-            foreach ($groups as $groupRecords) {
+            // For each group, keep the ORIGINAL (oldest) record and delete the DUPLICATES (newer ones)
+            foreach ($groups as $hashKey => $groupRecords) {
                 if (count($groupRecords) <= 1) {
                     continue; // Skip if not actually duplicates
                 }
 
-                // Sort by created_at ascending (oldest first)
+                // Sort by created_at ascending (oldest first) - ORIGINAL comes first
                 usort($groupRecords, fn($a, $b) => strcmp($a->created_at, $b->created_at));
 
-                // Keep the first (oldest) record
-                $keepRecord = array_shift($groupRecords);
-                $keptIds[] = $keepRecord->id;
+                // Keep the ORIGINAL (first/oldest) record - this is the original entry
+                $originalRecord = array_shift($groupRecords);
+                $keptIds[] = $originalRecord->id;
 
-                // Delete the rest
-                foreach ($groupRecords as $recordToDelete) {
-                    $address = Address::find($recordToDelete->id);
+                $groupDetails[] = [
+                    'group_key' => $hashKey,
+                    'original_record_kept' => [
+                        'id' => $originalRecord->id,
+                        'created_at' => $originalRecord->created_at,
+                        'company_name' => $originalRecord->company_name,
+                        'email' => $originalRecord->email_address_system,
+                        'note' => 'ORIGINAL - KEPT'
+                    ],
+                    'duplicate_records_deleted' => []
+                ];
+
+                // Delete the DUPLICATES (newer records) - these are the copies/duplicates
+                foreach ($groupRecords as $duplicateRecord) {
+                    $address = Address::find($duplicateRecord->id);
                     if ($address) {
-                        $address->delete(); // Soft delete
-                        $deletedIds[] = $recordToDelete->id;
+                        $address->delete(); // Soft delete the duplicate
+                        $deletedIds[] = $duplicateRecord->id;
                         $deletedCount++;
+
+                        $groupDetails[count($groupDetails) - 1]['duplicate_records_deleted'][] = [
+                            'id' => $duplicateRecord->id,
+                            'created_at' => $duplicateRecord->created_at,
+                            'company_name' => $duplicateRecord->company_name,
+                            'email' => $duplicateRecord->email_address_system,
+                            'note' => 'DUPLICATE - DELETED'
+                        ];
                     }
                 }
             }
@@ -294,16 +321,25 @@ class ApiController extends Controller
                 'deleted_count' => $deletedCount,
                 'deleted_ids' => $deletedIds,
                 'kept_ids' => $keptIds,
-                'total_groups_processed' => count($groups)
+                'total_groups_processed' => count($groups),
+                'group_details' => $groupDetails
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => "Successfully deleted {$deletedCount} duplicate records with null feedback and seen values.",
-                'deleted_count' => $deletedCount,
-                'deleted_ids' => $deletedIds,
-                'kept_ids' => $keptIds,
-                'total_groups_processed' => count($groups)
+                'message' => "Successfully deleted {$deletedCount} DUPLICATE records (kept ORIGINAL records). Only records with null feedback and null seen were processed.",
+                'summary' => [
+                    'original_records_kept' => count($keptIds),
+                    'duplicate_records_deleted' => $deletedCount,
+                    'total_groups_processed' => count($groups)
+                ],
+                'original_records_kept' => $keptIds,
+                'duplicate_records_deleted' => $deletedIds,
+                'debug_info' => [
+                    'total_duplicates_found' => count($allDuplicateRecords),
+                    'target_records_count' => count($targetRecords),
+                    'group_details' => $groupDetails
+                ]
             ], 200);
 
         } catch (Exception $e) {
@@ -320,6 +356,137 @@ class ApiController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Debug endpoint to see what duplicates exist and their feedback/seen status
+     */
+    public function debugDuplicates(Request $request)
+    {
+        // Define the fields used to identify duplicates
+        $groupFields = [
+            'phone_number',
+            'email_address_system',
+            'company_name',
+            'city',
+            'website',
+            'mobile_number',
+            'email_address_new',
+            'sub_project_id',
+            'main_category_query',
+            'sub_category_category',
+            'postal_code',
+            'street_address',
+        ];
+
+        $selectGroupCols = implode(', ', array_map(fn($c) => "`$c`", $groupFields));
+        $joinConditions = implode(' AND ', array_map(fn($c) => "a.`$c` <=> g.`$c`", $groupFields));
+
+        // Get all duplicates with their feedback and seen status
+        $sql = "
+            SELECT
+                a.id,
+                a.created_at,
+                a.feedback,
+                a.seen,
+                a.deleted_at,
+                a.phone_number,
+                a.email_address_system,
+                a.company_name,
+                a.city,
+                a.website,
+                a.mobile_number,
+                a.email_address_new,
+                a.sub_project_id,
+                a.main_category_query,
+                a.sub_category_category,
+                a.postal_code,
+                a.street_address
+            FROM addresses a
+            INNER JOIN (
+                SELECT {$selectGroupCols}
+                FROM addresses
+                WHERE deleted_at IS NULL
+                GROUP BY {$selectGroupCols}
+                HAVING COUNT(*) > 1
+            ) g ON {$joinConditions}
+            WHERE a.deleted_at IS NULL
+            ORDER BY a.created_at ASC
+        ";
+
+        $duplicateRecords = DB::select($sql);
+
+        // Group by duplicate criteria
+        $groups = [];
+        foreach ($duplicateRecords as $record) {
+            $keyParts = [];
+            foreach ($groupFields as $field) {
+                $keyParts[$field] = $record->{$field} ?? null;
+            }
+            $hashKey = md5(json_encode($keyParts));
+
+            if (!isset($groups[$hashKey])) {
+                $groups[$hashKey] = [];
+            }
+            $groups[$hashKey][] = $record;
+        }
+
+        // Analyze each group
+        $analysis = [];
+        foreach ($groups as $hashKey => $groupRecords) {
+            if (count($groupRecords) <= 1) continue;
+
+            $nullFeedbackSeen = [];
+            $withFeedbackSeen = [];
+
+            foreach ($groupRecords as $record) {
+                $hasNullFeedback = empty($record->feedback);
+                $hasNullSeen = empty($record->seen);
+
+                if ($hasNullFeedback && $hasNullSeen) {
+                    $nullFeedbackSeen[] = $record;
+                } else {
+                    $withFeedbackSeen[] = $record;
+                }
+            }
+
+            // Sort to determine original vs duplicates
+            usort($groupRecords, fn($a, $b) => strcmp($a->created_at, $b->created_at));
+
+            $analysis[] = [
+                'group_key' => $hashKey,
+                'total_records' => count($groupRecords),
+                'null_feedback_seen_count' => count($nullFeedbackSeen),
+                'with_feedback_seen_count' => count($withFeedbackSeen),
+                'records' => array_map(function($r, $index) use ($groupRecords) {
+                    $isOriginal = $index === 0; // First record (oldest) is original
+                    return [
+                        'id' => $r->id,
+                        'created_at' => $r->created_at,
+                        'company_name' => $r->company_name,
+                        'email' => $r->email_address_system,
+                        'feedback' => $r->feedback,
+                        'seen' => $r->seen,
+                        'has_null_feedback' => empty($r->feedback),
+                        'has_null_seen' => empty($r->seen),
+                        'would_be_deleted' => empty($r->feedback) && empty($r->seen),
+                        'is_original_or_duplicate' => $isOriginal ? 'ORIGINAL (would be kept)' : 'DUPLICATE (would be deleted)'
+                    ];
+                }, $groupRecords, array_keys($groupRecords))
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'total_duplicate_groups' => count($analysis),
+            'analysis' => $analysis,
+            'summary' => [
+                'groups_with_null_feedback_seen' => count(array_filter($analysis, fn($g) => $g['null_feedback_seen_count'] > 0)),
+                'total_records_with_null_feedback_seen' => array_sum(array_column($analysis, 'null_feedback_seen_count')),
+                'total_records_with_feedback_seen' => array_sum(array_column($analysis, 'with_feedback_seen_count'))
+            ]
+        ]);
+    }
+
     public function apidata(Request $request)
     {
         // Retrieve all incoming request data
