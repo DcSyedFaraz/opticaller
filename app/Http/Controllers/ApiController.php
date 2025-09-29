@@ -66,7 +66,6 @@ class ApiController extends Controller
                 a.postal_code,
                 a.street_address
             FROM addresses a
-            WHERE a.deleted_at IS NULL
             INNER JOIN (
                 SELECT {$selectGroupCols}
                 FROM addresses
@@ -74,6 +73,7 @@ class ApiController extends Controller
                 GROUP BY {$selectGroupCols}
                 HAVING COUNT(*) > 1
             ) g ON {$joinConditions}
+            WHERE a.deleted_at IS NULL
             ORDER BY a.sub_project_id, a.company_name, a.created_at ASC
         ";
         $rows = DB::select($sql);
