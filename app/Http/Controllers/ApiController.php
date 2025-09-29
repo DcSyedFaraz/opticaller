@@ -233,10 +233,25 @@ class ApiController extends Controller
 
             $allDuplicateRecords = DB::select($allDuplicatesSql);
 
-            // Now filter for records with null feedback and null seen
+            // Log what we found
+            Log::channel('address_deletion')->info('Found duplicate records', [
+                'total_duplicates' => count($allDuplicateRecords),
+                'sample_records' => array_slice($allDuplicateRecords, 0, 3)
+            ]);
+
+            // Now filter for records with null/empty feedback and null/empty seen
             $targetRecords = array_filter($allDuplicateRecords, function($record) {
-                return (empty($record->feedback) && empty($record->seen));
+                $hasEmptyFeedback = empty($record->feedback) || $record->feedback === null || $record->feedback === '';
+                $hasEmptySeen = empty($record->seen) || $record->seen === null || $record->seen === '';
+
+                return ($hasEmptyFeedback && $hasEmptySeen);
             });
+
+            // Log what we're targeting
+            Log::channel('address_deletion')->info('Filtered target records', [
+                'target_count' => count($targetRecords),
+                'sample_targets' => array_slice($targetRecords, 0, 3)
+            ]);
 
             if (empty($targetRecords)) {
                 Log::channel('address_deletion')->info('No duplicate records found with null feedback and null seen values.');
@@ -439,10 +454,10 @@ class ApiController extends Controller
             $withFeedbackSeen = [];
 
             foreach ($groupRecords as $record) {
-                $hasNullFeedback = empty($record->feedback);
-                $hasNullSeen = empty($record->seen);
+                $hasEmptyFeedback = empty($record->feedback) || $record->feedback === null || $record->feedback === '';
+                $hasEmptySeen = empty($record->seen) || $record->seen === null || $record->seen === '';
 
-                if ($hasNullFeedback && $hasNullSeen) {
+                if ($hasEmptyFeedback && $hasEmptySeen) {
                     $nullFeedbackSeen[] = $record;
                 } else {
                     $withFeedbackSeen[] = $record;
@@ -466,9 +481,9 @@ class ApiController extends Controller
                         'email' => $r->email_address_system,
                         'feedback' => $r->feedback,
                         'seen' => $r->seen,
-                        'has_null_feedback' => empty($r->feedback),
-                        'has_null_seen' => empty($r->seen),
-                        'would_be_deleted' => empty($r->feedback) && empty($r->seen),
+                        'has_empty_feedback' => empty($r->feedback) || $r->feedback === null || $r->feedback === '',
+                        'has_empty_seen' => empty($r->seen) || $r->seen === null || $r->seen === '',
+                        'would_be_deleted' => (empty($r->feedback) || $r->feedback === null || $r->feedback === '') && (empty($r->seen) || $r->seen === null || $r->seen === ''),
                         'is_original_or_duplicate' => $isOriginal ? 'ORIGINAL (would be kept)' : 'DUPLICATE (would be deleted)'
                     ];
                 }, $groupRecords, array_keys($groupRecords))
