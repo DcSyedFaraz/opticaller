@@ -502,6 +502,256 @@ class ApiController extends Controller
         ]);
     }
 
+    /**
+     * Debug specific duplicate records to understand why deletion isn't working
+     */
+    public function debugSpecificDuplicates(Request $request)
+    {
+        // Get specific records you mentioned
+        $specificIds = [33775, 25653]; // Seniorenclub records
+
+        $records = DB::select("
+            SELECT
+                id,
+                created_at,
+                feedback,
+                seen,
+                company_name,
+                email_address_system,
+                phone_number,
+                mobile_number,
+                sub_project_id,
+                city,
+                website,
+                postal_code,
+                street_address,
+                main_category_query,
+                sub_category_category
+            FROM addresses
+            WHERE id IN (" . implode(',', $specificIds) . ")
+            ORDER BY created_at ASC
+        ");
+
+        $analysis = [];
+        foreach ($records as $record) {
+            $hasEmptyFeedback = empty($record->feedback) || $record->feedback === null || $record->feedback === '';
+            $hasEmptySeen = empty($record->seen) || $record->seen === null || $record->seen === '';
+
+            $analysis[] = [
+                'id' => $record->id,
+                'created_at' => $record->created_at,
+                'company_name' => $record->company_name,
+                'phone_number' => $record->phone_number,
+                'email_address_system' => $record->email_address_system,
+                'feedback' => $record->feedback,
+                'seen' => $record->seen,
+                'feedback_type' => gettype($record->feedback),
+                'seen_type' => gettype($record->seen),
+                'has_empty_feedback' => $hasEmptyFeedback,
+                'has_empty_seen' => $hasEmptySeen,
+                'would_be_deleted' => $hasEmptyFeedback && $hasEmptySeen,
+                'is_original' => $record->id === $records[0]->id
+            ];
+        }
+
+        // Check if these are actually duplicates
+        $duplicateCheck = DB::select("
+            SELECT COUNT(*) as count
+            FROM addresses
+            WHERE phone_number = ?
+            AND company_name = ?
+            AND sub_project_id = ?
+            AND deleted_at IS NULL
+        ", [$records[0]->phone_number, $records[0]->company_name, $records[0]->sub_project_id]);
+
+        return response()->json([
+            'success' => true,
+            'specific_records' => $analysis,
+            'duplicate_check' => [
+                'phone_number' => $records[0]->phone_number,
+                'company_name' => $records[0]->company_name,
+                'sub_project_id' => $records[0]->sub_project_id,
+                'total_matching_records' => $duplicateCheck[0]->count
+            ],
+            'recommendation' => $duplicateCheck[0]->count > 1 ?
+                'These are duplicates and should be processed' :
+                'These are not duplicates'
+        ]);
+    }
+
+    /**
+     * Delete ALL duplicate records (regardless of feedback/seen status)
+     * Keeps the original (oldest) record and deletes all duplicates
+     */
+    public function deleteAllDuplicates(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            // Define the fields used to identify duplicates
+            $groupFields = [
+                'phone_number',
+                'email_address_system',
+                'company_name',
+                'city',
+                'website',
+                'mobile_number',
+                'email_address_new',
+                'sub_project_id',
+                'main_category_query',
+                'sub_category_category',
+                'postal_code',
+                'street_address',
+            ];
+
+            $selectGroupCols = implode(', ', array_map(fn($c) => "`$c`", $groupFields));
+            $joinConditions = implode(' AND ', array_map(fn($c) => "a.`$c` <=> g.`$c`", $groupFields));
+
+            // Get ALL duplicates (no filtering by feedback/seen)
+            $sql = "
+                SELECT
+                    a.id,
+                    a.created_at,
+                    a.feedback,
+                    a.seen,
+                    a.phone_number,
+                    a.email_address_system,
+                    a.company_name,
+                    a.city,
+                    a.website,
+                    a.mobile_number,
+                    a.email_address_new,
+                    a.sub_project_id,
+                    a.main_category_query,
+                    a.sub_category_category,
+                    a.postal_code,
+                    a.street_address
+                FROM addresses a
+                INNER JOIN (
+                    SELECT {$selectGroupCols}
+                    FROM addresses
+                    WHERE deleted_at IS NULL
+                    GROUP BY {$selectGroupCols}
+                    HAVING COUNT(*) > 1
+                ) g ON {$joinConditions}
+                WHERE a.deleted_at IS NULL
+                ORDER BY a.created_at ASC
+            ";
+
+            $allDuplicateRecords = DB::select($sql);
+
+            if (empty($allDuplicateRecords)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No duplicate records found.',
+                    'deleted_count' => 0
+                ], 200);
+            }
+
+            // Group records by duplicate criteria
+            $groups = [];
+            foreach ($allDuplicateRecords as $record) {
+                $keyParts = [];
+                foreach ($groupFields as $field) {
+                    $keyParts[$field] = $record->{$field} ?? null;
+                }
+                $hashKey = md5(json_encode($keyParts));
+
+                if (!isset($groups[$hashKey])) {
+                    $groups[$hashKey] = [];
+                }
+                $groups[$hashKey][] = $record;
+            }
+
+            $deletedCount = 0;
+            $deletedIds = [];
+            $keptIds = [];
+            $groupDetails = [];
+
+            // For each group, keep the ORIGINAL (oldest) record and delete ALL DUPLICATES
+            foreach ($groups as $hashKey => $groupRecords) {
+                if (count($groupRecords) <= 1) {
+                    continue; // Skip if not actually duplicates
+                }
+
+                // Sort by created_at ascending (oldest first) - ORIGINAL comes first
+                usort($groupRecords, fn($a, $b) => strcmp($a->created_at, $b->created_at));
+
+                // Keep the ORIGINAL (first/oldest) record
+                $originalRecord = array_shift($groupRecords);
+                $keptIds[] = $originalRecord->id;
+
+                $groupDetails[] = [
+                    'group_key' => $hashKey,
+                    'original_record_kept' => [
+                        'id' => $originalRecord->id,
+                        'created_at' => $originalRecord->created_at,
+                        'company_name' => $originalRecord->company_name,
+                        'email' => $originalRecord->email_address_system,
+                        'note' => 'ORIGINAL - KEPT'
+                    ],
+                    'duplicate_records_deleted' => []
+                ];
+
+                // Delete ALL DUPLICATES (newer records)
+                foreach ($groupRecords as $duplicateRecord) {
+                    $address = Address::find($duplicateRecord->id);
+                    if ($address) {
+                        $address->delete(); // Soft delete the duplicate
+                        $deletedIds[] = $duplicateRecord->id;
+                        $deletedCount++;
+
+                        $groupDetails[count($groupDetails) - 1]['duplicate_records_deleted'][] = [
+                            'id' => $duplicateRecord->id,
+                            'created_at' => $duplicateRecord->created_at,
+                            'company_name' => $duplicateRecord->company_name,
+                            'email' => $duplicateRecord->email_address_system,
+                            'note' => 'DUPLICATE - DELETED'
+                        ];
+                    }
+                }
+            }
+
+            DB::commit();
+
+            Log::channel('address_deletion')->info('Successfully deleted ALL duplicate records', [
+                'deleted_count' => $deletedCount,
+                'deleted_ids' => $deletedIds,
+                'kept_ids' => $keptIds,
+                'total_groups_processed' => count($groups),
+                'group_details' => $groupDetails
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully deleted {$deletedCount} DUPLICATE records (kept ORIGINAL records). ALL duplicates were processed regardless of feedback/seen status.",
+                'summary' => [
+                    'original_records_kept' => count($keptIds),
+                    'duplicate_records_deleted' => $deletedCount,
+                    'total_groups_processed' => count($groups)
+                ],
+                'original_records_kept' => $keptIds,
+                'duplicate_records_deleted' => $deletedIds,
+                'debug_info' => [
+                    'total_duplicates_found' => count($allDuplicateRecords),
+                    'group_details' => $groupDetails
+                ]
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::channel('address_deletion')->error('Failed to delete ALL duplicate records', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to delete ALL duplicate records: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function apidata(Request $request)
     {
         // Retrieve all incoming request data
