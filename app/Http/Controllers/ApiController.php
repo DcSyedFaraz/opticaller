@@ -78,7 +78,7 @@ class ApiController extends Controller
                 HAVING COUNT(*) > 1
             ) g ON {$joinConditions}
             WHERE a.deleted_at IS NULL
-            ORDER BY a.sub_project_id, a.company_name, a.created_at ASC
+            ORDER BY a.created_at DESC
         ";
         $rows = DB::select($sql);
 
@@ -129,9 +129,9 @@ class ApiController extends Controller
             $totalDuplicateRecords++;
         }
 
-        // Sort each group's records by created_at ascending (oldest first)
+        // Sort each group's records by created_at descending (newest first)
         foreach ($groups as &$g) {
-            usort($g['records'], fn($a, $b) => strcmp($a['created_at'], $b['created_at']));
+            usort($g['records'], fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
             $g['count'] = count($g['records']);
             $g['duplicate_summary'] = "Found {$g['count']} duplicate records";
 
@@ -147,13 +147,12 @@ class ApiController extends Controller
         // Reindex as a list
         $groupList = array_values($groups);
 
-        // Sort groups by size descending, then by earliest created_at
+        // Sort groups by latest record created_at (newest first), then by size desc
         usort($groupList, function ($a, $b) {
-            if ($a['count'] === $b['count']) {
-                $aFirst = $a['records'][0]['created_at'] ?? '';
-                $bFirst = $b['records'][0]['created_at'] ?? '';
-                return strcmp($aFirst, $bFirst);
-            }
+            $aLatest = $a['records'][0]['created_at'] ?? '';
+            $bLatest = $b['records'][0]['created_at'] ?? '';
+            $cmp = strcmp($bLatest, $aLatest);
+            if ($cmp !== 0) return $cmp;
             return $b['count'] <=> $a['count'];
         });
 
