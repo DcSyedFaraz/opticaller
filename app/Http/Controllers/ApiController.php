@@ -49,7 +49,7 @@ class ApiController extends Controller
         $joinConditions = implode(' AND ', array_map(fn($c) => "a.`$c` <=> g.`$c`", $groupFields));
 
         $sql = "
-            SELECT 
+            SELECT
                 a.id,
                 a.created_at,
                 a.feedback,
@@ -64,7 +64,11 @@ class ApiController extends Controller
                 a.main_category_query,
                 a.sub_category_category,
                 a.postal_code,
-                a.street_address
+                a.street_address,
+                a.contact_id,
+                a.first_name,
+                a.last_name,
+                a.salutation
             FROM addresses a
             INNER JOIN (
                 SELECT {$selectGroupCols}
@@ -78,35 +82,65 @@ class ApiController extends Controller
         ";
         $rows = DB::select($sql);
 
-        // Group by the full duplicate key so it’s clear which ones belong together
+        // Group by the full duplicate key so it's clear which ones belong together
         $groups = [];
+        $totalDuplicateRecords = 0;
+        $duplicateCriteriaStats = [];
+
         foreach ($rows as $r) {
             $keyParts = [];
+            $nonNullFields = [];
+
             foreach ($groupFields as $f) {
-                $keyParts[$f] = $r->{$f} ?? null;
+                $value = $r->{$f} ?? null;
+                $keyParts[$f] = $value;
+                if ($value !== null && $value !== '') {
+                    $nonNullFields[] = $f;
+                }
             }
+
             // Create a stable string key for internal grouping
             $hashKey = md5(json_encode($keyParts));
 
             if (!isset($groups[$hashKey])) {
                 $groups[$hashKey] = [
-                    'key' => $keyParts,
+                    'duplicate_criteria' => $keyParts,
+                    'non_null_criteria' => $nonNullFields,
                     'records' => [],
                 ];
             }
 
             $groups[$hashKey]['records'][] = [
                 'id' => (int)$r->id,
+                'contact_id' => $r->contact_id,
                 'created_at' => (string)$r->created_at,
                 'feedback' => $r->feedback,
                 'has_feedback' => !empty($r->feedback),
+                'company_name' => $r->company_name,
+                'email_address_system' => $r->email_address_system,
+                'phone_number' => $r->phone_number,
+                'mobile_number' => $r->mobile_number,
+                'first_name' => $r->first_name,
+                'last_name' => $r->last_name,
+                'salutation' => $r->salutation,
+                'sub_project_id' => $r->sub_project_id,
             ];
+
+            $totalDuplicateRecords++;
         }
 
         // Sort each group's records by created_at ascending (oldest first)
         foreach ($groups as &$g) {
             usort($g['records'], fn($a, $b) => strcmp($a['created_at'], $b['created_at']));
             $g['count'] = count($g['records']);
+            $g['duplicate_summary'] = "Found {$g['count']} duplicate records";
+
+            // Track criteria statistics
+            $criteriaKey = implode(', ', $g['non_null_criteria']);
+            if (!isset($duplicateCriteriaStats[$criteriaKey])) {
+                $duplicateCriteriaStats[$criteriaKey] = 0;
+            }
+            $duplicateCriteriaStats[$criteriaKey] += $g['count'];
         }
         unset($g);
 
@@ -123,10 +157,18 @@ class ApiController extends Controller
             return $b['count'] <=> $a['count'];
         });
 
+        // Sort criteria stats by frequency
+        arsort($duplicateCriteriaStats);
+
         return response()->json([
             'success' => true,
-            'total_groups' => count($groupList),
-            'data' => $groupList,
+            'summary' => [
+                'total_duplicate_groups' => count($groupList),
+                'total_duplicate_records' => $totalDuplicateRecords,
+                'most_common_duplicate_criteria' => array_slice($duplicateCriteriaStats, 0, 5, true),
+            ],
+            'duplicate_groups' => $groupList,
+            'message' => "Found " . count($groupList) . " groups of duplicate addresses containing {$totalDuplicateRecords} total records",
         ]);
     }
     public function apidata(Request $request)
@@ -634,7 +676,7 @@ class ApiController extends Controller
      * no need any more
      * Hard delete addresses by sub project IDs 1, 2, and 3
      */
-    
+
     // public function hardDeleteAddressesBySubProjects(Request $request)
     // {
 
