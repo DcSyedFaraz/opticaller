@@ -28,11 +28,6 @@ Route::post('/webhooks/call', [CallController::class, 'handleWebhook']);
 
 Route::get('/get_data', [ApiController::class, 'apidata']);
 Route::get('/get_addresses', [ApiController::class, 'index']);
-Route::get('/addresses/duplicates', [ApiController::class, 'duplicates']);
-Route::get('/addresses/debug-duplicates', [ApiController::class, 'debugDuplicates']);
-Route::get('/addresses/debug-specific-duplicates', [ApiController::class, 'debugSpecificDuplicates']);
-Route::get('/addresses/delete-duplicates', [ApiController::class, 'deleteDuplicateRecords']);
-Route::get('/addresses/delete-all-duplicates', [ApiController::class, 'deleteAllDuplicates']);
 Route::get('/get_projects', [ApiController::class, 'getProjectsAndSubprojects']);
 Route::post('/store_addresses', [ApiController::class, 'store']);
 Route::post('/store_project_sub_project', [ApiController::class, 'handleProjectsAndSubprojects']);
