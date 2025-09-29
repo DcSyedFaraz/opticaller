@@ -1,10 +1,20 @@
 <?php
-$logFileName = 'address-2025-09-25.log'; // Change to the log file you want to analyze
+if (PHP_SAPI !== 'cli') {
+    fwrite(STDERR, "This script must be run from the command line.\n");
+    exit(1);
+}
+
+if ($argc < 2) {
+    fwrite(STDERR, "Usage: php analyze_address_duplicates.php <log-file-name>\n");
+    exit(1);
+}
+
+$logFileName = basename($argv[1]);
 $storageDir = __DIR__ . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs';
 $logFile = $storageDir . DIRECTORY_SEPARATOR . $logFileName;
 
-if (!is_file($logFile)) {
-    fwrite(STDERR, "Log file not found: {$logFile}\n");
+if (!is_file($logFile) || !is_readable($logFile)) {
+    fwrite(STDERR, "Log file not found or unreadable: {$logFile}\n");
     exit(1);
 }
 
