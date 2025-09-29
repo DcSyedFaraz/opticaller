@@ -19,6 +19,116 @@ use Validator;
 
 class ApiController extends Controller
 {
+    /**
+     * List duplicate addresses grouped by the key fields, returning each
+     * duplicate's id, created_at, and feedback for easy identification.
+     *
+     * No parameters required; returns grouped result across active (non-deleted) addresses.
+     */
+    public function duplicates(Request $request)
+    {
+        // Subquery that identifies duplicate groups by the specified fields
+        $groupFields = [
+            'phone_number',
+            'email_address_system',
+            'company_name',
+            'city',
+            'website',
+            'mobile_number',
+            'email_address_new',
+            'sub_project_id',
+            'main_category_query',
+            'sub_category_category',
+            'postal_code',
+            'street_address',
+        ];
+
+        $selectGroupCols = implode(', ', array_map(fn($c) => "`$c`", $groupFields));
+
+        // Note: use NULL-safe equality (<=>) to match NULLs within groups
+        $joinConditions = implode(' AND ', array_map(fn($c) => "a.`$c` <=> g.`$c`", $groupFields));
+
+        $sql = "
+            SELECT 
+                a.id,
+                a.created_at,
+                a.feedback,
+                a.phone_number,
+                a.email_address_system,
+                a.company_name,
+                a.city,
+                a.website,
+                a.mobile_number,
+                a.email_address_new,
+                a.sub_project_id,
+                a.main_category_query,
+                a.sub_category_category,
+                a.postal_code,
+                a.street_address
+            FROM addresses a
+            WHERE a.deleted_at IS NULL
+            INNER JOIN (
+                SELECT {$selectGroupCols}
+                FROM addresses
+                WHERE deleted_at IS NULL
+                GROUP BY {$selectGroupCols}
+                HAVING COUNT(*) > 1
+            ) g ON {$joinConditions}
+            ORDER BY a.sub_project_id, a.company_name, a.created_at ASC
+        ";
+        $rows = DB::select($sql);
+
+        // Group by the full duplicate key so it’s clear which ones belong together
+        $groups = [];
+        foreach ($rows as $r) {
+            $keyParts = [];
+            foreach ($groupFields as $f) {
+                $keyParts[$f] = $r->{$f} ?? null;
+            }
+            // Create a stable string key for internal grouping
+            $hashKey = md5(json_encode($keyParts));
+
+            if (!isset($groups[$hashKey])) {
+                $groups[$hashKey] = [
+                    'key' => $keyParts,
+                    'records' => [],
+                ];
+            }
+
+            $groups[$hashKey]['records'][] = [
+                'id' => (int)$r->id,
+                'created_at' => (string)$r->created_at,
+                'feedback' => $r->feedback,
+                'has_feedback' => !empty($r->feedback),
+            ];
+        }
+
+        // Sort each group's records by created_at ascending (oldest first)
+        foreach ($groups as &$g) {
+            usort($g['records'], fn($a, $b) => strcmp($a['created_at'], $b['created_at']));
+            $g['count'] = count($g['records']);
+        }
+        unset($g);
+
+        // Reindex as a list
+        $groupList = array_values($groups);
+
+        // Sort groups by size descending, then by earliest created_at
+        usort($groupList, function ($a, $b) {
+            if ($a['count'] === $b['count']) {
+                $aFirst = $a['records'][0]['created_at'] ?? '';
+                $bFirst = $b['records'][0]['created_at'] ?? '';
+                return strcmp($aFirst, $bFirst);
+            }
+            return $b['count'] <=> $a['count'];
+        });
+
+        return response()->json([
+            'success' => true,
+            'total_groups' => count($groupList),
+            'data' => $groupList,
+        ]);
+    }
     public function apidata(Request $request)
     {
         // Retrieve all incoming request data
@@ -594,4 +704,3 @@ class ApiController extends Controller
     //     }
     // }
 }
-

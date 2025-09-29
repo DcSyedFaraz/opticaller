@@ -28,6 +28,7 @@ Route::post('/webhooks/call', [CallController::class, 'handleWebhook']);
 
 Route::get('/get_data', [ApiController::class, 'apidata']);
 Route::get('/get_addresses', [ApiController::class, 'index']);
+Route::get('/addresses/duplicates', [ApiController::class, 'duplicates']);
 Route::get('/get_projects', [ApiController::class, 'getProjectsAndSubprojects']);
 Route::post('/store_addresses', [ApiController::class, 'store']);
 Route::post('/store_project_sub_project', [ApiController::class, 'handleProjectsAndSubprojects']);
@@ -42,4 +43,3 @@ Route::get('/reports/calls', [CallReportController::class, 'daily']);
 // Address management by sub projects
 // Route::get('/addresses/count-by-subprojects', [ApiController::class, 'getAddressCountsBySubProjects']);
 // Route::get('/addresses/hard-delete-by-subprojects', [ApiController::class, 'hardDeleteAddressesBySubProjects']);
-
