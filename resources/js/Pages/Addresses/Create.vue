@@ -29,8 +29,8 @@
                 </div>
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="street_address">Street Address</InputLabel>
-                    <InputText v-model="newAddress.street_address" type="text" class="w-full" />
-                    <!-- <InputText ref="streetAddressInput" v-model="newAddress.street_address" type="text" class="w-full" /> -->
+                    <!-- <InputText v-model="newAddress.street_address" type="text" class="w-full" /> -->
+                    <InputText ref="streetAddressInput" v-model="newAddress.street_address" type="text" class="w-full" />
                     <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}
                     </Message>
                 </div>
@@ -227,6 +227,8 @@ export default {
             country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy'],
             autocompleteInstance: null,
             autocompleteListener: null,
+            placeAutocompleteElement: null,
+            placeAutocompleteListeners: [],
             salutationOptions: [
                 { label: 'Herr', value: 'Herr' },
                 { label: 'Frau', value: 'Frau' },
@@ -255,8 +257,30 @@ export default {
         if (this.autocompleteInstance && window.google?.maps?.event?.clearInstanceListeners) {
             window.google.maps.event.clearInstanceListeners(this.autocompleteInstance);
         }
+        // Clean up PlaceAutocompleteElement listeners and DOM
+        if (this.placeAutocompleteElement) {
+            this.placeAutocompleteListeners.forEach(({ type, handler }) => {
+                try {
+                    this.placeAutocompleteElement.removeEventListener(type, handler);
+                } catch (_) { }
+            });
+            this.placeAutocompleteListeners = [];
+            try {
+                // Reveal original input if we hid it
+                const inputComponent = this.$refs.streetAddressInput;
+                const inputEl = inputComponent?.$el ?? inputComponent;
+                if (inputEl && inputEl.style) inputEl.style.display = '';
+
+                // Remove the element from DOM
+                if (this.placeAutocompleteElement.parentNode) {
+                    this.placeAutocompleteElement.parentNode.removeChild(this.placeAutocompleteElement);
+                }
+            } catch (_) { }
+        }
+
         this.autocompleteListener = null;
         this.autocompleteInstance = null;
+        this.placeAutocompleteElement = null;
     },
     methods: {
         async initGoogleAutocomplete() {
@@ -274,37 +298,87 @@ export default {
                 return;
             }
 
-            if (this.autocompleteInstance) {
-                return;
-            }
+            // Prefer the new PlaceAutocompleteElement when available
+            const PlaceAutocompleteElement = window.google?.maps?.places?.PlaceAutocompleteElement;
 
             const inputComponent = this.$refs.streetAddressInput;
             const inputEl = inputComponent?.$el ?? inputComponent;
-
-            if (!inputEl) {
-                return;
-            }
-
-            if (!window.google?.maps?.places?.Autocomplete) {
-                console.warn('Google Places Autocomplete is unavailable.');
-                return;
-            }
+            if (!inputEl) return;
 
             const countryCodes = this.country_names
                 .map((name) => COUNTRY_CODE_MAP[name])
                 .filter(Boolean);
 
+            if (PlaceAutocompleteElement) {
+                // Create and configure the new element
+                const pae = new PlaceAutocompleteElement();
+                try {
+                    pae.className = inputEl.className || '';
+                    pae.placeholder = inputEl.getAttribute?.('placeholder') || '';
+                } catch (_) { }
+
+                // Configure fields and restrictions when supported
+                try { pae.fields = ['address_components', 'formatted_address']; } catch (_) { }
+                try { pae.types = ['address']; } catch (_) { }
+                try {
+                    if (countryCodes.length) {
+                        pae.componentRestrictions = { country: countryCodes };
+                    }
+                } catch (_) { }
+
+                // Insert before the existing input and hide the old input
+                try {
+                    inputEl.parentNode.insertBefore(pae, inputEl);
+                    if (inputEl.style) inputEl.style.display = 'none';
+                } catch (_) { }
+
+                // Wire up events (cover both legacy and component event names defensively)
+                const handler = () => this.handlePlaceElementSelect(pae);
+                const events = ['gmpx-placechange', 'place_changed', 'placechange'];
+                events.forEach((evt) => {
+                    try {
+                        pae.addEventListener(evt, handler);
+                        this.placeAutocompleteListeners.push({ type: evt, handler });
+                    } catch (_) { }
+                });
+
+                this.placeAutocompleteElement = pae;
+                return; // Done with new element path
+            }
+
+            // Fallback: legacy Autocomplete for existing projects
+            if (this.autocompleteInstance) return;
+            if (!window.google?.maps?.places?.Autocomplete) {
+                console.warn('Google Places Autocomplete is unavailable.');
+                return;
+            }
+
             const options = {
                 types: ['address'],
                 fields: ['address_components', 'formatted_address'],
             };
-
             if (countryCodes.length) {
                 options.componentRestrictions = { country: countryCodes };
             }
-
             this.autocompleteInstance = new window.google.maps.places.Autocomplete(inputEl, options);
             this.autocompleteListener = this.autocompleteInstance.addListener('place_changed', () => this.handlePlaceSelect());
+        },
+        handlePlaceElementSelect(element) {
+            if (!element) return;
+
+            let place = null;
+            try {
+                if (typeof element.getPlace === 'function') {
+                    place = element.getPlace();
+                }
+            } catch (_) { }
+            // Some builds expose the selected place on .place or event.detail.place
+            if (!place) {
+                try { place = element.place || element.value?.place || null; } catch (_) { }
+            }
+
+            if (!place) return;
+            this.applyPlaceToModel(place);
         },
         handlePlaceSelect() {
             if (!this.autocompleteInstance) {
@@ -312,10 +386,10 @@ export default {
             }
 
             const place = this.autocompleteInstance.getPlace();
-
-            if (!place || !place.address_components) {
-                return;
-            }
+            this.applyPlaceToModel(place);
+        },
+        applyPlaceToModel(place) {
+            if (!place || !place.address_components) return;
 
             const components = place.address_components;
             const streetNumber = findAddressComponent(components, ['street_number']);
@@ -328,26 +402,16 @@ export default {
             const country = findAddressComponent(components, ['country']);
 
             const street = [streetNumber, route].filter(Boolean).join(' ').trim() || place.name || '';
-
-            if (street) {
-                this.newAddress.street_address = street;
-            }
-
-            if (postalCode) {
-                this.newAddress.postal_code = postalCode;
-            }
+            if (street) this.newAddress.street_address = street;
+            if (postalCode) this.newAddress.postal_code = postalCode;
 
             const city = locality || postalTown || adminLevel2 || adminLevel1;
-
-            if (city) {
-                this.newAddress.city = city;
-            }
+            if (city) this.newAddress.city = city;
 
             if (country) {
                 if (!this.country_names.includes(country)) {
                     this.country_names = [...this.country_names, country];
                 }
-
                 this.newAddress.country = country;
             }
         },
