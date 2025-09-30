@@ -36,7 +36,7 @@ class AddressService
             $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
 
             // Try to fetch a due address with locking
-            $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+            $dueAddress = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'subproject.fieldVisibilities', 'calLogs.users')
                 ->whereIn('sub_project_id', $subProjectIds)
                 ->where('forbidden_promotion', false)
                 ->where(function ($query) {
@@ -138,4 +138,3 @@ class AddressService
         });
     }
 }
-

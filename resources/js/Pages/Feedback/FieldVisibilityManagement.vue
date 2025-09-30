@@ -81,6 +81,7 @@ export default {
                 { name: 'phone_number', label: 'Phone Number' },
                 { name: 'mobile_number', label: 'Mobile Number' },
                 { name: 'email_address_new', label: 'Email Address (New)' },
+                { name: 'invalid_number_button', label: 'Invalid Number Button' },
                 // Add other fields as needed
             ],
             editDialogVisible: false,
@@ -234,4 +235,3 @@ export default {
 <style scoped>
 /* Add any necessary styles */
 </style>
-

@@ -287,7 +287,7 @@
                                     </button>
 
                                     <!-- Modified Invalid Number Button -->
-                                    <button
+                                    <button v-if="!isHidden('invalid_number_button')"
                                         @click="console.log('Invalid Number button clicked'); saveEdits = true; handleInvalidNumber()"
                                         :disabled="isButtonDisabled"
                                         class="bg-red-500 justify-center hover:bg-red-400 disabled:bg-red-500 disabled:cursor-not-allowed text-white flex px-[1rem] w-full lg:w-auto py-3 text-xl mx-2 rounded mb-2">
@@ -987,7 +987,7 @@ export default {
         isHidden() {
             return (fieldName) => {
                 return this.localAddress?.subproject?.field_visibilities?.some(
-                    (visibility) => visibility.field_name === fieldName && visibility.is_hidden === 1
+                    (visibility) => visibility.field_name === fieldName && (visibility.is_hidden === 1 || visibility.is_hidden === true)
                 ) ?? false; // Default to false if undefined
             };
         },

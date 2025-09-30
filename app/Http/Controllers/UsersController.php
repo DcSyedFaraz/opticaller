@@ -99,7 +99,7 @@ class UsersController extends Controller
             // Load the specific address - admin can access any address including trashed ones
             if ($isAdmin) {
                 $address = Address::withTrashed()
-                    ->with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+                    ->with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'subproject.fieldVisibilities', 'calLogs.users')
                     ->where('id', $addressId)
                     ->first();
             } else {
@@ -107,7 +107,7 @@ class UsersController extends Controller
                 $subProjectIds = $user->subProjects()->pluck('sub_project_id');
 
                 // Load the specific address if user has access to it
-                $address = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'calLogs.users')
+                $address = Address::with('calLogs.notes', 'subproject.projects', 'subproject.feedbacks', 'subproject.fieldVisibilities', 'calLogs.users')
                     ->whereIn('sub_project_id', $subProjectIds)
                     ->where('id', $addressId)
                     ->first();
