@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\CallReportController;
 use App\Http\Controllers\CallController;
+use App\Http\Controllers\ActivityReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,9 @@ Route::post('/address/check-status', [ApiController::class, 'checkStatus']);
 
 // Call reports
 Route::get('/reports/calls', [CallReportController::class, 'daily']);
+
+// Activities listing and user-wise aggregates
+Route::get('/activities', [ActivityReportController::class, 'index']);
 
 // Address management by sub projects
 // Route::get('/addresses/count-by-subprojects', [ApiController::class, 'getAddressCountsBySubProjects']);

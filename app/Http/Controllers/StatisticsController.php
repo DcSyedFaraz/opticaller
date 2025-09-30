@@ -48,7 +48,13 @@ class StatisticsController extends Controller
             'activities' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
-        ])->get();
+        ])
+        // Only include users who have at least one call activity in the range
+        ->whereHas('activities', function ($query) use ($startDate, $endDate) {
+            $query->where('activity_type', 'call')
+                ->whereBetween('created_at', [$startDate, $endDate]);
+        })
+        ->get();
 
         $userData = $users->map(function ($user) {
             $totalLoggedInTime = $user->loginTimess->reduce(function ($carry, $loginTime) {
