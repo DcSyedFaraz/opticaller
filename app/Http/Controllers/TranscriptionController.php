@@ -73,9 +73,9 @@ class TranscriptionController extends Controller
     /**
      * Return the latest completed transcription for a given address as JSON.
      */
-    public function latestByAddress(Address $address)
+    public function latestByAddress($id)
     {
-        $latest = $address->transcriptions()
+        $latest = Transcription::where('address_id', $id)
             ->where('status', 'completed')
             ->orderByDesc('updated_at')
             ->get();
