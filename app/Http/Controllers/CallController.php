@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\CallEnded;
 use App\Events\CallInitiated;
 use App\Events\IncomingCall;
+use App\Models\Address;
 use App\Models\Transcription;
 use DB;
 use Http;
@@ -439,7 +440,7 @@ class CallController extends Controller
             // Get the calling phone number from sub project or use default
             $callingNumber = '+4976619759042'; // Default fallback
             if ($addressID) {
-                $address = \App\Models\Address::with('subproject')->find($addressID);
+                $address = Address::with('subproject')->find($addressID);
                 if ($address && $address->subproject) {
                     $callingNumber = $address->subproject->getCallingPhoneNumber();
                 }

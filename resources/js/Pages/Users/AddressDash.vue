@@ -26,13 +26,7 @@
                                     class="inline-flex items-center px-2 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                                     @click="hitCalendarLink" v-tooltip.top="'Open Calendar Link'" />
                             </div>
-                            <!-- Transcription Button -->
-                            <div class="mt-2 ml-2">
-                                <Button icon="pi pi-microphone"
-                                    class="inline-flex items-center px-2 py-2 !bg-green-600 text-white rounded-md !border-green-600 hover:!bg-green-700"
-                                    :disabled="transcriptionLoading || !localAddress?.id"
-                                    @click="openTranscriptionModal" v-tooltip.top="'View Transcriptions'" />
-                            </div>
+                            <!-- Transcription Button moved to Call History section -->
                             <!-- <div class="mt-2">
                                 <Button @click="makeCall()"
                                     class="inline-flex items-center px-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
@@ -426,6 +420,11 @@
                                     @click="showNotes()">
                                     <i class="pi pi-expand !text-xl text-secondary"></i>
                                 </button>
+                                <!-- Transcription Button (moved here) -->
+                                <Button label="Transcription" icon="pi pi-microphone"
+                                    class="inline-flex items-center px-2 py-2 !bg-green-600 text-white rounded-md !border-green-600 hover:!bg-green-700"
+                                    :disabled="transcriptionLoading || !localAddress?.id"
+                                    @click="openTranscriptionModal" v-tooltip.top="'Transcription'" />
                             </div>
                         </div>
                     </div>
@@ -1498,24 +1497,33 @@ export default {
                 this.activeConnection = null;
             }
         },
-        async hitCalendarLink() {
-            try {
-                await axios.post(`/addresses/${this.localAddress.id}/calendar-link`);
+        hitCalendarLink() {
+            const base = this.localAddress?.subproject?.calendar_link;
+            if (!base) {
                 this.$toast.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: 'Calendar link called successfully.',
+                    severity: 'warn',
+                    summary: 'No Link',
+                    detail: 'Calendar link is not configured.',
                     life: 3000,
                 });
-            } catch (error) {
-                const msg = error?.response?.data?.message || 'Failed to call calendar link.';
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: msg,
-                    life: 4000,
-                });
+                return;
             }
+
+            const first = (this.localAddress?.first_name || '').trim();
+            const last = (this.localAddress?.last_name || '').trim();
+            const name = (first + ' ' + last).trim() || (this.localAddress?.company_name || '');
+            const phone = this.localAddress?.mobile_number || this.localAddress?.phone_number || '';
+
+            const params = new URLSearchParams({
+                name,
+                'deal-id': this.localAddress?.deal_id || '',
+                email: this.localAddress?.email_address_system || '',
+                attendeePhoneNumber: phone,
+                smsReminderNumber: phone,
+            });
+
+            const url = base.includes('?') ? `${base}&${params.toString()}` : `${base}?${params.toString()}`;
+            window.open(url, '_blank', 'noopener');
         },
         hangUp() {
             this.$refs.twilioCallComponent.hangUp();
