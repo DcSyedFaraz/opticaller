@@ -71,7 +71,11 @@ class AddressController extends Controller
         | 1.  Forbidden Promotion Filter
         |---------------------------------*/
         $showForbiddenPromotion = $request->boolean('showForbiddenPromotion', false);
+        $includeDeleted = $request->boolean('includeDeleted', false);
         $query->where('forbidden_promotion', $showForbiddenPromotion);
+        if ($includeDeleted) {
+            $query->withTrashed();
+        }
 
         /* ---------------------------------
          | 1.  Row filters sent as JSON
@@ -86,6 +90,7 @@ class AddressController extends Controller
                     ->orWhere('addresses.contact_id', 'like', "%{$g}%")
                     ->orWhere('addresses.feedback', 'like', "%{$g}%")
                     ->orWhere('addresses.email_address_system', 'like', "%{$g}%")
+                    ->orWhere('addresses.phone_number', 'like', "%{$g}%")
                     ->orWhere('addresses.deal_id', 'like', "%{$g}%");
             });
         }
@@ -95,6 +100,7 @@ class AddressController extends Controller
             'company_name' => 'addresses.company_name',
             'subproject.title' => 'subprojects.title',
             'email_address_system' => 'addresses.email_address_system',
+            'phone_number' => 'addresses.phone_number',
             'feedback' => 'addresses.feedback',
             'follow_up_date' => 'addresses.follow_up_date',
             'deal_id' => 'addresses.deal_id',
@@ -146,6 +152,7 @@ class AddressController extends Controller
         return inertia('Addresses/Index', [
             'addresses' => $addresses,
             'showForbiddenPromotion' => $showForbiddenPromotion,
+            'includeDeleted' => $includeDeleted,
             'filters' => $request->all('sortField', 'sortOrder', 'page')
         ]);
     }
@@ -424,4 +431,3 @@ class AddressController extends Controller
         }
     }
 }
-

@@ -19,7 +19,7 @@ use Validator;
 
 class ApiController extends Controller
 {
-    
+
 
     public function apidata(Request $request)
     {
@@ -356,12 +356,12 @@ class ApiController extends Controller
     }
     public function store(Request $request)
     {
-        DB::beginTransaction();
+        // dd($request->all());
 
         try {
             $validatedData = Validator::make($request->all(), [
                 'addresses' => 'required|array',
-                'addresses.*.company_name' => 'required|string|max:255',
+                'addresses.*.company_name' => 'nullable|string|max:255',
                 'addresses.*.email_address_system' => 'required|email|max:255',
                 'addresses.*.salutation' => 'nullable|string',
                 'addresses.*.first_name' => 'nullable|string',
@@ -391,6 +391,7 @@ class ApiController extends Controller
             if ($validatedData->fails()) {
                 return response()->json(['error' => $validatedData->messages()], 422);
             }
+            DB::beginTransaction();
 
             $subprojectIds = SubProject::pluck('id')->all();
 

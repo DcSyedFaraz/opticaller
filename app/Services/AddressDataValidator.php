@@ -31,9 +31,9 @@ class AddressDataValidator
     {
         $errs = [];
 
-        if (empty($row['company_name'])) {
-            $errs[] = "Row {$num}: Company name is required";
-        }
+        // if (empty($row['company_name'])) {
+        //     $errs[] = "Row {$num}: Company name is required";
+        // }
 
         if (!empty($row['email_address_system']) && !filter_var($row['email_address_system'], FILTER_VALIDATE_EMAIL)) {
             $errs[] = "Row {$num}: Invalid email format ({$row['email_address_system']})";

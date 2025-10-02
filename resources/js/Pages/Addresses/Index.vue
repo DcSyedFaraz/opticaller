@@ -5,7 +5,13 @@
     <AuthenticatedLayout>
         <div class="flex justify-between mb-4">
             <h1 class="text-2xl font-bold">Address List</h1>
-            <div class="flex gap-2">
+            <div class="flex items-center gap-2">
+                <!-- Include Deleted Toggle -->
+                <div class="flex items-center mr-2 gap-2">
+                    <Checkbox v-model="includeDeleted" binary inputId="includeDeleted"
+                        @change="onIncludeDeletedChange" />
+                    <label for="includeDeleted" class="text-sm">Include Deleted</label>
+                </div>
                 <Button :icon="showForbiddenPromotion ? 'pi pi-eye-slash' : 'pi pi-eye'"
                     :label="showForbiddenPromotion ? 'Show Regular' : 'Show Forbidden'"
                     :class="showForbiddenPromotion ? 'p-button-danger' : 'p-button-warning'"
@@ -52,6 +58,13 @@
                 </Column>
 
                 <Column field="email_address_system" header="Email System" sortable>
+                    <template #filter="{ filterModel, filterCallback }">
+                        <InputText v-model="filterModel.value" @input="filterCallback()" placeholder="Search…" />
+                    </template>
+                </Column>
+
+                <!-- Phone Number -->
+                <Column field="phone_number" header="Phone Number" sortable>
                     <template #filter="{ filterModel, filterCallback }">
                         <InputText v-model="filterModel.value" @input="filterCallback()" placeholder="Search…" />
                     </template>
@@ -408,10 +421,12 @@ export default {
     data() {
         return {
             showForbiddenPromotion: false,
+            includeDeleted: (this.$page?.props?.includeDeleted ?? false),
             globalFilterFields: [
                 'company_name',
                 'subproject.title',
                 'email_address_system',
+                'phone_number',
                 'feedback',
                 'follow_up_date',
                 'deal_id',
@@ -430,6 +445,7 @@ export default {
                 company_name: { value: null, matchMode: FilterMatchMode.CONTAINS },
                 'subproject.title': { value: null, matchMode: FilterMatchMode.CONTAINS },
                 email_address_system: { value: null, matchMode: FilterMatchMode.CONTAINS },
+                phone_number: { value: null, matchMode: FilterMatchMode.CONTAINS },
                 feedback: { value: null, matchMode: FilterMatchMode.CONTAINS },
                 follow_up_date: { value: null, matchMode: FilterMatchMode.DATE_IS },
                 deal_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -469,9 +485,14 @@ export default {
                 ...this.query,
                 ...extra,
                 showForbiddenPromotion: this.showForbiddenPromotion,
+                includeDeleted: this.includeDeleted,
                 filters: JSON.stringify(this.tableFilters) // send full filter object
             };
             this.$inertia.get(route('addresses.index'), payload, { preserveState: true, replace: true });
+        },
+        onIncludeDeletedChange() {
+            this.query.page = 1;
+            this.fetchData();
         },
         /* events from DataTable */
         onPage({ page }) {
