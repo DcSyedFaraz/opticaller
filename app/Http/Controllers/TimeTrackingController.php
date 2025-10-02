@@ -151,7 +151,7 @@ class TimeTrackingController extends Controller
                 'address' => 'required|array',
                 'total_duration' => 'required|integer',
                 'address.id' => 'required|integer|exists:addresses,id',
-                'address.company_name' => 'required|string',
+                'address.company_name' => 'nullable|string',
                 'address.salutation' => 'nullable|string',
                 'address.street_address' => 'nullable|string',
                 'address.postal_code' => 'nullable|string',
