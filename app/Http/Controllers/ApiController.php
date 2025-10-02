@@ -50,7 +50,7 @@ class ApiController extends Controller
         try {
             Address::create([
                 'company_name' => $addressData['name'] ?? null,
-                'email_address_system' => $addressData['email'],
+                'email_address_system' => $addressData['email'] ?? null,
                 'phone_number' => $addressData['phone'] ?? null,
                 'mobile_number' => $addressData['mobile'] ?? null,
                 'sub_project_id' => 6,  // Ensuring sub_project_id is set to 1
@@ -362,7 +362,7 @@ class ApiController extends Controller
             $validatedData = Validator::make($request->all(), [
                 'addresses' => 'required|array',
                 'addresses.*.company_name' => 'nullable|string|max:255',
-                'addresses.*.email_address_system' => 'required|email|max:255',
+                'addresses.*.email_address_system' => 'nullable|email|max:255',
                 'addresses.*.salutation' => 'nullable|string',
                 'addresses.*.first_name' => 'nullable|string',
                 'addresses.*.last_name' => 'nullable|string',

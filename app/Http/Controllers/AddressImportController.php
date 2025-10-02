@@ -262,10 +262,7 @@ class AddressImportController extends Controller
     {
         $errs = [];
 
-        // company_name is required
-        if (empty($normalizedRow['company_name'])) {
-            $errs[] = "Row {$num}: Company name is required";
-        }
+        // company_name is optional
 
         // email_address_system if present must be a valid email
         if (

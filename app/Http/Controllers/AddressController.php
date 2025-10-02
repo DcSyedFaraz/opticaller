@@ -236,7 +236,7 @@ class AddressController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'company_name' => 'required|string|max:255',
+            'company_name' => 'nullable|string|max:255',
             'salutation' => 'nullable|string|max:255',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
@@ -246,7 +246,7 @@ class AddressController extends Controller
             'website' => 'nullable|max:255',
             'phone_number' => 'nullable|string|max:20',
             'mobile_number' => 'nullable|string|max:20',
-            'email_address_system' => 'required|email|max:255',
+            'email_address_system' => 'nullable|email|max:255',
             'email_address_new' => 'nullable|email|max:255',
             'sub_project_id' => 'nullable|exists:sub_projects,id',
             'hubspot_tag' => 'nullable|string|max:255',

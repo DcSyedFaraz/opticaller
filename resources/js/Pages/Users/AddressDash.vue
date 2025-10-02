@@ -67,7 +67,7 @@
                                     <div v-if="!isHidden('company_name')"
                                         class="field col-span-1 md:col-span-2 lg:col-span-2">
                                         <label for="company_name" class="font-extrabold text-sm">
-                                            Company Name: <span class="text-red-600">*</span>
+                                            Company Name:
                                         </label>
                                         <InputText id="company_name" v-model="localAddress.company_name"
                                             :disabled="isFieldLocked('company_name')"
@@ -199,7 +199,7 @@
                                     <!-- Email Address Field -->
                                     <div v-if="!isHidden('email_address_system')" class="field">
                                         <label for="email_address_system" class="font-extrabold text-sm">
-                                            Email Address: <span class="text-red-600">*</span>
+                                            Email Address:
                                         </label>
                                         <InputText id="email_address_system" v-model="localAddress.email_address_system"
                                             :disabled="isFieldLocked('email_address_system')"

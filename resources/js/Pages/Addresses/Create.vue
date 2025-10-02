@@ -7,7 +7,7 @@
             <form @submit.prevent="createAddress" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="company_name">Company Name</InputLabel>
-                    <InputText v-model="newAddress.company_name" type="text" required class="w-full" />
+                    <InputText v-model="newAddress.company_name" type="text" class="w-full" />
                     <Message v-if="errors.company_name" severity="error" class="mt-2">{{ errors.company_name }}
                     </Message>
                 </div>
