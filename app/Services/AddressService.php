@@ -14,7 +14,7 @@ class AddressService
     {
         $now = Carbon::now();
 
-        $threshold = now()->subMinutes(1);
+        $threshold = now()->subMinutes(5);
 
         // Check for stale addresses as before
         $staleAddresses = Address::whereHas('latestStatus', function ($query) use ($threshold) {

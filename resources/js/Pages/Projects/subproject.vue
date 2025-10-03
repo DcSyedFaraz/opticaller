@@ -24,10 +24,29 @@
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     </div>
                     <div class="sm:col-span-12">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Calling Number Source</label>
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center space-x-2">
+                                <RadioButton v-model="newPhoneMode" inputId="newModeTwilio" value="twilio" />
+                                <label for="newModeTwilio" class="text-sm">From Twilio Label</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <RadioButton v-model="newPhoneMode" inputId="newModeManual" value="manual" />
+                                <label for="newModeManual" class="text-sm">Manual</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="newPhoneMode === 'twilio'" class="sm:col-span-12">
+                        <label class="block text-sm font-medium text-gray-700">Twilio Label</label>
+                        <Select v-model="selectedTwilioNumberNew" :options="twilioNumbers" optionLabel="label" optionValue="id"
+                            placeholder="Select Label" class="w-full" @change="onSelectTwilioLabelNew" />
+                        <small class="text-gray-500">Selecting a label fills the phone field below.</small>
+                    </div>
+                    <div v-if="newPhoneMode === 'manual'" class="sm:col-span-12">
                         <label for="calling_phone_number" class="block text-sm font-medium text-gray-700">Calling Phone Number</label>
                         <InputText v-model="newProject.calling_phone_number" type="text" placeholder="+4976619759042"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                        <p class="mt-1 text-sm text-gray-500">Leave empty to use default number (+4976619759042)</p>
+                        <p class="mt-1 text-sm text-gray-500">E.164 format, e.g. +15551234567. Leave empty to use default (+4976619759042).</p>
                     </div>
                     <div class="sm:col-span-12">
                         <InputLabel for="Projects">Project</InputLabel>
@@ -130,10 +149,29 @@
                             class="mt-1 block w-full" />
                     </div>
                     <div class="field">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Calling Number Source</label>
+                        <div class="flex items-center space-x-6">
+                            <div class="flex items-center space-x-2">
+                                <RadioButton v-model="editPhoneMode" inputId="editModeTwilio" value="twilio" />
+                                <label for="editModeTwilio" class="text-sm">From Twilio Label</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <RadioButton v-model="editPhoneMode" inputId="editModeManual" value="manual" />
+                                <label for="editModeManual" class="text-sm">Manual</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="editPhoneMode === 'twilio'" class="field">
+                        <label class="block text-sm font-medium text-gray-700">Twilio Label</label>
+                        <Select v-model="selectedTwilioNumberEdit" :options="twilioNumbers" optionLabel="label" optionValue="id"
+                            placeholder="Select Label" class="w-full" @change="onSelectTwilioLabelEdit" />
+                        <small class="text-gray-500">Selecting a label fills the phone field below.</small>
+                    </div>
+                    <div v-if="editPhoneMode === 'manual'" class="field">
                         <label for="calling_phone_number" class="block text-sm font-medium text-gray-700">Calling Phone Number</label>
                         <InputText v-model="editProjectData.calling_phone_number" type="text" placeholder="+4976619759042"
                             class="mt-1 block w-full border border-gray-300 rounded-md py-2 pl-10 text-sm text-gray-700" />
-                        <p class="mt-1 text-sm text-gray-500">Leave empty to use default number (+4976619759042)</p>
+                        <p class="mt-1 text-sm text-gray-500">E.164 format, e.g. +15551234567. Leave empty to use default (+4976619759042).</p>
                     </div>
                     <div class="field">
                         <InputLabel for="Projects">Project</InputLabel>
@@ -184,6 +222,7 @@ export default {
     props: {
         subprojects: Array,
         projects: Array,
+        twilioNumbers: Array,
     },
     data() {
         return {
@@ -208,6 +247,10 @@ export default {
                 retry_schedule: [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
             },
             editDialogVisible: false,
+            selectedTwilioNumberNew: null,
+            selectedTwilioNumberEdit: null,
+            newPhoneMode: 'twilio',
+            editPhoneMode: 'twilio',
         };
     },
     mounted() {
@@ -217,6 +260,20 @@ export default {
         }
     },
     methods: {
+        onSelectTwilioLabelNew() {
+            if (this.newPhoneMode !== 'twilio') return;
+            const selected = (this.twilioNumbers || []).find(n => n.id === this.selectedTwilioNumberNew);
+            if (selected) {
+                this.newProject.calling_phone_number = selected.phone_number;
+            }
+        },
+        onSelectTwilioLabelEdit() {
+            if (this.editPhoneMode !== 'twilio') return;
+            const selected = (this.twilioNumbers || []).find(n => n.id === this.selectedTwilioNumberEdit);
+            if (selected) {
+                this.editProjectData.calling_phone_number = selected.phone_number;
+            }
+        },
         handleFileUpload(event, target) {
             const file = event.target.files[0];
             if (file && file.type === 'application/pdf') {
@@ -281,6 +338,9 @@ export default {
                 this.editProjectData.retry_schedule = [4, 12, 24, 24, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
             }
             this.editDialogVisible = true;
+            const match = (this.twilioNumbers || []).find(n => n.phone_number === this.editProjectData.calling_phone_number);
+            this.selectedTwilioNumberEdit = match ? match.id : null;
+            this.editPhoneMode = match ? 'twilio' : (this.editProjectData.calling_phone_number ? 'manual' : 'twilio');
         },
         updateProject() {
             const formData = new FormData();
@@ -350,5 +410,19 @@ export default {
             });
         },
     },
+    watch: {
+        selectedTwilioNumberNew() {
+            this.onSelectTwilioLabelNew();
+        },
+        selectedTwilioNumberEdit() {
+            this.onSelectTwilioLabelEdit();
+        },
+        newPhoneMode(val) {
+            if (val === 'twilio') this.onSelectTwilioLabelNew();
+        },
+        editPhoneMode(val) {
+            if (val === 'twilio') this.onSelectTwilioLabelEdit();
+        }
+    }
 };
 </script>

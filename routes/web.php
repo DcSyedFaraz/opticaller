@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\SubProjectFieldVisibilityController;
+use App\Http\Controllers\TwilioNumberController;
 use App\Http\Controllers\TimeTrackingController;
 use App\Http\Controllers\TranscriptionController;
 use App\Http\Controllers\UsersController;
@@ -114,6 +115,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::delete('/active/transcription/{transcription}', [TranscriptionController::class, 'destroy'])->name('transcriptions.destroy');
 
     Route::post('/field-visibility/bulk-update', [SubProjectFieldVisibilityController::class, 'bulkUpdate'])->name('field-visibility.bulkUpdate');
+
+    // Twilio Numbers CRUD
+    Route::resource('twilio-numbers', TwilioNumberController::class)->only(['index', 'store', 'update', 'destroy']);
 
 
 

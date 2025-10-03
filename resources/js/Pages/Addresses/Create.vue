@@ -30,7 +30,7 @@
                 <div class="col-span-1 sm:col-span-2 lg:col-span-3 mb-4">
                     <InputLabel for="street_address">Street Address</InputLabel>
                     <!-- <InputText v-model="newAddress.street_address" type="text" class="w-full" /> -->
-                    <InputText ref="streetAddressInput" v-model="newAddress.street_address" type="text" class="w-full" />
+                    <InputText ref="streetAddressInput" v-model="newAddress.street_address" type="text" class="w-full text-black " />
                     <Message v-if="errors.street_address" severity="error" class="mt-2">{{ errors.street_address }}
                     </Message>
                 </div>
@@ -154,6 +154,7 @@ let googleMapsScriptPromise;
 
 const COUNTRY_CODE_MAP = {
     Germany: 'DE',
+    Pakistan: 'PK',
     Austria: 'AT',
     Switzerland: 'CH',
     France: 'FR',
@@ -224,7 +225,7 @@ export default {
         return {
             newAddress: {},
             errors: {},
-            country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy'],
+            country_names: ['Germany', 'Austria', 'Switzerland', 'France', 'Italy','Pakistan'],
             autocompleteInstance: null,
             autocompleteListener: null,
             placeAutocompleteElement: null,
@@ -298,8 +299,9 @@ export default {
                 return;
             }
 
-            // Prefer the new PlaceAutocompleteElement when available
-            const PlaceAutocompleteElement = window.google?.maps?.places?.PlaceAutocompleteElement;
+            // Prefer the legacy Autocomplete for consistent styling and autofill
+            const useNewPlaceElement = false;
+            const PlaceAutocompleteElement = useNewPlaceElement ? (window.google?.maps?.places?.PlaceAutocompleteElement) : null;
 
             const inputComponent = this.$refs.streetAddressInput;
             const inputEl = inputComponent?.$el ?? inputComponent;

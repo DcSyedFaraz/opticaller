@@ -201,6 +201,7 @@ export default {
                 { id: 3, content: 'Add or modify feedback options', title: 'Feedback Customization', routeName: 'feedbacks.index', buttonText: 'Proceed' },
                 { id: 4, content: 'Interface to add or modify Addresses.', title: 'Add New Address', routeName: 'addresses.create', buttonText: 'Proceed' },
                 { id: 5, content: 'Option to lock specific fields to prevent user edits.', title: 'Fields Locking', routeName: '', buttonText: 'Proceed' },
+                { id: 6, content: 'Save Twilio phone numbers with labels for easy selection in sub-projects.', title: 'Twilio Numbers', routeName: 'twilio-numbers.index', buttonText: 'Proceed' },
             ],
             fieldLockDialogVisible: false,
             lockedFields: [], // Track locked fields
