@@ -95,6 +95,20 @@ class TimeTrackingController extends Controller
                 ]);
             }
 
+            // Soft delete the address as it has an invalid number
+            $addressToDelete = Address::find($validatedData['address']['id']);
+            if ($addressToDelete) {
+                $addressToDelete->delete();
+                Log::channel('address_deletion')->info('Address soft-deleted due to invalid number', [
+                    'address_id' => $validatedData['address']['id'],
+                    'user_id' => auth()->id(),
+                ]);
+            } else {
+                Log::channel('address_deletion')->warning('Address not found for soft delete on invalid number', [
+                    'address_id' => $validatedData['address']['id'] ?? null,
+                ]);
+            }
+
             // Commit the transaction
             DB::commit();
 
