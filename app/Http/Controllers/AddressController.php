@@ -372,6 +372,24 @@ class AddressController extends Controller
         return redirect()->route('dash')->with('message', 'Call back sent successfully!');
 
     }
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'distinct', 'exists:addresses,id'],
+        ]);
+
+        $query = Address::whereIn('id', $validated['ids']);
+        $deletedCount = $query->count();
+
+        if ($deletedCount === 0) {
+            return redirect()->back()->with('message', 'No matching addresses found for deletion.');
+        }
+
+        $query->delete();
+
+        return redirect()->back()->with('message', "{$deletedCount} address" . ($deletedCount === 1 ? '' : 'es') . ' deleted successfully.');
+    }
     public function destroy(Address $address)
     {
         $address->delete();

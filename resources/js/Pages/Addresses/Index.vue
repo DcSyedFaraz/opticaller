@@ -20,6 +20,9 @@
                     @click="downloadTemplate" />
                 <Button icon="pi pi-upload" label="Import Excel" class="p-button-outlined p-button-success"
                     @click="showImportDialog = true" />
+                <Button icon="pi pi-trash"
+                    :label="selectedAddresses.length ? `Delete Selected (${selectedAddresses.length})` : 'Delete Selected'"
+                    class="p-button-danger" @click="confirmBulkDelete" :disabled="!selectedAddresses.length" />
                 <Link :href="route('addresses.create')" class="p-button p-component p-button-contrast" as="button">
                 Create New
                 </Link>
@@ -27,11 +30,12 @@
         </div>
 
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <DataTable :value="addresses.data" v-model:filters="tableFilters" filterDisplay="row"
+            <DataTable :value="addresses.data" v-model:filters="tableFilters"
+                v-model:selection="selectedAddresses" filterDisplay="row" :metaKeySelection="false"
                 :globalFilterFields="globalFilterFields" :sortField="query.sortField"
-                :sortOrder="sortOrderMap[query.sortOrder]" lazy responsiveLayout="scroll" dataKey="id" :paginator="true"
-                :rows="addresses.per_page" :totalRecords="addresses.total" @page="onPage" @sort="onSort"
-                @filter="onFilter">
+                :sortOrder="sortOrderMap[query.sortOrder]" lazy responsiveLayout="scroll" dataKey="id"
+                :paginator="true" :rows="addresses.per_page" :totalRecords="addresses.total" @page="onPage"
+                @sort="onSort" @filter="onFilter">
                 <!-- Global filter bar -->
                 <template #header>
                     <div class="flex justify-end">
@@ -41,6 +45,8 @@
                         </IconField>
                     </div>
                 </template>
+
+                <Column selectionMode="multiple" headerStyle="width:3rem" :exportable="false"></Column>
 
                 <!-- Company Name -->
                 <Column field="company_name" header="Company Name" sortable style="min-width:12rem">
@@ -453,6 +459,7 @@ export default {
                 closure_user_name: { value: null, matchMode: FilterMatchMode.CONTAINS }
             },
             sortOrderMap: { asc: 1, desc: -1 },
+            selectedAddresses: [],
 
             // Excel Import related data
             showImportDialog: false,
@@ -470,6 +477,7 @@ export default {
         toggleForbiddenPromotion() {
             this.showForbiddenPromotion = !this.showForbiddenPromotion;
             this.query.page = 1; // reset to first page
+            this.selectedAddresses = [];
             this.fetchData();
         },
         downloadTemplate() {
@@ -492,21 +500,25 @@ export default {
         },
         onIncludeDeletedChange() {
             this.query.page = 1;
+            this.selectedAddresses = [];
             this.fetchData();
         },
         /* events from DataTable */
         onPage({ page }) {
             this.query.page = page + 1;
+            this.selectedAddresses = [];
             this.fetchData();
         },
         onSort({ sortField, sortOrder }) {
             this.query.sortField = sortField || 'id';
             this.query.sortOrder = sortOrder === 1 ? 'asc' : 'desc';
+            this.selectedAddresses = [];
             this.fetchData();
         },
         onFilter() {
             // whenever any column filter or global changes
             this.query.page = 1; // reset to first page after filtering
+            this.selectedAddresses = [];
             this.fetchData();
         },
         /* CRUD helpers */
@@ -523,6 +535,36 @@ export default {
         },
         deleteAddress(address) {
             this.$inertia.delete(route('addresses.destroy', address.id), { preserveScroll: true });
+        },
+        confirmBulkDelete() {
+            if (!this.selectedAddresses.length) {
+                return;
+            }
+            const count = this.selectedAddresses.length;
+            this.$confirm.require({
+                message: `Delete ${count === 1 ? 'the selected address?' : `${count} selected addresses?`}`,
+                header: 'Confirm Bulk Delete',
+                icon: 'pi pi-exclamation-triangle',
+                acceptLabel: 'Delete',
+                rejectLabel: 'Cancel',
+                acceptClass: 'p-button-danger',
+                accept: () => this.deleteSelected()
+            });
+        },
+        deleteSelected() {
+            const ids = this.selectedAddresses.map(address => address?.id).filter(Boolean);
+
+            if (!ids.length) {
+                return;
+            }
+
+            this.$inertia.delete(route('addresses.bulkDestroy'), {
+                data: { ids },
+                preserveScroll: true,
+                onSuccess: () => {
+                    this.selectedAddresses = [];
+                }
+            });
         },
 
         // Excel Import Methods
@@ -902,6 +944,16 @@ export default {
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    },
+    watch: {
+        'addresses.data'(newRows) {
+            if (!Array.isArray(newRows) || !newRows.length) {
+                this.selectedAddresses = [];
+                return;
+            }
+            const visibleIds = newRows.map(address => address.id);
+            this.selectedAddresses = this.selectedAddresses.filter(address => visibleIds.includes(address?.id));
         }
     },
     mounted() {

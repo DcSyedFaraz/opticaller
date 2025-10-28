@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified', 'role:admin|milung'])->group(function () 
 });
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
+    Route::delete('/addresses/bulk-delete', [AddressController::class, 'bulkDestroy'])->name('addresses.bulkDestroy');
     Route::resource('addresses', AddressController::class);
     Route::get('/addresses/download/template', [AddressImportController::class, 'downloadTemplate'])->name('addresses.template.download');
     Route::post('/addresses/import', [AddressImportController::class, 'import'])->name('addresses.import');
