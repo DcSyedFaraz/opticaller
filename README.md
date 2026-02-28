@@ -1,89 +1,85 @@
 # OptiCaller
 
-**OptiCaller** is a Laravel-based web application designed to streamline and automate outbound calling campaigns. It integrates AI-driven features to enhance call scheduling, contact management, and campaign analytics, making it an ideal solution for businesses aiming to optimize their telecommunication strategies.
+OptiCaller is a fullstack call center management platform for running outbound calling campaigns. Agents make calls directly from the browser via Twilio Voice. Admins get real-time visibility into active conferences, agent activity, campaign analytics, and call transcriptions — all in one place.
 
-## 🚀 Features
+## Stack
 
-* **Campaign Management**: Create, monitor, and analyze outbound calling campaigns with ease.
-* **Contact Management**: Efficiently manage contact lists and segment audiences for targeted outreach.
-* **AI-Powered Scheduling**: Leverage AI to determine optimal calling times, increasing engagement rates.
-* **Real-Time Analytics**: Access comprehensive dashboards to monitor campaign performance and agent productivity.
-* **User Roles & Permissions**: Define roles to manage access levels and maintain data security.
+- **Backend**: Laravel 10, PHP 8.1+
+- **Frontend**: Vue 3, Inertia.js, PrimeVue, Tailwind CSS
+- **Database**: MySQL
+- **Real-time**: Laravel Reverb (WebSockets)
+- **Calling**: Twilio Voice SDK (browser + server)
+- **Auth**: Laravel Sanctum + Spatie Permissions
 
-## 🛠️ Tech Stack
+## Setup
 
-* **Frontend**: Vue.js, Tailwind CSS
-* **Backend**: Laravel (PHP)
-* **Database**: MySQL
-* **Build Tools**: Vite
-
-## 📦 Installation
-
-1. **Clone the Repository**:
-
-   ```bash
-   git clone https://github.com/DcSyedFaraz/opticaller.git
-   cd opticaller
-   ```
-2. **Install Dependencies**:
-
-   ```bash
-   composer install
-   npm install
-   ```
-3. **Environment Setup**:
-
-   * Duplicate `.env.example` and rename it to `.env`.
-   * Configure your database and other environment variables in the `.env` file.
-4. **Generate Application Key**:
-
-   ```bash
-   php artisan key:generate
-   ```
-5. **Run Migrations**:
-
-   ```bash
-   php artisan migrate
-   ```
-6. **Start the Development Server**:
-
-   ```bash
-   php artisan serve
-   npm run dev
-   ```
-
-## 📂 Project Structure
-
-```plaintext
-opticaller/
-├── app/               # Application logic
-├── bootstrap/         # Bootstrap files
-├── config/            # Configuration files
-├── database/          # Migrations and seeders
-├── public/            # Publicly accessible files
-├── resources/         # Views and assets
-├── routes/            # Route definitions
-├── storage/           # Compiled views, logs, etc.
-├── tests/             # Automated tests
-├── .env.example       # Environment variable example
-├── artisan            # Artisan CLI
-├── composer.json      # PHP dependencies
-├── package.json       # Node.js dependencies
-└── vite.config.js     # Vite configuration
+```bash
+git clone https://github.com/DcSyedFaraz/opticaller.git && cd opticaller
+composer install && npm install
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed
+npm run dev && php artisan serve
 ```
 
-## 🧪 Testing
+Configure the following in your `.env` before running:
 
-* **Run Tests**:
+```env
+# Database
+DB_DATABASE=opticaller
+DB_USERNAME=root
+DB_PASSWORD=
 
-  ```bash
-  php artisan test
-  ```
+# Twilio (required for calling features)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_API_KEY=
+TWILIO_API_SECRET=
+TWILIO_APP_SID=
+ADMIN_APP_SID=
+TWILIO_PHONE_NUMBER=
+TWILIO_VOICE_INTELLIGENCE_SERVICE_SID=
 
-## 🤝 Contributing
+# Laravel Reverb (required for real-time features)
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_HOST=127.0.0.1
+PUSHER_PORT=8080
+PUSHER_SCHEME=http
+BROADCAST_DRIVER=reverb
+```
 
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
+To run WebSockets locally:
 
-## 📄 License
+```bash
+php artisan reverb:start
+php artisan queue:work
+```
 
-This project is licensed under the [MIT License](LICENSE).
+## What Was Built
+
+- **Authentication** — Role-based login (Admin / Agent) via Laravel Sanctum and Spatie Permissions
+- **Campaign Management** — Projects → SubProjects → Addresses hierarchy for organizing calling campaigns
+- **Contact Management (Addresses)** — Full CRUD with bulk import via CSV, soft deletes, field locking, follow-up/re-call date tracking, and forbidden flag for opt-out compliance
+- **Twilio Voice Calling** — Browser-based outbound calls using Twilio Voice SDK; calls are routed through Twilio Conferences (not direct dial) to enable admin monitoring and recording
+- **Call Recording & Transcription** — Calls are recorded automatically; transcription is requested via Twilio Intelligence API on completion, stored with speaker identification (Agent vs Caller), and recordings are deleted after transcription
+- **Real-time Conference Monitoring** — Admin can observe all active conferences live via WebSockets (Laravel Reverb)
+- **Agent Activity Tracking** — Tracks call logs, break times, and time-on-call per agent per session
+- **Analytics Dashboard** — Today's call counts, completed contacts, and per-agent productivity metrics
+- **Feedback System** — Customizable feedback templates per campaign with configurable field visibility
+- **Dual Token System** — Separate Twilio Voice tokens for agents and admins with different TwiML App SIDs
+
+## What Was Cut
+
+- **Inbound call handling** — Twilio webhook routes exist but inbound call routing to agents is not fully implemented. Descoped to keep the outbound flow complete and solid.
+- **Email notifications** — MAIL config is present in `.env.example` but no notification emails are triggered. Not needed for the core use case.
+- **Automated tests** — No feature or unit tests written. Given the time constraints, manual testing was prioritised over test coverage.
+- **Mobile responsiveness** — The UI is built for desktop use. The nature of the app (agents on workstations) made this a reasonable cut.
+- **Google Maps integration** — `VITE_GOOGLE_MAPS_API_KEY` is in `.env.example` but the map feature was not completed.
+
+## Known Issues
+
+- Twilio webhooks require a publicly accessible URL. For local development, use [ngrok](https://ngrok.com) and update your Twilio app's webhook URLs to point to your tunnel.
+- Laravel Reverb must be running separately (`php artisan reverb:start`) for real-time features to work. The app does not degrade gracefully if Reverb is offline.
+- Queue worker (`php artisan queue:work`) is required for transcription processing after calls complete.
+- The `.env.example` does not include Twilio keys — they must be added manually as documented above.
