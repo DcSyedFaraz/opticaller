@@ -249,6 +249,23 @@
                                 </div>
                             </div>
 
+                            <!-- Server Error Trace (for debugging) -->
+                            <div v-if="importResults.errorTrace" class="mb-4">
+                                <div class="bg-gray-900 border border-gray-700 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="pi pi-code text-gray-400 text-lg"></i>
+                                        </div>
+                                        <div class="ml-3 w-full">
+                                            <h4 class="text-sm font-medium text-gray-200 mb-2">
+                                                Server Error — Stack Trace
+                                            </h4>
+                                            <pre class="text-xs text-green-400 whitespace-pre-wrap break-all max-h-48 overflow-y-auto font-mono">{{ importResults.errorTrace }}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Warnings (truncated fields) -->
                             <div v-if="importResults.warnings && importResults.warnings.length > 0" class="mb-4">
                                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -783,7 +800,8 @@ export default {
                             skipped: flashData.skipped || 0,
                             errors: flashData.importErrors || [],
                             warnings: flashData.importWarnings || [],
-                            total: flashData.total || 0
+                            total: flashData.total || 0,
+                            errorTrace: flashData.errorTrace || null,
                         };
                         console.log('Import Results:', this.importResults, this.importResults.skipped == 0);
 

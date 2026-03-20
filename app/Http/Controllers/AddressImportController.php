@@ -85,8 +85,19 @@ class AddressImportController extends Controller
             return back()->with([
                 'success' => false,
                 'message' => 'Import failed due to server error',
-                'error' => config('app.debug') ? $e->getMessage() : 'Please contact support',
-            ], 500);
+                'importErrors' => [[
+                    'rowNumber' => null,
+                    'message' => $e->getMessage(),
+                    'rawRow' => [],
+                    'normalizedRow' => [],
+                ]],
+                'importWarnings' => [],
+                'imported' => 0,
+                'skipped' => 0,
+                'total' => 0,
+                'error' => $e->getMessage(),
+                'errorTrace' => collect(explode("\n", $e->getTraceAsString()))->take(10)->implode("\n"),
+            ]);
         }
     }
 
