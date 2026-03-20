@@ -73,6 +73,7 @@ class AddressImportController extends Controller
                 'imported' => $result['imported'],
                 'skipped' => $result['skipped'],
                 'importErrors' => $result['errors'],
+                'importWarnings' => $result['warnings'],
                 'total' => count($previewData),
             ]);
         } catch (\Throwable $e) {
@@ -97,6 +98,7 @@ class AddressImportController extends Controller
         $imported = 0;
         $skipped = 0;
         $errors = [];
+        $warnings = [];
 
         // 1) Preload existing composite keys for duplicate checks:
         //    - street_address + postal_code  (Set 1)
@@ -118,7 +120,7 @@ class AddressImportController extends Controller
         $subprojects = SubProject::pluck('id', 'title')->all();
         $subprojectsById = SubProject::pluck('id', 'id')->all();
 
-        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $existingMobiles, $subprojects, $subprojectsById) {
+        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, &$warnings, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $existingMobiles, $subprojects, $subprojectsById) {
             foreach (array_chunk($data, 100) as $batchIndex => $batch) {
                 $toInsert = [];
 
@@ -165,7 +167,7 @@ class AddressImportController extends Controller
 
                     // Recover previously deleted records when re-imported
                     if ($trashed = $this->findTrashedMatch($normalized)) {
-                        $updateData = $this->prepareInsert($normalized, $subprojects, $subprojectsById);
+                        $updateData = $this->prepareInsert($normalized, $subprojects, $subprojectsById, $rowNumber, $warnings);
                         $trashed->restore();
                         $trashed->update($updateData);
                         $imported++;
@@ -190,7 +192,7 @@ class AddressImportController extends Controller
                     }
 
                     // Prepare the insert data array
-                    $toInsert[] = $this->prepareInsert($normalized, $subprojects, $subprojectsById);
+                    $toInsert[] = $this->prepareInsert($normalized, $subprojects, $subprojectsById, $rowNumber, $warnings);
                 }
                 // dd($toInsert);
 
@@ -222,7 +224,7 @@ class AddressImportController extends Controller
             }
         });
 
-        return compact('imported', 'skipped', 'errors');
+        return compact('imported', 'skipped', 'errors', 'warnings');
     }
 
     /**
@@ -486,9 +488,21 @@ class AddressImportController extends Controller
     }
 
     /**
+     * Truncate a string value to the given max length, returning the truncated value.
+     * Returns null if the value is null/empty.
+     */
+    private function truncate(?string $value, int $max): ?string
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+        return mb_strlen($value) > $max ? mb_substr($value, 0, $max) : $value;
+    }
+
+    /**
      * Prepare the final array to insert into the `addresses` table.
      */
-    private function prepareInsert(array $row, array $subprojects, array $subprojectsById): array
+    private function prepareInsert(array $row, array $subprojects, array $subprojectsById, int $rowNumber = 0, array &$warnings = []): array
     {
         // Resolve subproject ID or name → ID (if provided)
         $subId = null;
@@ -507,26 +521,35 @@ class AddressImportController extends Controller
             }
         }
 
+        // Helper: truncate and record a warning if the value was cut
+        $t = function (?string $value, int $max, string $field) use ($rowNumber, &$warnings): ?string {
+            if ($value !== null && mb_strlen($value) > $max) {
+                $warnings[] = "Row {$rowNumber}: Field '{$field}' was truncated to {$max} characters";
+                return mb_substr($value, 0, $max);
+            }
+            return $value;
+        };
+
         return [
             // Existing table columns:
-            'company_name' => $row['company_name'] ?? null,
+            'company_name' => $t($row['company_name'] ?? null, 255, 'company_name'),
             'salutation' => null,
             'first_name' => null,
             'last_name' => null,
-            'street_address' => $row['street_address'] ?? null,
-            'postal_code' => $row['postal_code'] ?? null,
-            'city' => $row['city'] ?? null,
-            'country' => $row['country'] ?? null,
-            'website' => $row['website'] ?? null,
-            'phone_number' => $row['phone_number'] ?? null,
-            'mobile_number' => $row['mobile_number'] ?? null,
-            'email_address_system' => $row['email_address_system'] ?? null,
-            'email_address_new' => $row['email_address_new'] ?? null,
-            'feedback' => $row['feedback'] ?? null,
+            'street_address' => $t($row['street_address'] ?? null, 255, 'street_address'),
+            'postal_code' => $t($row['postal_code'] ?? null, 255, 'postal_code'),
+            'city' => $t($row['city'] ?? null, 255, 'city'),
+            'country' => $t($row['country'] ?? null, 255, 'country'),
+            'website' => $t($row['website'] ?? null, 255, 'website'),
+            'phone_number' => $t($row['phone_number'] ?? null, 255, 'phone_number'),
+            'mobile_number' => $t($row['mobile_number'] ?? null, 255, 'mobile_number'),
+            'email_address_system' => $t($row['email_address_system'] ?? null, 255, 'email_address_system'),
+            'email_address_new' => $t($row['email_address_new'] ?? null, 255, 'email_address_new'),
+            'feedback' => $t($row['feedback'] ?? null, 255, 'feedback'),
             'follow_up_date' => $this->parseDate($row['follow_up_date'] ?? null),
             'linkedin' => null,
             'logo' => null,
-            'notes' => $row['notes'] ?? null,
+            'notes' => $t($row['notes'] ?? null, 255, 'notes'),
             'contact_id' => is_numeric($row['contact_id'] ?? null) ? (int) $row['contact_id'] : null,
             'sub_project_id' => $subId,
             'created_at' => now(),

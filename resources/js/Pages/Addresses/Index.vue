@@ -249,6 +249,33 @@
                                 </div>
                             </div>
 
+                            <!-- Warnings (truncated fields) -->
+                            <div v-if="importResults.warnings && importResults.warnings.length > 0" class="mb-4">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="pi pi-exclamation-circle text-yellow-500 text-lg"></i>
+                                        </div>
+                                        <div class="ml-3 w-full">
+                                            <h4 class="text-sm font-medium text-yellow-800 mb-2">
+                                                Warnings — {{ importResults.warnings.length }} field(s) were truncated to 255 characters
+                                            </h4>
+                                            <div class="max-h-32 overflow-y-auto">
+                                                <ul class="text-sm text-yellow-700 space-y-1">
+                                                    <li v-for="(warning, index) in importResults.warnings.slice(0, 5)" :key="index" class="flex items-start">
+                                                        <span class="inline-block w-2 h-2 bg-yellow-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                                                        <span>{{ warning }}</span>
+                                                    </li>
+                                                    <li v-if="importResults.warnings.length > 5" class="text-yellow-600 font-medium">
+                                                        ... and {{ importResults.warnings.length - 5 }} more warnings
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Success Message -->
                             <div v-if="importResults.success && (!importResults.errors || importResults.errors.length === 0)"
                                 class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -755,6 +782,7 @@ export default {
                             imported: flashData.imported || 0,
                             skipped: flashData.skipped || 0,
                             errors: flashData.importErrors || [],
+                            warnings: flashData.importWarnings || [],
                             total: flashData.total || 0
                         };
                         console.log('Import Results:', this.importResults, this.importResults.skipped == 0);
