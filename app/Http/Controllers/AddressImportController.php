@@ -131,8 +131,8 @@ class AddressImportController extends Controller
         $subprojects = SubProject::pluck('id', 'title')->all();
         $subprojectsById = SubProject::pluck('id', 'id')->all();
 
-        DB::transaction(function () use ($data, $options, &$imported, &$skipped, &$errors, &$warnings, $existingByStreetPostal, $existingByNamePostal, $existingEmails, $existingPhones, $existingMobiles, $subprojects, $subprojectsById) {
-            foreach (array_chunk($data, 100) as $batchIndex => $batch) {
+        foreach (array_chunk($data, 100) as $batchIndex => $batch) {
+            DB::transaction(function () use ($batch, $batchIndex, $options, &$imported, &$skipped, &$errors, &$warnings, &$existingByStreetPostal, &$existingByNamePostal, &$existingEmails, &$existingPhones, &$existingMobiles, $subprojects, $subprojectsById) {
                 $toInsert = [];
 
                 foreach ($batch as $rowIndex => $row) {
@@ -205,7 +205,6 @@ class AddressImportController extends Controller
                     // Prepare the insert data array
                     $toInsert[] = $this->prepareInsert($normalized, $subprojects, $subprojectsById, $rowNumber, $warnings);
                 }
-                // dd($toInsert);
 
                 if (!empty($toInsert)) {
                     Address::insert($toInsert);
@@ -214,12 +213,10 @@ class AddressImportController extends Controller
                     // After insert, update our in-memory sets so subsequent rows won't duplicate
                     foreach ($toInsert as $record) {
                         if (!empty($record['street_address']) && !empty($record['postal_code'])) {
-                            $key1 = "{$record['street_address']}|{$record['postal_code']}";
-                            $existingByStreetPostal[$key1] = true;
+                            $existingByStreetPostal["{$record['street_address']}|{$record['postal_code']}"] = true;
                         }
                         if (!empty($record['company_name']) && !empty($record['postal_code'])) {
-                            $key2 = "{$record['company_name']}|{$record['postal_code']}";
-                            $existingByNamePostal[$key2] = true;
+                            $existingByNamePostal["{$record['company_name']}|{$record['postal_code']}"] = true;
                         }
                         if (!empty($record['email_address_system'])) {
                             $existingEmails[$record['email_address_system']] = true;
@@ -232,8 +229,8 @@ class AddressImportController extends Controller
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         return compact('imported', 'skipped', 'errors', 'warnings');
     }
