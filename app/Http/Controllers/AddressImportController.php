@@ -131,8 +131,39 @@ class AddressImportController extends Controller
         $subprojects = SubProject::pluck('id', 'title')->all();
         $subprojectsById = SubProject::pluck('id', 'id')->all();
 
+        // 4) Preload all trashed addresses into in-memory lookup maps for fast matching
+        $trashedRecords = Address::onlyTrashed()->get();
+        $trashedByContactId = [];
+        $trashedByStreetPostal = [];
+        $trashedByNamePostal = [];
+        $trashedByEmail = [];
+        $trashedByPhone = [];
+        $trashedByMobile = [];
+
+        foreach ($trashedRecords as $trashed) {
+            if (!empty($trashed->contact_id)) {
+                $trashedByContactId[$trashed->contact_id] = $trashed;
+            }
+            if (!empty($trashed->street_address) && !empty($trashed->postal_code)) {
+                $trashedByStreetPostal["{$trashed->street_address}|{$trashed->postal_code}"] = $trashed;
+            }
+            if (!empty($trashed->company_name) && !empty($trashed->postal_code)) {
+                $trashedByNamePostal["{$trashed->company_name}|{$trashed->postal_code}"] = $trashed;
+            }
+            if (!empty($trashed->email_address_system)) {
+                $trashedByEmail[$trashed->email_address_system] = $trashed;
+            }
+            if (!empty($trashed->phone_number)) {
+                $trashedByPhone[$trashed->phone_number] = $trashed;
+            }
+            if (!empty($trashed->mobile_number)) {
+                $trashedByMobile[$trashed->mobile_number] = $trashed;
+            }
+        }
+        unset($trashedRecords); // Free the collection
+
         foreach (array_chunk($data, 100) as $batchIndex => $batch) {
-            DB::transaction(function () use ($batch, $batchIndex, $options, &$imported, &$skipped, &$errors, &$warnings, &$existingByStreetPostal, &$existingByNamePostal, &$existingEmails, &$existingPhones, &$existingMobiles, $subprojects, $subprojectsById) {
+            DB::transaction(function () use ($batch, $batchIndex, $options, &$imported, &$skipped, &$errors, &$warnings, &$existingByStreetPostal, &$existingByNamePostal, &$existingEmails, &$existingPhones, &$existingMobiles, $subprojects, $subprojectsById, &$trashedByContactId, &$trashedByStreetPostal, &$trashedByNamePostal, &$trashedByEmail, &$trashedByPhone, &$trashedByMobile) {
                 $toInsert = [];
 
                 foreach ($batch as $rowIndex => $row) {
@@ -176,8 +207,9 @@ class AddressImportController extends Controller
                         }
                     }
 
-                    // Recover previously deleted records when re-imported
-                    if ($trashed = $this->findTrashedMatch($normalized)) {
+                    // Recover previously deleted records when re-imported (in-memory lookup)
+                    $trashed = $this->findTrashedMatchInMemory($normalized, $trashedByContactId, $trashedByStreetPostal, $trashedByNamePostal, $trashedByEmail, $trashedByPhone, $trashedByMobile);
+                    if ($trashed) {
                         $updateData = $this->prepareInsert($normalized, $subprojects, $subprojectsById, $rowNumber, $warnings);
                         $trashed->restore();
                         $trashed->update($updateData);
@@ -413,57 +445,58 @@ class AddressImportController extends Controller
     }
 
     /**
-     * Find a soft-deleted address matching the given row using the same
-     * duplicate rules.
+     * Find a soft-deleted address matching the given row using preloaded in-memory maps.
+     * Zero database queries — all lookups are O(1) hash map checks.
      */
-    private function findTrashedMatch(array $row): ?Address
-    {
-        if (!empty($row['contact_id'])) {
-            $match = Address::onlyTrashed()->where('contact_id', $row['contact_id'])->first();
-            if ($match) {
-                return $match;
-            }
+    private function findTrashedMatchInMemory(
+        array $row,
+        array &$byContactId,
+        array &$byStreetPostal,
+        array &$byNamePostal,
+        array &$byEmail,
+        array &$byPhone,
+        array &$byMobile
+    ): ?Address {
+        if (!empty($row['contact_id']) && isset($byContactId[$row['contact_id']])) {
+            $match = $byContactId[$row['contact_id']];
+            unset($byContactId[$row['contact_id']]); // Prevent re-matching
+            return $match;
         }
 
         if (!empty($row['street_address']) && !empty($row['postal_code'])) {
-            $match = Address::onlyTrashed()
-                ->where('street_address', $row['street_address'])
-                ->where('postal_code', $row['postal_code'])
-                ->first();
-            if ($match) {
+            $key = "{$row['street_address']}|{$row['postal_code']}";
+            if (isset($byStreetPostal[$key])) {
+                $match = $byStreetPostal[$key];
+                unset($byStreetPostal[$key]);
                 return $match;
             }
         }
 
         if (!empty($row['company_name']) && !empty($row['postal_code'])) {
-            $match = Address::onlyTrashed()
-                ->where('company_name', $row['company_name'])
-                ->where('postal_code', $row['postal_code'])
-                ->first();
-            if ($match) {
+            $key = "{$row['company_name']}|{$row['postal_code']}";
+            if (isset($byNamePostal[$key])) {
+                $match = $byNamePostal[$key];
+                unset($byNamePostal[$key]);
                 return $match;
             }
         }
 
-        if (!empty($row['email_address_system'])) {
-            $match = Address::onlyTrashed()->where('email_address_system', $row['email_address_system'])->first();
-            if ($match) {
-                return $match;
-            }
+        if (!empty($row['email_address_system']) && isset($byEmail[$row['email_address_system']])) {
+            $match = $byEmail[$row['email_address_system']];
+            unset($byEmail[$row['email_address_system']]);
+            return $match;
         }
 
-        if (!empty($row['phone_number'])) {
-            $match = Address::onlyTrashed()->where('phone_number', $row['phone_number'])->first();
-            if ($match) {
-                return $match;
-            }
+        if (!empty($row['phone_number']) && isset($byPhone[$row['phone_number']])) {
+            $match = $byPhone[$row['phone_number']];
+            unset($byPhone[$row['phone_number']]);
+            return $match;
         }
 
-        if (!empty($row['mobile_number'])) {
-            $match = Address::onlyTrashed()->where('mobile_number', $row['mobile_number'])->first();
-            if ($match) {
-                return $match;
-            }
+        if (!empty($row['mobile_number']) && isset($byMobile[$row['mobile_number']])) {
+            $match = $byMobile[$row['mobile_number']];
+            unset($byMobile[$row['mobile_number']]);
+            return $match;
         }
 
         return null;
