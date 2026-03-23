@@ -67,62 +67,54 @@ class AddressService
             }
 
             // If no due address, fetch addresses dynamically
+            $addressesPerPage = 1;
+
             $subProjectIds = auth()->user()->subProjects()->pluck('sub_project_id');
 
-            $excludeIds = [];
-            $address = null;
+            $addresses = Address::with('calLogs.notes', 'subproject.projects', 'subproject.fieldVisibilities', 'subproject.feedbacks', 'calLogs.users', 'project')
+                ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
+                ->orderBy('sub_projects.priority', 'desc')
+                ->whereIn('sub_project_id', $subProjectIds)
+                ->where('forbidden_promotion', false)
+                ->where(function ($query) {
+                    $query->whereNull('addresses.seen')
+                        ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
+                })
+                ->whereNull('follow_up_date')
+                ->whereNull('re_call_date')
+                ->where(function ($query) use ($now) {
+                    $query->whereHas('notreached', function ($q) use ($now) {
+                        $q->where(function ($subQuery) use ($now) {
+                            $subQuery->whereNull('paused_until')
+                                ->orWhere('paused_until', '<=', $now);
+                        });
+                    })
+                        ->orWhereDoesntHave('notreached');
+                })
+                ->select('addresses.*')
+                ->lockForUpdate() // Lock the selected rows for update
+                ->paginate($addressesPerPage);
 
-            do {
-                $candidate = Address::with('calLogs.notes', 'subproject.projects', 'subproject.fieldVisibilities', 'subproject.feedbacks', 'calLogs.users', 'project')
-                    ->join('sub_projects', 'addresses.sub_project_id', '=', 'sub_projects.id')
-                    ->orderBy('sub_projects.priority', 'desc')
-                    ->whereIn('sub_project_id', $subProjectIds)
-                    ->where('forbidden_promotion', false)
-                    ->where(function ($query) {
-                        $query->whereNull('addresses.seen')
-                            ->orWhere('addresses.seen', '<', Carbon::now()->subDay());
-                    })
-                    ->whereNull('follow_up_date')
-                    ->whereNull('re_call_date')
-                    ->where(function ($query) use ($now) {
-                        $query->whereHas('notreached', function ($q) use ($now) {
-                            $q->where(function ($subQuery) use ($now) {
-                                $subQuery->whereNull('paused_until')
-                                    ->orWhere('paused_until', '<=', $now);
-                            });
-                        })
-                            ->orWhereDoesntHave('notreached');
-                    })
-                    ->when(!empty($excludeIds), function ($query) use ($excludeIds) {
-                        $query->whereNotIn('addresses.id', $excludeIds);
-                    })
-                    ->select('addresses.*')
-                    ->lockForUpdate()
-                    ->first();
+            $address = $addresses->first();
 
-                if (!$candidate) {
-                    break;
+            // Filter out addresses that have exceeded their retry attempts
+            if ($address && $address->notreached()->exists()) {
+                $latestNotReached = $address->notreached()->latest()->first();
+                $subProject = $address->subproject;
+
+                if ($subProject && !$subProject->hasMoreRetryAttempts($latestNotReached->attempt_count)) {
+                    // This address has exceeded its retry attempts, skip it
+                    Log::channel('address')->info('Address exceeded retry attempts, skipping', [
+                        'address_id' => $address->id,
+                        'attempt_count' => $latestNotReached->attempt_count,
+                        'sub_project_id' => $subProject->id,
+                    ]);
+
+                    // Try to get the next address
+                    $addresses = $addresses->slice(1);
+                    $address = $addresses->first();
                 }
-
-                // Check if this address has exceeded its retry attempts
-                if ($candidate->notreached()->exists()) {
-                    $latestNotReached = $candidate->notreached()->latest()->first();
-                    $subProject = $candidate->subproject;
-
-                    if ($subProject && !$subProject->hasMoreRetryAttempts($latestNotReached->attempt_count)) {
-                        Log::channel('address')->info('Address exceeded retry attempts, skipping', [
-                            'address_id' => $candidate->id,
-                            'attempt_count' => $latestNotReached->attempt_count,
-                            'sub_project_id' => $subProject->id,
-                        ]);
-                        $excludeIds[] = $candidate->id;
-                        continue;
-                    }
-                }
-
-                $address = $candidate;
-                break;
-            } while (true);
+            }
 
             if (!$address) {
                 Log::channel('address')->warning('No Addresses to Process', [
